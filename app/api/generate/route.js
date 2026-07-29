@@ -24,7 +24,7 @@ export async function POST(request) {
       sourceName: source.name,
     });
 
-    const article = createArticle({
+  const article = createArticle({
       source_id,
       source_raw_text: source_text,
       title: draft.title,
@@ -32,6 +32,7 @@ export async function POST(request) {
       category: draft.category,
       flags: draft.flags,
       confidence_score: draft.confidence_score,
+      generated_by: draft.provider,
     });
 
     return NextResponse.json(article, { status: 201 });
