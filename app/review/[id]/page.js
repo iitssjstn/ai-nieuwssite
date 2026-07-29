@@ -97,6 +97,9 @@ export default function ReviewDetail() {
         <span className="flag flag-ok">
           Confidence: {article.confidence_score != null ? Math.round(article.confidence_score * 100) + "%" : "-"}
         </span>
+        {article.generated_by && (
+          <span className="badge badge-muted">via {article.generated_by}</span>
+        )}
       </div>
 
       <div className="actions" style={{ marginBottom: 10 }}>
