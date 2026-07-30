@@ -10,6 +10,7 @@ export default function ReviewOverview() {
   const [pageviews, setPageviews] = useState([]);
   const [sourceId, setSourceId] = useState("");
   const [sourceText, setSourceText] = useState("");
+  const [sourceUrl, setSourceUrl] = useState("");
   const [extraSources, setExtraSources] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -49,12 +50,14 @@ export default function ReviewOverview() {
         body: JSON.stringify({
           source_id: sourceId,
           source_text: sourceText,
+          source_url: sourceUrl,
           additional_sources: extraSources,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Onbekende fout");
       setSourceText("");
+      setSourceUrl("");
       setExtraSources([]);
       await loadAll();
     } catch (err) {
@@ -118,6 +121,13 @@ export default function ReviewOverview() {
             </select>
           )}
         </div>
+        <input
+          type="text"
+          placeholder="Link naar het bronartikel (optioneel, voor verificatie)"
+          value={sourceUrl}
+          onChange={(e) => setSourceUrl(e.target.value)}
+          style={{ marginBottom: 8 }}
+        />
         <textarea
           rows={4}
           placeholder="Plak hier de brontekst (bijv. uit een RSS-item of persbericht)..."
@@ -138,6 +148,17 @@ export default function ReviewOverview() {
               onChange={(e) => {
                 const copy = [...extraSources];
                 copy[i] = { ...copy[i], name: e.target.value };
+                setExtraSources(copy);
+              }}
+              style={{ marginBottom: 4 }}
+            />
+            <input
+              type="text"
+              placeholder="Link naar deze bron (optioneel)"
+              value={s.url || ""}
+              onChange={(e) => {
+                const copy = [...extraSources];
+                copy[i] = { ...copy[i], url: e.target.value };
                 setExtraSources(copy);
               }}
               style={{ marginBottom: 4 }}
@@ -182,6 +203,7 @@ export default function ReviewOverview() {
           <p style={{ fontWeight: 500, margin: 0 }}>{a.title}</p>
           <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
             Confidence: {a.confidence_score != null ? Math.round(a.confidence_score * 100) + "%" : "-"}
+            {a.source_url && " · 🔗 bron-link beschikbaar"}
           </p>
         </Link>
       ))}
