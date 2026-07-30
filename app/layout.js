@@ -17,7 +17,6 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
-        />
       </body>
     </html>
   );
