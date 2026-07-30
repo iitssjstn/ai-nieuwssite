@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { generateDraft } from "@/lib/ai";
-import { createArticle, getSources, findPossibleDuplicate } from "@/lib/db";
+import { createArticle, getSources, findPossibleDuplicate, getImageProviderConfig } from "@/lib/db";
+import { searchStockPhoto } from "@/lib/image-search";
 
 export async function POST(request) {
   const body = await request.json();
@@ -31,6 +32,28 @@ export async function POST(request) {
 
     const possibleDuplicate = findPossibleDuplicate(draft.title);
 
+    // Automatisch een passende stockfoto zoeken op basis van de door de AI
+    // bedachte trefwoorden. Faalt dit (geen provider ingesteld, geen
+    // resultaat, storing) dan wordt het artikel gewoon zonder afbeelding
+    // aangemaakt — dit mag het genereren nooit blokkeren.
+    let featuredImage = null;
+    let featuredImageCredit = null;
+    if (draft.image_keywords) {
+      try {
+        const photo = await searchStockPhoto(draft.image_keywords, {
+          pexels: getImageProviderConfig("pexels"),
+          unsplash: getImageProviderConfig("unsplash"),
+        });
+        if (photo) {
+          featuredImage = photo.url;
+          featuredImageCredit = { name: photo.credit_name, url: photo.credit_url, source: photo.source };
+        }
+      } catch {
+        // stil negeren — geen afbeelding is niet erg genoeg om het hele
+        // concept te laten mislukken
+      }
+    }
+
     const article = createArticle({
       source_id,
       source_raw_text: source_text,
@@ -44,6 +67,8 @@ export async function POST(request) {
       generated_by: draft.provider,
       possible_duplicate: possibleDuplicate,
       consistency_notes: draft.consistency_notes || [],
+      featured_image: featuredImage,
+      featured_image_credit: featuredImageCredit,
     });
 
     return NextResponse.json(article, { status: 201 });

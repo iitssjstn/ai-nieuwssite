@@ -16,6 +16,8 @@ export default function ReviewDetail() {
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [featuredImage, setFeaturedImage] = useState(null);
+  const [featuredImageCredit, setFeaturedImageCredit] = useState(null);
+  const [searchingPhoto, setSearchingPhoto] = useState(false);
   const [tagsInput, setTagsInput] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [busy, setBusy] = useState(false);
@@ -40,6 +42,7 @@ export default function ReviewDetail() {
         setTitle(a.title);
         setBody(plainTextToHtml(a.body));
         setFeaturedImage(a.featured_image || null);
+        setFeaturedImageCredit(a.featured_image_credit || null);
         setTagsInput((a.tags || []).join(", "));
         lastSaved.current = { title: a.title, body: plainTextToHtml(a.body), featuredImage: a.featured_image || null };
       });
@@ -111,7 +114,26 @@ export default function ReviewDetail() {
 
   async function saveEdit() {
     const tags = tagsInput.split(",").map((t) => t.trim()).filter(Boolean);
-    await act("edit", { title, articleBody: body, featuredImage, tags });
+    await act("edit", { title, articleBody: body, featuredImage, featuredImageCredit, tags });
+  }
+
+  async function handleSearchStockPhoto() {
+    setSearchingPhoto(true);
+    try {
+      const res = await fetch("/api/generate/image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: title }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setFeaturedImage(data.url);
+      setFeaturedImageCredit({ name: data.credit_name, url: data.credit_url, source: data.source });
+    } catch (err) {
+      alert("Stockfoto zoeken mislukt: " + err.message);
+    } finally {
+      setSearchingPhoto(false);
+    }
   }
 
   function handleSchedule() {
@@ -261,9 +283,21 @@ export default function ReviewDetail() {
               <div style={{ marginBottom: 10 }}>
                 <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Uitgelichte afbeelding</p>
                 {featuredImage && (
-                  <img src={featuredImage} alt="" style={{ maxWidth: "100%", borderRadius: 8, marginBottom: 6, display: "block" }} />
+                  <>
+                    <img src={featuredImage} alt="" style={{ maxWidth: "100%", borderRadius: 8, marginBottom: 4, display: "block" }} />
+                    {featuredImageCredit && (
+                      <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6 }}>
+                        Foto: {featuredImageCredit.name} via {featuredImageCredit.source}
+                      </p>
+                    )}
+                  </>
                 )}
-                <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFeaturedUpload} disabled={uploadingFeatured} />
+                <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                  <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFeaturedUpload} disabled={uploadingFeatured} />
+                  <button type="button" onClick={handleSearchStockPhoto} disabled={searchingPhoto} style={{ width: "auto", padding: "5px 10px", fontSize: 12 }}>
+                    {searchingPhoto ? "Bezig..." : "🔍 Nieuwe stockfoto zoeken"}
+                  </button>
+                </div>
               </div>
 
               <RichEditor value={body} onChange={setBody} />
@@ -286,7 +320,14 @@ export default function ReviewDetail() {
             <>
               <p style={{ fontWeight: 500, fontSize: 15, margin: "0 0 6px" }}>{article.title}</p>
               {article.featured_image && (
-                <img src={article.featured_image} alt="" style={{ maxWidth: "100%", borderRadius: 8, marginBottom: 8, display: "block" }} />
+                <>
+                  <img src={article.featured_image} alt="" style={{ maxWidth: "100%", borderRadius: 8, marginBottom: 4, display: "block" }} />
+                  {article.featured_image_credit && (
+                    <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
+                      Foto: {article.featured_image_credit.name} via {article.featured_image_credit.source}
+                    </p>
+                  )}
+                </>
               )}
               <div className="body-text">
                 <ArticleBody body={article.body} />

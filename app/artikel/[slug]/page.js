@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getArticle, getArticleBySlug, incrementViews } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { isHtmlBody, getExcerpt } from "@/lib/content";
+import { isHtmlBody, getExcerpt, resolveImageUrl } from "@/lib/content";
 
 function timeAgo(dateStr) {
   if (!dateStr) return "";
@@ -42,7 +42,7 @@ export function generateMetadata({ params }) {
   const baseUrl = getBaseUrl();
   const url = `${baseUrl}/artikel/${article.slug}`;
   const description = getExcerpt(article.body, 160);
-  const images = article.featured_image ? [`${baseUrl}${article.featured_image}`] : [];
+  const images = article.featured_image ? [resolveImageUrl(article.featured_image, baseUrl)] : [];
 
   return {
     title: article.title,
@@ -81,7 +81,7 @@ export default function ArticlePage({ params }) {
     headline: article.title,
     datePublished: article.published_at,
     dateModified: article.published_at,
-    image: article.featured_image ? [`${baseUrl}${article.featured_image}`] : undefined,
+    image: article.featured_image ? [resolveImageUrl(article.featured_image, baseUrl)] : undefined,
     publisher: { "@type": "Organization", name: "Dagblad" },
     mainEntityOfPage: `${baseUrl}/artikel/${article.slug}`,
   };
@@ -105,11 +105,26 @@ export default function ArticlePage({ params }) {
         </div>
 
         {article.featured_image && (
-          <img
-            src={article.featured_image}
-            alt=""
-            style={{ width: "100%", borderRadius: 12, marginBottom: 20, display: "block" }}
-          />
+          <>
+            <img
+              src={article.featured_image}
+              alt=""
+              style={{ width: "100%", borderRadius: 12, marginBottom: article.featured_image_credit ? 4 : 20, display: "block" }}
+            />
+            {article.featured_image_credit && (
+              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>
+                Foto:{" "}
+                {article.featured_image_credit.url ? (
+                  <a href={article.featured_image_credit.url} target="_blank" rel="noopener noreferrer" style={{ color: "inherit" }}>
+                    {article.featured_image_credit.name}
+                  </a>
+                ) : (
+                  article.featured_image_credit.name
+                )}{" "}
+                via {article.featured_image_credit.source}
+              </p>
+            )}
+          </>
         )}
 
         {htmlBody ? (

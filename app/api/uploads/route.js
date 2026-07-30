@@ -38,6 +38,9 @@ export async function POST(request) {
     const buffer = Buffer.from(await file.arrayBuffer());
     fs.writeFileSync(path.join(UPLOADS_DIR, filename), buffer);
   } catch (err) {
+    // Meestal een bestandsrechten-probleem op de server (bijv. de gemounte
+    // data-map is niet schrijfbaar voor de containergebruiker) — dit geeft
+    // nu een duidelijke melding i.p.v. een stille crash.
     return NextResponse.json(
       { error: "Kon bestand niet opslaan op de server: " + err.message },
       { status: 500 }

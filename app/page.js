@@ -41,7 +41,14 @@ export default function HomePage() {
             <Link href={`/artikel/${hero.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
               <div className="hero-card">
                 {hero.featured_image && (
-                  <img src={hero.featured_image} alt="" style={{ width: "100%", borderRadius: 8, marginBottom: 12, display: "block" }} />
+                  <>
+                    <img src={hero.featured_image} alt="" style={{ width: "100%", borderRadius: 8, marginBottom: 4, display: "block" }} />
+                    {hero.featured_image_credit && (
+                      <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
+                        Foto: {hero.featured_image_credit.name} via {hero.featured_image_credit.source}
+                      </p>
+                    )}
+                  </>
                 )}
                 <span className="badge">{hero.category}</span>
                 <h2>{hero.title}</h2>
