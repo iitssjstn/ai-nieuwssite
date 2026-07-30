@@ -202,7 +202,30 @@ export default function ReviewDetail() {
       <div className="review-columns" style={{ marginTop: 20 }}>
         <div className="review-col source">
           <p className="label">Bron — {article.source_id}</p>
+          {article.source_url && (
+            <p style={{ marginBottom: 8 }}>
+              <a href={article.source_url} target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: "var(--accent-text)" }}>
+                🔗 Origineel bronartikel openen
+              </a>
+            </p>
+          )}
           <p className="body-text">{article.source_raw_text}</p>
+          {article.additional_sources?.length > 0 && (
+            <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--border)" }}>
+              <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Extra bronnen (fact-check):</p>
+              {article.additional_sources.map((s, i) => (
+                <p key={i} style={{ fontSize: 13, margin: "2px 0" }}>
+                  {s.url ? (
+                    <a href={s.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-text)" }}>
+                      🔗 {s.name || `Bron ${i + 2}`}
+                    </a>
+                  ) : (
+                    <span>{s.name || `Bron ${i + 2}`} (geen link opgegeven)</span>
+                  )}
+                </p>
+              ))}
+            </div>
+          )}
         </div>
         <div className="review-col draft">
           <p className="label">AI-concept</p>
