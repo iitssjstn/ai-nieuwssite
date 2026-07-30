@@ -1,29 +1,25 @@
 import { NextResponse } from "next/server";
-import { computeSessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
-import { verifyPassword } from "@/lib/auth-node";
+import { createSessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
+import { verifyCredentials } from "@/lib/auth-node";
 
 export async function POST(request) {
-  const { password } = await request.json();
+  const { username, password } = await request.json();
 
-  const ok = await verifyPassword(password || "");
-  if (!ok) {
-    return NextResponse.json({ error: "Onjuist wachtwoord" }, { status: 401 });
+  const user = await verifyCredentials(username || "", password || "");
+  if (!user) {
+    return NextResponse.json({ error: "Onjuiste gebruikersnaam of wachtwoord" }, { status: 401 });
   }
 
   let token;
   try {
-    token = await computeSessionToken();
+    token = await createSessionToken({ userId: user.id, username: user.username, role: user.role });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
-  const res = NextResponse.json({ success: true });
+  const res = NextResponse.json({ success: true, user: { username: user.username, role: user.role } });
 
   // Alleen "Secure" zetten als de binnenkomende request ook echt via HTTPS
-  // loopt. NODE_ENV === "production" zegt daar niets over — die is ook
-  // "production" als je (nog) via gewone HTTP binnenkomt, bijvoorbeeld
-  // direct op http://ip:3000 of vóórdat certbot is ingesteld. Een cookie
-  // met Secure=true wordt door de browser stilzwijgend genegeerd op een
-  // niet-HTTPS pagina, wat live aanvoelde als "inloggen doet niets".
+  // loopt — zie eerdere aantekening: anders wordt de cookie stil genegeerd.
   const forwardedProto = request.headers.get("x-forwarded-proto");
   const isHttps = forwardedProto === "https" || request.nextUrl.protocol === "https:";
 

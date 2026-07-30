@@ -7,23 +7,28 @@ export default function ReviewOverview() {
   const [pending, setPending] = useState([]);
   const [sources, setSources] = useState([]);
   const [stats, setStats] = useState(null);
+  const [pageviews, setPageviews] = useState([]);
   const [sourceId, setSourceId] = useState("");
   const [sourceText, setSourceText] = useState("");
+  const [extraSources, setExtraSources] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   async function loadAll() {
-    const [pendingRes, sourcesRes, statsRes] = await Promise.all([
+    const [pendingRes, sourcesRes, statsRes, pvRes] = await Promise.all([
       fetch("/api/articles?status=pending_review"),
       fetch("/api/sources"),
       fetch("/api/stats"),
+      fetch("/api/stats/pageviews"),
     ]);
     const pendingData = await pendingRes.json();
     const sourcesData = await sourcesRes.json();
     const statsData = await statsRes.json();
+    const pvData = await pvRes.json();
     setPending(pendingData);
     setSources(sourcesData);
     setStats(statsData);
+    setPageviews(pvData.days || []);
     if (sourcesData.length > 0 && !sourceId) setSourceId(sourcesData[0].id);
   }
 
@@ -41,11 +46,16 @@ export default function ReviewOverview() {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ source_id: sourceId, source_text: sourceText }),
+        body: JSON.stringify({
+          source_id: sourceId,
+          source_text: sourceText,
+          additional_sources: extraSources,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Onbekende fout");
       setSourceText("");
+      setExtraSources([]);
       await loadAll();
     } catch (err) {
       setError(err.message);
@@ -54,14 +64,42 @@ export default function ReviewOverview() {
     }
   }
 
+  const maxViews = Math.max(1, ...pageviews.map((d) => d.views));
+
   return (
     <div className="container">
       {stats && (
-        <div style={{ display: "flex", gap: 12, marginBottom: 28, flexWrap: "wrap" }}>
-          <StatCard label="Gepubliceerd" value={stats.published} color="#173404" text="#9fd15d" />
-          <StatCard label="Te reviewen" value={stats.pending_review} color="#412402" text="#f0b154" />
-          <StatCard label="Afgekeurd" value={stats.rejected} color="#501313" text="#f09595" />
-          <StatCard label="Bronnen" value={stats.sources} color="#042c53" text="#6fa8e8" />
+        <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
+          <StatCard label="Gepubliceerd" value={stats.published} text="#9fd15d" />
+          <StatCard label="Te reviewen" value={stats.pending_review} text="#f0b154" />
+          <StatCard label="Goedgekeurd" value={stats.approved} text="#6fa8e8" />
+          <StatCard label="Gepland" value={stats.scheduled} text="#6fa8e8" />
+          <StatCard label="Afgekeurd" value={stats.rejected} text="#f09595" />
+          <StatCard label="Bronnen" value={stats.sources} text="#6fa8e8" />
+        </div>
+      )}
+
+      {pageviews.length > 0 && (
+        <div style={{ background: "var(--surface-1)", borderRadius: 10, padding: 16, marginBottom: 28 }}>
+          <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 12 }}>Paginaweergaven — laatste 14 dagen</p>
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 60 }}>
+            {pageviews.map((d) => (
+              <div
+                key={d.date}
+                title={`${d.date}: ${d.views}`}
+                style={{
+                  flex: 1,
+                  height: `${Math.max(4, (d.views / maxViews) * 60)}px`,
+                  background: "var(--accent-text)",
+                  borderRadius: 2,
+                  opacity: 0.85,
+                }}
+              />
+            ))}
+          </div>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
+            Totaal deze periode: {pageviews.reduce((sum, d) => sum + d.views, 0)} weergaven
+          </p>
         </div>
       )}
 
@@ -87,6 +125,44 @@ export default function ReviewOverview() {
           onChange={(e) => setSourceText(e.target.value)}
           style={{ marginBottom: 10 }}
         />
+
+        {extraSources.map((s, i) => (
+          <div key={i} style={{ marginBottom: 8 }}>
+            <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>
+              Extra bron {i + 2} (voor fact-checking)
+            </p>
+            <input
+              type="text"
+              placeholder="Naam van deze bron (bijv. NOS)"
+              value={s.name}
+              onChange={(e) => {
+                const copy = [...extraSources];
+                copy[i] = { ...copy[i], name: e.target.value };
+                setExtraSources(copy);
+              }}
+              style={{ marginBottom: 4 }}
+            />
+            <textarea
+              rows={3}
+              placeholder="Brontekst van deze extra bron..."
+              value={s.text}
+              onChange={(e) => {
+                const copy = [...extraSources];
+                copy[i] = { ...copy[i], text: e.target.value };
+                setExtraSources(copy);
+              }}
+            />
+          </div>
+        ))}
+        <button
+          type="button"
+          onClick={() => setExtraSources((s) => [...s, { name: "", text: "" }])}
+          style={{ width: "auto", padding: "5px 10px", fontSize: 12, marginBottom: 10 }}
+        >
+          + Nog een bron toevoegen (fact-check)
+        </button>
+        <br />
+
         {error && <p style={{ color: "var(--danger-text)", fontSize: 13 }}>{error}</p>}
         <button type="submit" className="primary" disabled={loading || sources.length === 0} style={{ width: "auto", padding: "10px 20px" }}>
           {loading ? "Bezig met genereren..." : "Concept genereren"}
@@ -100,6 +176,9 @@ export default function ReviewOverview() {
       {pending.map((a) => (
         <Link key={a.id} href={`/review/${a.id}`} className="pending-item">
           <span className="badge badge-muted" style={{ marginBottom: 8, display: "inline-block" }}>{a.category}</span>
+          {a.possible_duplicate && (
+            <span className="flag flag-warn" style={{ marginLeft: 8 }}>⚠ mogelijk duplicaat</span>
+          )}
           <p style={{ fontWeight: 500, margin: 0 }}>{a.title}</p>
           <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
             Confidence: {a.confidence_score != null ? Math.round(a.confidence_score * 100) + "%" : "-"}
@@ -110,10 +189,10 @@ export default function ReviewOverview() {
   );
 }
 
-function StatCard({ label, value, color, text }) {
+function StatCard({ label, value, text }) {
   return (
-    <div style={{ background: "var(--surface-1)", borderRadius: 10, padding: "12px 18px", minWidth: 130 }}>
-      <p style={{ fontSize: 24, fontWeight: 600, margin: 0, color: text || "var(--text-primary)" }}>{value}</p>
+    <div style={{ background: "var(--surface-1)", borderRadius: 10, padding: "12px 18px", minWidth: 120 }}>
+      <p style={{ fontSize: 22, fontWeight: 600, margin: 0, color: text || "var(--text-primary)" }}>{value}</p>
       <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>{label}</p>
     </div>
   );

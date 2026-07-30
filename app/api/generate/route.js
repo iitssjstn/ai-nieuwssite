@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { generateDraft } from "@/lib/ai";
-import { createArticle, getSources } from "@/lib/db";
+import { createArticle, getSources, findPossibleDuplicate } from "@/lib/db";
 
 export async function POST(request) {
   const body = await request.json();
-  const { source_id, source_text } = body;
+  const { source_id, source_text, additional_sources } = body;
 
   if (!source_id || !source_text) {
     return NextResponse.json(
@@ -18,11 +18,18 @@ export async function POST(request) {
     return NextResponse.json({ error: "Onbekende bron" }, { status: 400 });
   }
 
+  const additionalSources = Array.isArray(additional_sources)
+    ? additional_sources.filter((s) => s?.text?.trim()).map((s) => ({ name: s.name, text: s.text }))
+    : [];
+
   try {
     const draft = await generateDraft({
       sourceText: source_text,
       sourceName: source.name,
+      additionalSources,
     });
+
+    const possibleDuplicate = findPossibleDuplicate(draft.title);
 
     const article = createArticle({
       source_id,
@@ -33,6 +40,8 @@ export async function POST(request) {
       flags: draft.flags,
       confidence_score: draft.confidence_score,
       generated_by: draft.provider,
+      possible_duplicate: possibleDuplicate,
+      consistency_notes: draft.consistency_notes || [],
     });
 
     return NextResponse.json(article, { status: 201 });

@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 export default function LoginPage() {
   const [checking, setChecking] = useState(true);
   const [hasAccount, setHasAccount] = useState(true);
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [googleApiKey, setGoogleApiKey] = useState("");
@@ -30,7 +31,7 @@ export default function LoginPage() {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ username, password }),
     });
     setBusy(false);
     if (res.ok) {
@@ -53,7 +54,7 @@ export default function LoginPage() {
     const res = await fetch("/api/auth/setup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ password, googleApiKey }),
+      body: JSON.stringify({ username, password, googleApiKey }),
     });
     setBusy(false);
     if (res.ok) {
@@ -76,12 +77,19 @@ export default function LoginPage() {
           <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 20 }}>Redactie — inloggen</h1>
           <form onSubmit={handleLogin}>
             <input
+              type="text"
+              placeholder="Gebruikersnaam"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              style={{ marginBottom: 8 }}
+              autoFocus
+            />
+            <input
               type="password"
               placeholder="Wachtwoord"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={{ marginBottom: 12 }}
-              autoFocus
             />
             {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 12 }}>{error}</p>}
             <button type="submit" className="primary" disabled={busy} style={{ width: "100%" }}>
@@ -93,16 +101,23 @@ export default function LoginPage() {
         <>
           <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Admin-account aanmaken</h1>
           <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-            Er bestaat nog geen account. Dit kan maar één keer — kies nu je wachtwoord.
+            Er bestaat nog geen account. Dit kan maar één keer — kies nu je gebruikersnaam en wachtwoord.
           </p>
           <form onSubmit={handleSetup}>
+            <input
+              type="text"
+              placeholder="Gebruikersnaam"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              style={{ marginBottom: 8 }}
+              autoFocus
+            />
             <input
               type="password"
               placeholder="Nieuw wachtwoord (min. 8 tekens)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={{ marginBottom: 8 }}
-              autoFocus
             />
             <input
               type="password"

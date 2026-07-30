@@ -1,5 +1,13 @@
 import { NextResponse } from "next/server";
-import { getArticle, updateArticle, deleteArticle, addReviewLogEntry } from "@/lib/db";
+import { getArticle, updateArticle, editArticleWithRevision, deleteArticle, addReviewLogEntry } from "@/lib/db";
+import { getSessionFromRequest } from "@/lib/auth";
+
+// Acties die alleen een admin mag uitvoeren — een redacteur mag artikelen
+// aanmaken/bewerken/inleveren, maar niet zelf goedkeuren/publiceren/afkeuren.
+const ADMIN_ONLY_ACTIONS = [
+  "approve", "publish", "reject", "unpublish",
+  "schedule", "unschedule", "archive", "unarchive", "toggle_breaking",
+];
 
 export async function GET(request, { params }) {
   const article = getArticle(params.id);
@@ -7,63 +15,93 @@ export async function GET(request, { params }) {
   return NextResponse.json(article);
 }
 
-// action: "approve" | "reject" | "edit" | "unpublish"
+// action: "approve" | "publish" | "reject" | "edit" | "unpublish" |
+//         "toggle_breaking" | "schedule" | "unschedule" | "archive" | "unarchive"
 export async function PATCH(request, { params }) {
+  const session = await getSessionFromRequest(request);
   const body = await request.json();
-  const { action, title, articleBody, featuredImage, reviewer_id } = body;
+  const { action, title, articleBody, featuredImage, tags, scheduledAt } = body;
+
+  if (ADMIN_ONLY_ACTIONS.includes(action) && session?.role !== "admin") {
+    return NextResponse.json({ error: "Alleen voor admins" }, { status: 403 });
+  }
 
   const existing = getArticle(params.id);
   if (!existing) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
 
-  let updates = {};
-  let logAction = action;
+  const reviewer = session?.username || "onbekend";
+  let updated;
+  let diff = null;
 
   if (action === "approve") {
-    updates = {
+    // Goedkeuren ≠ publiceren: het artikel wacht daarna nog op de losse
+    // publiceer-stap (of kan direct aansluitend gepubliceerd worden).
+    updated = updateArticle(params.id, {
+      status: "approved",
+      reviewer_id: reviewer,
+      reviewed_at: new Date().toISOString(),
+    });
+  } else if (action === "publish") {
+    updated = updateArticle(params.id, {
       status: "published",
-      reviewer_id: reviewer_id || "onbekend",
-      reviewed_at: new Date().toISOString(),
       published_at: new Date().toISOString(),
-    };
+    });
   } else if (action === "reject") {
-    updates = {
+    updated = updateArticle(params.id, {
       status: "rejected",
-      reviewer_id: reviewer_id || "onbekend",
+      reviewer_id: reviewer,
       reviewed_at: new Date().toISOString(),
-    };
+    });
   } else if (action === "unpublish") {
-    updates = {
-      status: "pending_review",
-      published_at: null,
-    };
+    updated = updateArticle(params.id, { status: "pending_review", published_at: null });
+  } else if (action === "archive") {
+    updated = updateArticle(params.id, { status: "archived" });
+  } else if (action === "unarchive") {
+    updated = updateArticle(params.id, { status: "published" });
   } else if (action === "toggle_breaking") {
-    updates = { breaking: !existing.breaking };
+    updated = updateArticle(params.id, { breaking: !existing.breaking });
+  } else if (action === "schedule") {
+    if (!scheduledAt) {
+      return NextResponse.json({ error: "scheduledAt is verplicht" }, { status: 400 });
+    }
+    updated = updateArticle(params.id, {
+      status: "scheduled",
+      scheduled_at: scheduledAt,
+      published_at: null,
+      reviewer_id: reviewer,
+      reviewed_at: new Date().toISOString(),
+    });
+  } else if (action === "unschedule") {
+    updated = updateArticle(params.id, { status: "pending_review", scheduled_at: null });
   } else if (action === "edit") {
-    updates = {
-      title: title ?? existing.title,
-      body: articleBody ?? existing.body,
-      featured_image: featuredImage !== undefined ? featuredImage : existing.featured_image,
-    };
+    updated = editArticleWithRevision(params.id, {
+      title,
+      body: articleBody,
+      featured_image: featuredImage,
+    });
+    if (tags !== undefined) {
+      updated = updateArticle(params.id, { tags });
+    }
+    diff = "titel/body/afbeelding/tags aangepast";
   } else {
     return NextResponse.json({ error: "Onbekende actie" }, { status: 400 });
   }
 
-  const updated = updateArticle(params.id, updates);
-  addReviewLogEntry({
-    article_id: params.id,
-    action: logAction,
-    diff: action === "edit" ? "titel/body aangepast" : null,
-  });
-
+  addReviewLogEntry({ article_id: params.id, action, diff, by: reviewer });
   return NextResponse.json(updated);
 }
 
 export async function DELETE(request, { params }) {
+  const session = await getSessionFromRequest(request);
+  if (session?.role !== "admin") {
+    return NextResponse.json({ error: "Alleen voor admins" }, { status: 403 });
+  }
+
   const existing = getArticle(params.id);
   if (!existing) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
 
   deleteArticle(params.id);
-  addReviewLogEntry({ article_id: params.id, action: "delete", diff: null });
+  addReviewLogEntry({ article_id: params.id, action: "delete", diff: null, by: session.username });
 
   return NextResponse.json({ success: true });
 }

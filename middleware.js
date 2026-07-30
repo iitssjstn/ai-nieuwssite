@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { computeSessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
+import { verifySessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
 
 // Routes die tot het admin-paneel horen. Alles hierbuiten is publieke site.
 const ADMIN_PATH_PREFIXES = [
@@ -12,12 +12,23 @@ const ADMIN_PATH_PREFIXES = [
   "/api/auth",
   "/api/settings",
   "/api/uploads",
+  "/api/users",
 ];
 
 // Subset die WEL alleen op het admin-subdomein mag bestaan, maar NIET zelf
 // een geldige sessie mag vereisen — anders kun je nooit meer inloggen
 // (de loginpagina zelf, en de login/logout-endpoints).
 const AUTH_EXEMPT_PREFIXES = ["/login", "/api/auth"];
+
+// Alleen voor de rol "admin" — redacteuren (rol "editor") mogen artikelen
+// genereren/bewerken, maar geen bronnen/instellingen/gebruikers beheren.
+const ADMIN_ONLY_PREFIXES = [
+  "/review/sources",
+  "/review/settings",
+  "/api/sources",
+  "/api/settings",
+  "/api/users",
+];
 
 function matchesPrefix(pathname, list) {
   return list.some((p) => pathname === p || pathname.startsWith(p + "/"));
@@ -31,18 +42,12 @@ export async function middleware(request) {
   const pathIsAdmin = matchesPrefix(pathname, ADMIN_PATH_PREFIXES);
 
   // Scheiding tussen hoofddomein en admin-subdomein — alleen actief als
-  // ADMIN_HOSTNAME is ingesteld. Zonder die env-variabele werkt alles op
-  // één host, zoals voorheen (handig voor lokaal ontwikkelen).
+  // ADMIN_HOSTNAME is ingesteld.
   if (adminHostname) {
     if (pathIsAdmin && !isAdminHost) {
-      // Admin-routes bestaan simpelweg niet op het hoofddomein: een 404,
-      // geen 403/redirect — zo is zelfs niet zichtbaar dát er een
-      // adminpaneel bestaat voor wie op het hoofddomein rondkijkt.
       return new NextResponse("Not found", { status: 404 });
     }
     if (!pathIsAdmin && isAdminHost) {
-      // Op het admin-subdomein bestaat de publieke site niet — alles stuurt
-      // door naar het dashboard.
       return NextResponse.redirect(new URL("/review", request.url));
     }
   }
@@ -51,43 +56,34 @@ export async function middleware(request) {
     return NextResponse.next();
   }
 
-  // /login en /api/auth/* moeten bereikbaar blijven zonder geldige sessie —
-  // dat zijn precies de routes die je nodig hebt óm in te loggen.
   if (matchesPrefix(pathname, AUTH_EXEMPT_PREFIXES)) {
     return NextResponse.next();
   }
 
-  // Vanaf hier: dezelfde wachtwoord-/sessiecheck als voorheen, nu alleen
-  // nog van toepassing op admin-routes (op de juiste host).
-  const cookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
   const isApi = pathname.startsWith("/api/");
+  const cookie = request.cookies.get(SESSION_COOKIE_NAME)?.value;
 
-  let expected;
+  let session;
   try {
-    expected = await computeSessionToken();
+    session = await verifySessionToken(cookie);
   } catch {
-    if (isApi) {
-      return NextResponse.json(
-        { error: "Serverconfiguratie ontbreekt (SESSION_SECRET)." },
-        { status: 500 }
-      );
-    }
-    return new NextResponse(
-      "Serverconfiguratie ontbreekt: SESSION_SECRET is niet ingesteld. De redactiepagina is daarom geblokkeerd totdat dit is opgelost.",
-      { status: 500 }
-    );
+    const msg = "Serverconfiguratie ontbreekt (SESSION_SECRET).";
+    return isApi
+      ? NextResponse.json({ error: msg }, { status: 500 })
+      : new NextResponse(msg + " De redactiepagina is geblokkeerd totdat dit is opgelost.", { status: 500 });
   }
 
-  if (cookie === expected) {
-    return NextResponse.next();
+  if (!session) {
+    if (isApi) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 });
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (isApi) {
-    return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 });
+  if (session.role !== "admin" && matchesPrefix(pathname, ADMIN_ONLY_PREFIXES)) {
+    if (isApi) return NextResponse.json({ error: "Alleen voor admins" }, { status: 403 });
+    return NextResponse.redirect(new URL("/review", request.url));
   }
 
-  const loginUrl = new URL("/login", request.url);
-  return NextResponse.redirect(loginUrl);
+  return NextResponse.next();
 }
 
 export const config = {

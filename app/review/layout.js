@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -29,6 +30,7 @@ const NAV = [
   {
     href: "/review/sources",
     label: "Bronnen",
+    adminOnly: true,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M5 5c8 0 14 6 14 14" />
@@ -40,6 +42,7 @@ const NAV = [
   {
     href: "/review/settings",
     label: "Instellingen",
+    adminOnly: true,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <circle cx="12" cy="12" r="3" />
@@ -78,6 +81,17 @@ function pageTitle(pathname) {
 export default function ReviewLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [me, setMe] = useState(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((r) => (r.ok ? r.json() : null))
+      .then(setMe)
+      .catch(() => setMe(null));
+  }, []);
+
+  const isAdmin = me?.role === "admin";
+  const visibleNav = NAV.filter((item) => !item.adminOnly || isAdmin);
 
   function goToPublicSite() {
     if (typeof window === "undefined") return;
@@ -91,7 +105,7 @@ export default function ReviewLayout({ children }) {
       <aside className="admin-sidebar">
         <span className="admin-brand">Novapers</span>
 
-        {NAV.map((item) => {
+        {visibleNav.map((item) => {
           const active = item.href === "/review" ? pathname === "/review" : pathname.startsWith(item.href);
           return (
             <Link key={item.href} href={item.href} className={`admin-nav-item${active ? " active" : ""}`}>
@@ -113,10 +127,10 @@ export default function ReviewLayout({ children }) {
         <div className="admin-sidebar-spacer" />
 
         <div className="admin-user-chip">
-          <div className="admin-user-avatar">A</div>
+          <div className="admin-user-avatar">{(me?.username || "?")[0].toUpperCase()}</div>
           <div>
-            <p>Redacteur</p>
-            <p className="role">Admin</p>
+            <p>{me?.username || "..."}</p>
+            <p className="role">{me?.role === "admin" ? "Admin" : "Redacteur"}</p>
           </div>
           <button
             className="admin-logout-btn"

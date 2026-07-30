@@ -38,7 +38,7 @@ export default function HomePage() {
         {/* Hoofdkolom */}
         <div>
           {hero && (
-            <Link href={`/artikel/${hero.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+            <Link href={`/artikel/${hero.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
               <div className="hero-card">
                 {hero.featured_image && (
                   <img src={hero.featured_image} alt="" style={{ width: "100%", borderRadius: 8, marginBottom: 12, display: "block" }} />
@@ -54,7 +54,7 @@ export default function HomePage() {
           {gridItems.length > 0 && (
             <div className="grid-2">
               {gridItems.map((a) => (
-                <Link key={a.id} href={`/artikel/${a.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                <Link key={a.id} href={`/artikel/${a.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
                   <div className="card">
                     {a.featured_image && (
                       <img src={a.featured_image} alt="" style={{ width: "100%", borderRadius: 6, marginBottom: 8, display: "block" }} />
@@ -71,7 +71,7 @@ export default function HomePage() {
           <div style={{ marginTop: 8 }}>
             <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Laatste nieuws</h3>
             {latestNews.map((a) => (
-              <Link key={a.id} href={`/artikel/${a.id}`} className="latest-news-row">
+              <Link key={a.id} href={`/artikel/${a.slug}`} className="latest-news-row">
                 <span className="latest-news-time">{timeAgo(a.published_at)}</span>
                 <span className="latest-news-cat">{a.category}</span>
                 <p className="latest-news-title">{a.title}</p>
@@ -94,7 +94,7 @@ export default function HomePage() {
               <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven.</p>
             )}
             {mostRead.map((a, i) => (
-              <Link key={a.id} href={`/artikel/${a.id}`} className="sidebar-item">
+              <Link key={a.id} href={`/artikel/${a.slug}`} className="sidebar-item">
                 <span className="sidebar-rank">{i + 1}</span>
                 <p>{a.title}</p>
               </Link>

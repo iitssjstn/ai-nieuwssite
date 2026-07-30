@@ -9,6 +9,8 @@ export default function SourcesPage() {
   const [trustLevel, setTrustLevel] = useState("official");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const [fetchingId, setFetchingId] = useState(null);
+  const [fetchResult, setFetchResult] = useState({});
 
   async function load() {
     const res = await fetch("/api/sources");
@@ -47,6 +49,24 @@ export default function SourcesPage() {
     await load();
   }
 
+  async function fetchNow(id) {
+    setFetchingId(id);
+    setFetchResult((r) => ({ ...r, [id]: null }));
+    try {
+      const res = await fetch(`/api/sources/${id}/fetch`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setFetchResult((r) => ({
+        ...r,
+        [id]: `${data.created} nieuw(e) concept(en) aangemaakt${data.errors?.length ? `, ${data.errors.length} fout(en)` : ""}`,
+      }));
+    } catch (err) {
+      setFetchResult((r) => ({ ...r, [id]: "Fout: " + err.message }));
+    } finally {
+      setFetchingId(null);
+    }
+  }
+
   return (
     <div className="container">
       <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 16 }}>Bronnen ({sources.length})</h1>
@@ -80,15 +100,25 @@ export default function SourcesPage() {
 
       {sources.map((s) => (
         <div key={s.id} className="pending-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div>
+          <div style={{ minWidth: 0 }}>
             <p style={{ fontWeight: 500, margin: 0 }}>{s.name}</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
               {trustLabel(s.trust_level)}{s.feed_url ? ` · ${s.feed_url}` : ""}
             </p>
+            {fetchResult[s.id] && (
+              <p style={{ fontSize: 12, color: "var(--accent-text)", margin: "4px 0 0" }}>{fetchResult[s.id]}</p>
+            )}
           </div>
-          <button onClick={() => remove(s.id)} className="danger" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-            Verwijderen
-          </button>
+          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+            {s.feed_url && (
+              <button onClick={() => fetchNow(s.id)} disabled={fetchingId === s.id} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+                {fetchingId === s.id ? "Bezig..." : "Nu ophalen"}
+              </button>
+            )}
+            <button onClick={() => remove(s.id)} className="danger" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+              Verwijderen
+            </button>
+          </div>
         </div>
       ))}
     </div>

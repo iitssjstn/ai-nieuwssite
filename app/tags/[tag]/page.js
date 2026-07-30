@@ -12,22 +12,20 @@ function timeAgo(dateStr) {
   return `${Math.floor(hours / 24)} dag(en) geleden`;
 }
 
-export default function CategoryPage({ params }) {
-  const naam = decodeURIComponent(params.naam);
+export default function TagPage({ params }) {
+  const tag = decodeURIComponent(params.tag);
   const articles = getArticles({ status: "published" })
-    .filter((a) => a.category?.toLowerCase() === naam.toLowerCase())
+    .filter((a) => (a.tags || []).some((t) => t.toLowerCase() === tag.toLowerCase()))
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
   return (
     <div className="container">
       <Header />
-      <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16, textTransform: "capitalize" }}>
-        {naam}
-      </h1>
+      <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>#{tag}</h1>
 
       {articles.length === 0 && (
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
-          Nog geen artikelen in deze categorie.
+          Nog geen artikelen met deze tag.
         </p>
       )}
 

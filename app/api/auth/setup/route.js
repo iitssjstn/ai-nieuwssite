@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { computeSessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
+import { createSessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
 import { hasAdminAccount, createAdminAccount } from "@/lib/auth-node";
 import { setGoogleApiKey } from "@/lib/db";
 
@@ -10,15 +10,16 @@ export async function POST(request) {
   // overschrijven via dit endpoint.
   if (hasAdminAccount()) {
     return NextResponse.json(
-      { error: "Er bestaat al een admin-account. Gebruik /login." },
+      { error: "Er bestaat al een account. Gebruik /login." },
       { status: 409 }
     );
   }
 
-  const { password, googleApiKey } = await request.json();
+  const { username, password, googleApiKey } = await request.json();
 
+  let user;
   try {
-    createAdminAccount(password || "");
+    user = createAdminAccount(username || "", password || "");
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
@@ -27,11 +28,10 @@ export async function POST(request) {
     setGoogleApiKey(googleApiKey.trim());
   }
 
-  // Meteen inloggen na het aanmaken, zodat je niet apart nog hoeft in te
-  // loggen met het wachtwoord dat je net zelf koos.
+  // Meteen inloggen na het aanmaken.
   let token;
   try {
-    token = await computeSessionToken();
+    token = await createSessionToken({ userId: user.id, username: user.username, role: user.role });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }

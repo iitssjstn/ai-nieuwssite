@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getArticles } from "@/lib/db";
+import PageviewTracker from "./PageviewTracker";
 
 const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech"];
 
@@ -10,8 +11,9 @@ export default function Header() {
 
   return (
     <>
+      <PageviewTracker />
       {breaking && (
-        <Link href={`/artikel/${breaking.id}`} className="breaking-bar">
+        <Link href={`/artikel/${breaking.slug}`} className="breaking-bar">
           <span className="breaking-label">Breaking</span>
           <span className="breaking-title">{breaking.title}</span>
         </Link>
