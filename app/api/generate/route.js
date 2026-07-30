@@ -4,7 +4,7 @@ import { createArticle, getSources, findPossibleDuplicate } from "@/lib/db";
 
 export async function POST(request) {
   const body = await request.json();
-  const { source_id, source_text, additional_sources } = body;
+  const { source_id, source_text, source_url, additional_sources } = body;
 
   if (!source_id || !source_text) {
     return NextResponse.json(
@@ -19,7 +19,7 @@ export async function POST(request) {
   }
 
   const additionalSources = Array.isArray(additional_sources)
-    ? additional_sources.filter((s) => s?.text?.trim()).map((s) => ({ name: s.name, text: s.text }))
+    ? additional_sources.filter((s) => s?.text?.trim()).map((s) => ({ name: s.name, text: s.text, url: s.url || null }))
     : [];
 
   try {
@@ -34,6 +34,8 @@ export async function POST(request) {
     const article = createArticle({
       source_id,
       source_raw_text: source_text,
+      source_url: source_url?.trim() || null,
+      additional_sources: additionalSources.map(({ name, url }) => ({ name, url })),
       title: draft.title,
       body: draft.body,
       category: draft.category,
