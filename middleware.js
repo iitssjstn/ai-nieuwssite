@@ -30,6 +30,11 @@ const ADMIN_ONLY_PREFIXES = [
   "/api/users",
 ];
 
+// Routes die op BEIDE domeinen moeten blijven werken, ook al zijn ze geen
+// "admin"-route — geüploade afbeeldingen moeten zichtbaar zijn zowel in de
+// preview binnen het adminpaneel (admin-subdomein) als op de publieke site.
+const SHARED_PATH_PREFIXES = ["/media"];
+
 function matchesPrefix(pathname, list) {
   return list.some((p) => pathname === p || pathname.startsWith(p + "/"));
 }
@@ -42,8 +47,8 @@ export async function middleware(request) {
   const pathIsAdmin = matchesPrefix(pathname, ADMIN_PATH_PREFIXES);
 
   // Scheiding tussen hoofddomein en admin-subdomein — alleen actief als
-  // ADMIN_HOSTNAME is ingesteld.
-  if (adminHostname) {
+  // ADMIN_HOSTNAME is ingesteld. /media is op beide domeinen bereikbaar.
+  if (adminHostname && !matchesPrefix(pathname, SHARED_PATH_PREFIXES)) {
     if (pathIsAdmin && !isAdminHost) {
       return new NextResponse("Not found", { status: 404 });
     }
