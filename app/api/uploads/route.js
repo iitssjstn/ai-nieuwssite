@@ -31,11 +31,18 @@ export async function POST(request) {
     return NextResponse.json({ error: "Bestand is groter dan 5MB" }, { status: 400 });
   }
 
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-
   const filename = `${crypto.randomUUID()}.${ext}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-  fs.writeFileSync(path.join(UPLOADS_DIR, filename), buffer);
+
+  try {
+    fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+    const buffer = Buffer.from(await file.arrayBuffer());
+    fs.writeFileSync(path.join(UPLOADS_DIR, filename), buffer);
+  } catch (err) {
+    return NextResponse.json(
+      { error: "Kon bestand niet opslaan op de server: " + err.message },
+      { status: 500 }
+    );
+  }
 
   return NextResponse.json({ url: `/media/${filename}` }, { status: 201 });
 }
