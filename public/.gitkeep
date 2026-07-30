@@ -1,0 +1,2 @@
+Dit bestand zorgt dat git de public-map altijd bewaart, ook als hij verder
+leeg is — anders vergeet git lege mappen en breekt de Docker-build.
