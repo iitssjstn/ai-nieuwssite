@@ -165,6 +165,9 @@ export default function ReviewDetail() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload mislukt");
       setFeaturedImage(data.url);
+      // Een zelf-geüploade foto heeft geen stockfoto-bron — anders blijft de
+      // credit van een eerder automatisch gevonden foto ten onrechte staan.
+      setFeaturedImageCredit(null);
     } catch (err) {
       alert("Uitgelichte afbeelding uploaden mislukt: " + err.message);
     } finally {
@@ -287,7 +290,14 @@ export default function ReviewDetail() {
                     <img src={featuredImage} alt="" style={{ maxWidth: "100%", borderRadius: 8, marginBottom: 4, display: "block" }} />
                     {featuredImageCredit && (
                       <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6 }}>
-                        Foto: {featuredImageCredit.name} via {featuredImageCredit.source}
+                        Foto: {featuredImageCredit.name} via {featuredImageCredit.source}{" "}
+                        <button
+                          type="button"
+                          onClick={() => setFeaturedImageCredit(null)}
+                          style={{ width: "auto", padding: "0 4px", fontSize: 11, background: "none", border: "none", color: "var(--danger-text)", cursor: "pointer" }}
+                        >
+                          ✕ verwijderen
+                        </button>
                       </p>
                     )}
                   </>
