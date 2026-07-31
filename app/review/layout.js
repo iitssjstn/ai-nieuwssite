@@ -231,9 +231,9 @@ export default function ReviewLayout({ children }) {
         )}
 
         <div className="admin-user-chip">
-          <div className="admin-user-avatar">{(me?.username || "?")[0].toUpperCase()}</div>
+          <div className="admin-user-avatar">{(me?.full_name || me?.username || "?")[0].toUpperCase()}</div>
           <div>
-            <p>{me?.username || "..."}</p>
+            <p>{me?.full_name || me?.username || "..."}</p>
             <p className="role">{me?.role === "admin" ? "Admin" : "Redacteur"}</p>
           </div>
           <button

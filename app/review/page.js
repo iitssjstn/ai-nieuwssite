@@ -50,18 +50,6 @@ export default function ReviewOverview() {
 
   return (
     <div className="container">
-      {onlineUsers.length > 0 && (
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-          <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Nu online:</span>
-          {onlineUsers.map((u) => (
-            <span key={u.id} className="badge badge-muted" style={{ display: "flex", alignItems: "center", gap: 5 }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#9fd15d", display: "inline-block" }} />
-              {u.full_name || u.username}
-            </span>
-          ))}
-        </div>
-      )}
-
       {stats && (
         <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
           <StatCard label="Gepubliceerd" value={stats.published} text="#9fd15d" href="/review/published?tab=published" />
@@ -156,6 +144,35 @@ export default function ReviewOverview() {
                 <span>{c.category}</span>
                 <span style={{ color: "var(--text-muted)" }}>{c.views}</span>
               </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {onlineUsers.length > 0 && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: 16,
+            right: 16,
+            background: "var(--surface-1)",
+            border: "1px solid var(--border)",
+            borderRadius: 10,
+            padding: "8px 12px",
+            boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
+            maxWidth: 220,
+            zIndex: 20,
+          }}
+        >
+          <p style={{ fontSize: 10, color: "var(--text-muted)", margin: "0 0 5px", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+            Nu online
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+            {onlineUsers.map((u) => (
+              <span key={u.id} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#9fd15d", display: "inline-block", flexShrink: 0 }} />
+                {u.full_name || u.username}
+              </span>
             ))}
           </div>
         </div>
