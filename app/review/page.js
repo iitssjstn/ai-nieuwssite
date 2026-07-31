@@ -8,6 +8,8 @@ export default function ReviewOverview() {
   const [sources, setSources] = useState([]);
   const [stats, setStats] = useState(null);
   const [pageviews, setPageviews] = useState([]);
+  const [analyticsPeriod, setAnalyticsPeriod] = useState("today");
+  const [analytics, setAnalytics] = useState(null);
   const [sourceId, setSourceId] = useState("");
   const [sourceText, setSourceText] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
@@ -32,6 +34,16 @@ export default function ReviewOverview() {
     setPageviews(pvData.days || []);
     if (sourcesData.length > 0 && !sourceId) setSourceId(sourcesData[0].id);
   }
+
+  async function loadAnalytics(period) {
+    const res = await fetch(`/api/stats/analytics?period=${period}`);
+    setAnalytics(await res.json());
+  }
+
+  useEffect(() => {
+    loadAnalytics(analyticsPeriod);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [analyticsPeriod]);
 
   useEffect(() => {
     loadAll();
@@ -103,6 +115,43 @@ export default function ReviewOverview() {
           <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
             Totaal deze periode: {pageviews.reduce((sum, d) => sum + d.views, 0)} weergaven
           </p>
+        </div>
+      )}
+
+      {analytics && (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
+          <div style={{ background: "var(--surface-1)", borderRadius: 10, padding: 16 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+              <p style={{ fontSize: 13, fontWeight: 500, margin: 0 }}>Meest gelezen</p>
+              <select value={analyticsPeriod} onChange={(e) => setAnalyticsPeriod(e.target.value)} style={{ width: "auto", padding: "3px 6px", fontSize: 12 }}>
+                <option value="today">Vandaag</option>
+                <option value="week">Deze week</option>
+                <option value="month">Deze maand</option>
+              </select>
+            </div>
+            {analytics.top_articles.length === 0 && (
+              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven in deze periode.</p>
+            )}
+            {analytics.top_articles.map((a, i) => (
+              <Link key={a.id} href={`/review/${a.id}`} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "5px 0", color: "inherit", textDecoration: "none" }}>
+                <span>{i + 1}. {a.title}</span>
+                <span style={{ color: "var(--text-muted)", flexShrink: 0, marginLeft: 8 }}>{a.views}</span>
+              </Link>
+            ))}
+          </div>
+
+          <div style={{ background: "var(--surface-1)", borderRadius: 10, padding: 16 }}>
+            <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 10 }}>Weergaven per categorie</p>
+            {analytics.by_category.length === 0 && (
+              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen data.</p>
+            )}
+            {analytics.by_category.map((c) => (
+              <div key={c.category} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "5px 0" }}>
+                <span>{c.category}</span>
+                <span style={{ color: "var(--text-muted)" }}>{c.views}</span>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

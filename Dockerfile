@@ -26,6 +26,16 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
+# lib/ en scripts/ als losse broncode meekopiëren (niet alleen de door
+# webpack gebundelde versie binnenin .next/server) — nodig voor het
+# losstaande RSS-scheduler-script, dat bewust buiten Next.js' bundelaar om
+# draait (zie scripts/rss-scheduler.mjs voor de reden). De volledige
+# node_modules (i.p.v. alleen de door Next.js "standalone" geselecteerde,
+# uitgedunde set) zorgt dat dat script altijd zijn dependencies vindt.
+COPY --from=builder --chown=nextjs:nodejs /app/lib ./lib
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
+
 # data/db.json wordt hierna overschaduwd door een gemount volume in
 # docker-compose — dit is alleen de fallback als er (nog) geen volume is.
 COPY --from=builder --chown=nextjs:nodejs /app/data ./data

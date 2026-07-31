@@ -18,6 +18,7 @@ export default function ReviewDetail() {
   const [featuredImage, setFeaturedImage] = useState(null);
   const [featuredImageCredit, setFeaturedImageCredit] = useState(null);
   const [searchingPhoto, setSearchingPhoto] = useState(false);
+  const [photoOptions, setPhotoOptions] = useState(null);
   const [tagsInput, setTagsInput] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [busy, setBusy] = useState(false);
@@ -35,6 +36,8 @@ export default function ReviewDetail() {
   const [pollIdInput, setPollIdInput] = useState("");
   const [locationInput, setLocationInput] = useState({ lat: "", lng: "", label: "" });
   const [geocoding, setGeocoding] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewWidth, setPreviewWidth] = useState("desktop");
 
   const lastSaved = useRef({ title: "", body: "", featuredImage: null });
   const autosaveTimer = useRef(null);
@@ -149,20 +152,33 @@ export default function ReviewDetail() {
 
   async function handleSearchStockPhoto() {
     setSearchingPhoto(true);
+    setPhotoOptions(null);
     try {
       const res = await fetch("/api/generate/image", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query: title }),
+        body: JSON.stringify({ query: title, multiple: true }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
-      setFeaturedImage(data.url);
-      setFeaturedImageCredit({ name: data.credit_name, url: data.credit_url, source: data.source });
+      setPhotoOptions(data.options);
     } catch (err) {
       alert("Stockfoto zoeken mislukt: " + err.message);
     } finally {
       setSearchingPhoto(false);
+    }
+  }
+
+  function choosePhoto(option) {
+    setFeaturedImage(option.url);
+    setFeaturedImageCredit({ name: option.credit_name, url: option.credit_url, source: option.source });
+    setPhotoOptions(null);
+    if (option.source === "Unsplash" && option.confirmUrl) {
+      fetch("/api/generate/image/confirm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmUrl: option.confirmUrl, source: option.source }),
+      }).catch(() => {});
     }
   }
 
@@ -303,6 +319,18 @@ export default function ReviewDetail() {
         </div>
       )}
 
+      {article.claims?.length > 0 && (
+        <div style={{ background: "var(--surface-1)", borderRadius: 8, padding: "10px 14px", margin: "16px 0", fontSize: 13 }}>
+          <p style={{ margin: "0 0 8px", fontWeight: 500 }}>🔍 Claim-verificatie (door AI, controleer zelf ook)</p>
+          {article.claims.map((c, i) => (
+            <p key={i} style={{ margin: "4px 0", display: "flex", alignItems: "flex-start", gap: 6 }}>
+              <span style={{ flexShrink: 0 }}>{c.verified ? "✅" : "⚠️"}</span>
+              <span>{c.text}</span>
+            </p>
+          ))}
+        </div>
+      )}
+
       <div className="review-columns" style={{ marginTop: 20 }}>
         <div className="review-col source">
           <p className="label">Bron — {article.source_id}</p>
@@ -384,9 +412,25 @@ export default function ReviewDetail() {
                 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                   <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFeaturedUpload} disabled={uploadingFeatured} />
                   <button type="button" onClick={handleSearchStockPhoto} disabled={searchingPhoto} style={{ width: "auto", padding: "5px 10px", fontSize: 12 }}>
-                    {searchingPhoto ? "Bezig..." : "🔍 Nieuwe stockfoto zoeken"}
+                    {searchingPhoto ? "Bezig..." : "🔍 Nieuwe stockfoto's zoeken"}
                   </button>
                 </div>
+
+                {photoOptions && (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 6, marginTop: 10 }}>
+                    {photoOptions.map((opt, i) => (
+                      <button
+                        key={i}
+                        type="button"
+                        onClick={() => choosePhoto(opt)}
+                        style={{ padding: 0, border: "2px solid transparent", borderRadius: 6, overflow: "hidden", cursor: "pointer" }}
+                        title={`${opt.credit_name} via ${opt.source}`}
+                      >
+                        <img src={opt.thumb} alt="" style={{ width: "100%", height: 70, objectFit: "cover", display: "block" }} />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <RichEditor value={body} onChange={setBody} />
@@ -510,6 +554,61 @@ export default function ReviewDetail() {
           <button disabled={busy} onClick={() => act("toggle_liveblog")}>
             {article.is_liveblog ? "Liveblog uitzetten" : "Als liveblog markeren"}
           </button>
+          <button disabled={busy} onClick={() => setShowPreview((s) => !s)}>
+            👁 Voorbeeld
+          </button>
+        </div>
+      )}
+
+      {showPreview && (
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: "flex", gap: 4, marginBottom: 10 }}>
+            {[
+              { id: "desktop", label: "Desktop", width: "100%" },
+              { id: "tablet", label: "Tablet", width: 768 },
+              { id: "mobile", label: "Mobiel", width: 375 },
+            ].map((d) => (
+              <button
+                key={d.id}
+                onClick={() => setPreviewWidth(d.id)}
+                style={{
+                  width: "auto", padding: "5px 12px", fontSize: 12,
+                  background: previewWidth === d.id ? "var(--accent-bg)" : "transparent",
+                  color: previewWidth === d.id ? "var(--accent-text)" : "var(--text-secondary)",
+                  border: "1px solid var(--border)",
+                }}
+              >
+                {d.label}
+              </button>
+            ))}
+          </div>
+          <div style={{ background: "#f4f3ef", borderRadius: 10, padding: 20, display: "flex", justifyContent: "center" }}>
+            <div
+              style={{
+                width: previewWidth === "desktop" ? "100%" : previewWidth === "tablet" ? 768 : 375,
+                maxWidth: "100%",
+                background: "#fff",
+                borderRadius: 8,
+                padding: 24,
+                color: "#1c1c1a",
+              }}
+            >
+              <span className="badge">{article.category}</span>
+              <h1 style={{ fontSize: previewWidth === "mobile" ? 20 : 26, margin: "10px 0", color: "#1c1c1a" }}>
+                {editing ? title : article.title}
+              </h1>
+              {(editing ? featuredImage : article.featured_image) && (
+                <img
+                  src={editing ? featuredImage : article.featured_image}
+                  alt=""
+                  style={{ width: "100%", borderRadius: 8, marginBottom: 16 }}
+                />
+              )}
+              <div style={{ color: "#1c1c1a", fontSize: 15, lineHeight: 1.7 }}>
+                <ArticleBody body={editing ? body : article.body} />
+              </div>
+            </div>
+          </div>
         </div>
       )}
 

@@ -21,4 +21,11 @@ if [ -z "$SESSION_SECRET" ]; then
   export SESSION_SECRET
 fi
 
+# Losstaand achtergrondproces voor automatische RSS-import — draait bewust
+# als apart proces i.p.v. via Next.js' instrumentation-hook (zie
+# scripts/rss-scheduler.mjs). Faalt dit om wat voor reden dan ook, dan mag
+# dat de hoofdsite nooit platleggen — vandaar op de achtergrond, los van
+# "exec" voor de hoofdserver hieronder.
+node scripts/rss-scheduler.mjs &
+
 exec node server.js

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 
@@ -117,12 +117,47 @@ export default function ReviewLayout({ children }) {
   const pathname = usePathname();
   const router = useRouter();
   const [me, setMe] = useState(null);
+  const [pendingCount, setPendingCount] = useState(0);
+  const [notifPermission, setNotifPermission] = useState("default");
+  const lastCount = useRef(0);
+  const notifiedOnce = useRef(false);
+
+  useEffect(() => {
+    if (typeof Notification !== "undefined") setNotifPermission(Notification.permission);
+  }, []);
 
   useEffect(() => {
     fetch("/api/auth/me")
       .then((r) => (r.ok ? r.json() : null))
       .then(setMe)
       .catch(() => setMe(null));
+  }, []);
+
+  useEffect(() => {
+    async function poll() {
+      try {
+        const res = await fetch("/api/stats");
+        if (!res.ok) return;
+        const stats = await res.json();
+        const count = stats.pending_review || 0;
+
+        // Alleen een browsermelding tonen bij een ECHTE toename (niet bij de
+        // allereerste keer laden, anders krijg je 'm bij elke paginabezoek).
+        if (notifiedOnce.current && count > lastCount.current && typeof Notification !== "undefined" && Notification.permission === "granted") {
+          new Notification("Novapers — nieuwe review", {
+            body: `${count} artikel(en) wachten op review`,
+          });
+        }
+        notifiedOnce.current = true;
+        lastCount.current = count;
+        setPendingCount(count);
+      } catch {
+        // volgende poll probeert het gewoon opnieuw
+      }
+    }
+    poll();
+    const interval = setInterval(poll, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   const isAdmin = me?.role === "admin";
@@ -142,10 +177,19 @@ export default function ReviewLayout({ children }) {
 
         {visibleNav.map((item) => {
           const active = item.href === "/review" ? pathname === "/review" : pathname.startsWith(item.href);
+          const showBadge = item.href === "/review" && pendingCount > 0;
           return (
             <Link key={item.href} href={item.href} className={`admin-nav-item${active ? " active" : ""}`}>
               {item.icon}
               {item.label}
+              {showBadge && (
+                <span style={{
+                  marginLeft: "auto", background: "#a32d2d", color: "#fff", borderRadius: 10,
+                  fontSize: 11, padding: "1px 7px", fontWeight: 600,
+                }}>
+                  {pendingCount}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -160,6 +204,19 @@ export default function ReviewLayout({ children }) {
         </a>
 
         <div className="admin-sidebar-spacer" />
+
+        {notifPermission === "default" && (
+          <button
+            className="admin-nav-item"
+            style={{ width: "100%", textAlign: "left", background: "none", cursor: "pointer" }}
+            onClick={async () => {
+              const result = await Notification.requestPermission();
+              setNotifPermission(result);
+            }}
+          >
+            🔔 Meldingen aanzetten
+          </button>
+        )}
 
         <div className="admin-user-chip">
           <div className="admin-user-avatar">{(me?.username || "?")[0].toUpperCase()}</div>

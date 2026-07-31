@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { generateDraft } from "@/lib/ai";
 import { createArticle, getSources, findPossibleDuplicate, getImageProviderConfig } from "@/lib/db";
 import { searchStockPhoto } from "@/lib/image-search";
+import { geocodeLocation } from "@/lib/geocode";
 
 export async function POST(request) {
   const body = await request.json();
@@ -54,6 +55,12 @@ export async function POST(request) {
       }
     }
 
+    // Automatisch een locatie koppelen (voor de nieuwskaart) als de AI een
+    // duidelijke plaats in het artikel herkende. Faalt de geocoding, dan
+    // blijft het artikel gewoon zonder locatie — nooit blokkerend, net als
+    // bij de stockfoto.
+    const location = draft.location_hint ? await geocodeLocation(draft.location_hint) : null;
+
     const article = createArticle({
       source_id,
       source_raw_text: source_text,
@@ -69,6 +76,8 @@ export async function POST(request) {
       consistency_notes: draft.consistency_notes || [],
       featured_image: featuredImage,
       featured_image_credit: featuredImageCredit,
+      claims: draft.claims || [],
+      location,
     });
 
     return NextResponse.json(article, { status: 201 });

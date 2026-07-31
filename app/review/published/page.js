@@ -1,13 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+
+const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
 
 export default function PublishedArticles() {
   const [tab, setTab] = useState("published");
   const [articles, setArticles] = useState([]);
   const [busyId, setBusyId] = useState(null);
   const [me, setMe] = useState(null);
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
 
   async function load() {
     const res = await fetch(`/api/articles?status=${tab}`);
@@ -42,6 +47,28 @@ export default function PublishedArticles() {
     setBusyId(null);
   }
 
+  const filtered = useMemo(() => {
+    let result = articles;
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      result = result.filter(
+        (a) => a.title.toLowerCase().includes(q) || (a.tags || []).some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    if (categoryFilter) {
+      result = result.filter((a) => a.category === categoryFilter);
+    }
+    result = [...result].sort((a, b) => {
+      const da = new Date(a.published_at || a.created_at);
+      const db = new Date(b.published_at || b.created_at);
+      if (sortBy === "newest") return db - da;
+      if (sortBy === "oldest") return da - db;
+      if (sortBy === "most_read") return (b.views || 0) - (a.views || 0);
+      return 0;
+    });
+    return result;
+  }, [articles, search, categoryFilter, sortBy]);
+
   const isAdmin = me?.role === "admin";
 
   return (
@@ -56,22 +83,43 @@ export default function PublishedArticles() {
       </div>
 
       <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 16 }}>
-        {tab === "published" ? "Gepubliceerde" : "Gearchiveerde"} artikelen ({articles.length})
+        {tab === "published" ? "Gepubliceerde" : "Gearchiveerde"} artikelen ({filtered.length} van {articles.length})
       </h1>
 
-      {articles.length === 0 && (
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        <input
+          type="text"
+          placeholder="Zoeken op titel of tag..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{ flex: "1 1 220px" }}
+        />
+        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} style={{ width: "auto" }}>
+          <option value="">Alle categorieën</option>
+          {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ width: "auto" }}>
+          <option value="newest">Nieuwste eerst</option>
+          <option value="oldest">Oudste eerst</option>
+          <option value="most_read">Meest gelezen</option>
+        </select>
+      </div>
+
+      {filtered.length === 0 && (
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
-          {tab === "published" ? "Nog niets gepubliceerd." : "Nog niets gearchiveerd."}
+          {articles.length === 0
+            ? (tab === "published" ? "Nog niets gepubliceerd." : "Nog niets gearchiveerd.")
+            : "Geen artikelen komen overeen met je zoekopdracht/filter."}
         </p>
       )}
 
-      {articles.map((a) => (
+      {filtered.map((a) => (
         <div key={a.id} className="pending-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
           <div style={{ minWidth: 0 }}>
             <span className="badge badge-muted" style={{ marginBottom: 8, display: "inline-block" }}>{a.category}</span>
             <p style={{ fontWeight: 500, margin: 0 }}>{a.title}</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
-              Gepubliceerd: {a.published_at ? new Date(a.published_at).toLocaleString("nl-NL") : "-"}
+              Gepubliceerd: {a.published_at ? new Date(a.published_at).toLocaleString("nl-NL") : "-"} · {a.views || 0} weergaven
             </p>
           </div>
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
