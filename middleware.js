@@ -36,6 +36,11 @@ const ADMIN_ONLY_PREFIXES = [
   "/api/keys",
 ];
 
+// Uitzondering binnen een admin-only prefix — wél inloggen vereist, maar
+// niet per se de rol "admin" (bijv. het "wie is online"-overzicht op het
+// dashboard, dat voor elke redacteur zichtbaar hoort te zijn).
+const ADMIN_ONLY_EXCEPTIONS = ["/api/users/online"];
+
 // Routes die op BEIDE domeinen moeten blijven werken, ook al zijn ze geen
 // "admin"-route — geüploade afbeeldingen moeten zichtbaar zijn zowel in de
 // preview binnen het adminpaneel (admin-subdomein) als op de publieke site.
@@ -89,7 +94,7 @@ export async function middleware(request) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (session.role !== "admin" && matchesPrefix(pathname, ADMIN_ONLY_PREFIXES)) {
+  if (session.role !== "admin" && matchesPrefix(pathname, ADMIN_ONLY_PREFIXES) && !matchesPrefix(pathname, ADMIN_ONLY_EXCEPTIONS)) {
     if (isApi) return NextResponse.json({ error: "Alleen voor admins" }, { status: 403 });
     return NextResponse.redirect(new URL("/review", request.url));
   }

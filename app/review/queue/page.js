@@ -6,6 +6,7 @@ import Link from "next/link";
 export default function QueuePage() {
   const [pending, setPending] = useState([]);
   const [sources, setSources] = useState([]);
+  const [stats, setStats] = useState(null);
   const [sourceId, setSourceId] = useState("");
   const [sourceText, setSourceText] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
@@ -14,14 +15,16 @@ export default function QueuePage() {
   const [error, setError] = useState(null);
 
   async function loadAll() {
-    const [pendingRes, sourcesRes] = await Promise.all([
+    const [pendingRes, sourcesRes, statsRes] = await Promise.all([
       fetch("/api/articles?status=pending_review"),
       fetch("/api/sources"),
+      fetch("/api/stats"),
     ]);
     const pendingData = await pendingRes.json();
     const sourcesData = await sourcesRes.json();
     setPending(pendingData);
     setSources(sourcesData);
+    setStats(await statsRes.json());
     if (sourcesData.length > 0 && !sourceId) setSourceId(sourcesData[0].id);
   }
 
@@ -61,6 +64,17 @@ export default function QueuePage() {
 
   return (
     <div className="container">
+      {stats && (
+        <div style={{ display: "flex", gap: 12, marginBottom: 28, flexWrap: "wrap" }}>
+          <StatCard label="Gepubliceerd" value={stats.published} text="#9fd15d" href="/review/published?tab=published" />
+          <StatCard label="Te reviewen" value={stats.pending_review} text="#f0b154" href="/review/queue" />
+          <StatCard label="Goedgekeurd" value={stats.approved} text="#6fa8e8" href="/review/published?tab=approved" />
+          <StatCard label="Gepland" value={stats.scheduled} text="#6fa8e8" href="/review/published?tab=scheduled" />
+          <StatCard label="Afgekeurd" value={stats.rejected} text="#f09595" href="/review/published?tab=rejected" />
+          <StatCard label="Bronnen" value={stats.sources} text="#6fa8e8" href="/review/sources" />
+        </div>
+      )}
+
       <h1 style={{ fontSize: 18, fontWeight: 500 }}>Nieuw concept genereren</h1>
       <form onSubmit={handleGenerate} style={{ marginBottom: 32 }}>
         <div style={{ marginBottom: 10 }}>
@@ -163,5 +177,22 @@ export default function QueuePage() {
         </Link>
       ))}
     </div>
+  );
+}
+
+function StatCard({ label, value, text, href }) {
+  return (
+    <Link
+      href={href}
+      style={{
+        background: "var(--surface-1)", borderRadius: 10, padding: "12px 18px", minWidth: 120,
+        display: "block", textDecoration: "none", border: "1px solid transparent",
+        transition: "border-color 0.15s",
+      }}
+      className="stat-card-link"
+    >
+      <p style={{ fontSize: 22, fontWeight: 600, margin: 0, color: text || "var(--text-primary)" }}>{value}</p>
+      <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>{label}</p>
+    </Link>
   );
 }

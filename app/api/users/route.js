@@ -9,9 +9,19 @@ export async function GET() {
 }
 
 export async function POST(request) {
-  const { username, password, role } = await request.json();
+  const { username, password, role, full_name, email, phone, address } = await request.json();
+
+  if (email && email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+    return NextResponse.json({ error: "Ongeldig e-mailadres" }, { status: 400 });
+  }
+
   try {
-    const user = createEditorAccount(username, password, role === "admin" ? "admin" : "editor");
+    const user = createEditorAccount(username, password, role === "admin" ? "admin" : "editor", {
+      full_name: full_name?.trim() || null,
+      email: email?.trim() || null,
+      phone: phone?.trim() || null,
+      address: address?.trim() || null,
+    });
     return NextResponse.json(user, { status: 201 });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 400 });

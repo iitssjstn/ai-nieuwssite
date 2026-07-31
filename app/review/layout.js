@@ -146,6 +146,8 @@ export default function ReviewLayout({ children }) {
   useEffect(() => {
     async function poll() {
       try {
+        fetch("/api/auth/heartbeat", { method: "POST" }).catch(() => {});
+
         const res = await fetch("/api/stats");
         if (!res.ok) return;
         const stats = await res.json();

@@ -9,6 +9,12 @@ export default function ReviewOverview() {
   const [hoveredDay, setHoveredDay] = useState(null);
   const [analyticsPeriod, setAnalyticsPeriod] = useState("today");
   const [analytics, setAnalytics] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
+
+  async function loadOnlineUsers() {
+    const res = await fetch("/api/users/online");
+    if (res.ok) setOnlineUsers((await res.json()).users || []);
+  }
 
   async function loadAll() {
     const [statsRes, pvRes] = await Promise.all([
@@ -34,10 +40,28 @@ export default function ReviewOverview() {
     loadAll();
   }, []);
 
+  useEffect(() => {
+    loadOnlineUsers();
+    const interval = setInterval(loadOnlineUsers, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const maxViews = Math.max(1, ...pageviews.map((d) => d.views));
 
   return (
     <div className="container">
+      {onlineUsers.length > 0 && (
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+          <span style={{ fontSize: 12, color: "var(--text-muted)" }}>Nu online:</span>
+          {onlineUsers.map((u) => (
+            <span key={u.id} className="badge badge-muted" style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#9fd15d", display: "inline-block" }} />
+              {u.full_name || u.username}
+            </span>
+          ))}
+        </div>
+      )}
+
       {stats && (
         <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
           <StatCard label="Gepubliceerd" value={stats.published} text="#9fd15d" href="/review/published?tab=published" />
