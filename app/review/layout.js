@@ -18,6 +18,15 @@ const NAV = [
     ),
   },
   {
+    href: "/review/queue",
+    label: "Wachtrij",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5" />
+      </svg>
+    ),
+  },
+  {
     href: "/review/published",
     label: "Gepubliceerd",
     icon: (
@@ -103,6 +112,7 @@ function LogoutIcon() {
 
 function pageTitle(pathname) {
   if (pathname === "/review") return "Dashboard";
+  if (pathname.startsWith("/review/queue")) return "Wachtrij";
   if (pathname.startsWith("/review/published")) return "Gepubliceerd";
   if (pathname.startsWith("/review/polls")) return "Polls";
   if (pathname.startsWith("/review/kaart")) return "Kaart";
@@ -177,7 +187,7 @@ export default function ReviewLayout({ children }) {
 
         {visibleNav.map((item) => {
           const active = item.href === "/review" ? pathname === "/review" : pathname.startsWith(item.href);
-          const showBadge = item.href === "/review" && pendingCount > 0;
+          const showBadge = item.href === "/review/queue" && pendingCount > 0;
           return (
             <Link key={item.href} href={item.href} className={`admin-nav-item${active ? " active" : ""}`}>
               {item.icon}

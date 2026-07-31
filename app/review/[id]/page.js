@@ -106,7 +106,7 @@ export default function ReviewDetail() {
     const updated = await res.json();
     setBusy(false);
     if (["reject", "unpublish", "schedule", "unschedule", "archive"].includes(action)) {
-      router.push("/review");
+      router.push("/review/queue");
     } else {
       setArticle(updated);
       setEditing(false);
@@ -292,7 +292,7 @@ export default function ReviewDetail() {
   if (!article) return <div className="container">Laden...</div>;
   const isAdmin = me?.role === "admin";
 
-  const backHref = article.status === "published" || article.status === "archived" ? "/review/published" : "/review";
+  const backHref = article.status === "published" || article.status === "archived" ? "/review/published" : "/review/queue";
   const backLabel = article.status === "published" || article.status === "archived" ? "← Terug naar gepubliceerd" : "← Terug naar wachtrij";
 
   return (
