@@ -152,20 +152,31 @@ button {
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--surface-2);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 14px;
 }
 button.primary { background: #1c1c1a; color: #fff; border: none; }
 button.danger { background: #fff; color: #a32d2d; border-color: #f0999540; }
+button:disabled { opacity: 0.5; cursor: not-allowed; }
 
-textarea, input[type="text"] {
+textarea,
+input[type="text"],
+input[type="password"],
+input[type="datetime-local"],
+select {
   width: 100%;
   font-family: inherit;
   font-size: 14px;
   padding: 10px;
   border-radius: 8px;
   border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text-primary);
 }
+textarea::placeholder,
+input::placeholder { color: var(--text-muted); }
+input[type="file"] { color: var(--text-secondary); font-size: 13px; }
 
 .pending-item {
   display: block;

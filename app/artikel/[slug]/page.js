@@ -1,5 +1,7 @@
 import Header from "../../components/Header";
 import Link from "next/link";
+import LiveblogTimeline from "../../components/LiveblogTimeline";
+import PollWidget from "../../components/PollWidget";
 import { getArticle, getArticleBySlug, incrementViews } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -94,6 +96,11 @@ export default function ArticlePage({ params }) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <span className="badge">{article.category}</span>
+      {article.is_liveblog && (
+        <span className="badge" style={{ background: "#a32d2d", color: "#fff", marginLeft: 6 }}>
+          🔴 LIVE
+        </span>
+      )}
       <article>
         <h1>{article.title}</h1>
         <div className="byline">
@@ -127,7 +134,18 @@ export default function ArticlePage({ params }) {
           </>
         )}
 
-        {htmlBody ? (
+        {article.is_liveblog ? (
+          <>
+            {article.body && (
+              htmlBody ? (
+                <div dangerouslySetInnerHTML={{ __html: article.body }} style={{ marginBottom: 20 }} />
+              ) : (
+                paragraphs.map((p, i) => <p key={i}>{p}</p>)
+              )
+            )}
+            <LiveblogTimeline articleId={article.id} initialUpdates={article.liveblog_updates || []} />
+          </>
+        ) : htmlBody ? (
           <div dangerouslySetInnerHTML={{ __html: article.body }} />
         ) : (
           <>
@@ -146,6 +164,8 @@ export default function ArticlePage({ params }) {
             <span className="badge badge-muted">Advertentie</span>
           </div>
         )}
+
+        {article.poll_id && <PollWidget pollId={article.poll_id} />}
 
         {article.tags?.length > 0 && (
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 24 }}>

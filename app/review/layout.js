@@ -28,6 +28,27 @@ const NAV = [
     ),
   },
   {
+    href: "/review/polls",
+    label: "Polls",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="4" y="10" width="4" height="10" rx="1" />
+        <rect x="10" y="5" width="4" height="15" rx="1" />
+        <rect x="16" y="13" width="4" height="7" rx="1" />
+      </svg>
+    ),
+  },
+  {
+    href: "/review/kaart",
+    label: "Kaart",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z" />
+        <circle cx="12" cy="10" r="2.5" />
+      </svg>
+    ),
+  },
+  {
     href: "/review/sources",
     label: "Bronnen",
     adminOnly: true,
@@ -36,6 +57,17 @@ const NAV = [
         <path d="M5 5c8 0 14 6 14 14" />
         <path d="M5 11c5 0 8 3 8 8" />
         <circle cx="5.5" cy="18.5" r="1.5" fill="currentColor" stroke="none" />
+      </svg>
+    ),
+  },
+  {
+    href: "/review/webhooks",
+    label: "Webhooks & API",
+    adminOnly: true,
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <path d="M8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" />
+        <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
       </svg>
     ),
   },
@@ -72,6 +104,9 @@ function LogoutIcon() {
 function pageTitle(pathname) {
   if (pathname === "/review") return "Dashboard";
   if (pathname.startsWith("/review/published")) return "Gepubliceerd";
+  if (pathname.startsWith("/review/polls")) return "Polls";
+  if (pathname.startsWith("/review/kaart")) return "Kaart";
+  if (pathname.startsWith("/review/webhooks")) return "Webhooks & API";
   if (pathname.startsWith("/review/sources")) return "Bronnen";
   if (pathname.startsWith("/review/settings")) return "Instellingen";
   if (/^\/review\/[^/]+$/.test(pathname)) return "Artikel reviewen";

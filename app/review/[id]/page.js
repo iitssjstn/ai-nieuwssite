@@ -26,6 +26,15 @@ export default function ReviewDetail() {
   const [showRevisions, setShowRevisions] = useState(false);
   const [titleVariants, setTitleVariants] = useState(null);
   const [loadingTitles, setLoadingTitles] = useState(false);
+  const [extraContent, setExtraContent] = useState(null);
+  const [extraContentLoading, setExtraContentLoading] = useState(null);
+  const [showExtras, setShowExtras] = useState(false);
+  const [translateLang, setTranslateLang] = useState("en");
+  const [liveblogText, setLiveblogText] = useState("");
+  const [postingUpdate, setPostingUpdate] = useState(false);
+  const [pollIdInput, setPollIdInput] = useState("");
+  const [locationInput, setLocationInput] = useState({ lat: "", lng: "", label: "" });
+  const [geocoding, setGeocoding] = useState(false);
 
   const lastSaved = useRef({ title: "", body: "", featuredImage: null });
   const autosaveTimer = useRef(null);
@@ -44,6 +53,8 @@ export default function ReviewDetail() {
         setFeaturedImage(a.featured_image || null);
         setFeaturedImageCredit(a.featured_image_credit || null);
         setTagsInput((a.tags || []).join(", "));
+        setPollIdInput(a.poll_id || "");
+        setLocationInput(a.location || { lat: "", lng: "", label: "" });
         lastSaved.current = { title: a.title, body: plainTextToHtml(a.body), featuredImage: a.featured_image || null };
       });
   }, [id]);
@@ -114,7 +125,26 @@ export default function ReviewDetail() {
 
   async function saveEdit() {
     const tags = tagsInput.split(",").map((t) => t.trim()).filter(Boolean);
-    await act("edit", { title, articleBody: body, featuredImage, featuredImageCredit, tags });
+    const location = locationInput.lat && locationInput.lng ? locationInput : null;
+    await act("edit", { title, articleBody: body, featuredImage, featuredImageCredit, tags, pollId: pollIdInput, location });
+  }
+
+  async function handleGeocode() {
+    if (!locationInput.label?.trim()) return;
+    setGeocoding(true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationInput.label)}&format=json&limit=1`,
+        { headers: { "Accept-Language": "nl" } }
+      );
+      const results = await res.json();
+      if (!results[0]) throw new Error("Locatie niet gevonden");
+      setLocationInput({ label: locationInput.label, lat: results[0].lat, lng: results[0].lon });
+    } catch (err) {
+      alert("Locatie opzoeken mislukt: " + err.message);
+    } finally {
+      setGeocoding(false);
+    }
   }
 
   async function handleSearchStockPhoto() {
@@ -191,6 +221,55 @@ export default function ReviewDetail() {
       alert("Titelvarianten genereren mislukt: " + err.message);
     } finally {
       setLoadingTitles(false);
+    }
+  }
+
+  async function handleExtraContent(kind, extraBody = {}) {
+    setExtraContentLoading(kind);
+    try {
+      const res = await fetch(`/api/generate/${kind}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: article.title, body: article.body, ...extraBody }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+      setExtraContent({ kind, data });
+    } catch (err) {
+      alert("Genereren mislukt: " + err.message);
+    } finally {
+      setExtraContentLoading(null);
+    }
+  }
+
+  async function handlePostUpdate() {
+    if (!liveblogText.trim()) return;
+    setPostingUpdate(true);
+    const res = await fetch(`/api/articles/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "add_liveblog_update", liveblogText }),
+    });
+    setPostingUpdate(false);
+    if (res.ok) {
+      const updated = await res.json();
+      setArticle(updated);
+      setLiveblogText("");
+    } else {
+      alert("Update plaatsen mislukt");
+    }
+  }
+
+  async function handleDeleteUpdate(updateId) {
+    if (!confirm("Deze update verwijderen?")) return;
+    const res = await fetch(`/api/articles/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "delete_liveblog_update", updateId }),
+    });
+    if (res.ok) {
+      const updated = await res.json();
+      setArticle(updated);
     }
   }
 
@@ -322,6 +401,39 @@ export default function ReviewDetail() {
                 />
               </div>
 
+              <div style={{ marginTop: 10 }}>
+                <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Poll-ID (optioneel, uit Polls-pagina)</p>
+                <input
+                  type="text"
+                  placeholder="Plak hier een poll-ID"
+                  value={pollIdInput}
+                  onChange={(e) => setPollIdInput(e.target.value)}
+                />
+              </div>
+
+              <div style={{ marginTop: 10 }}>
+                <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Locatie (voor de nieuwskaart, optioneel)</p>
+                <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+                  <input
+                    type="text"
+                    placeholder="Plaatsnaam (bijv. Vaassen)"
+                    value={locationInput.label || ""}
+                    onChange={(e) => setLocationInput((l) => ({ ...l, label: e.target.value }))}
+                  />
+                  <button type="button" onClick={handleGeocode} disabled={geocoding} style={{ width: "auto", padding: "5px 10px", fontSize: 12 }}>
+                    {geocoding ? "..." : "Opzoeken"}
+                  </button>
+                </div>
+                {locationInput.lat && locationInput.lng && (
+                  <p style={{ fontSize: 11, color: "var(--text-muted)" }}>
+                    Coördinaten: {locationInput.lat}, {locationInput.lng}{" "}
+                    <button type="button" onClick={() => setLocationInput({ lat: "", lng: "", label: "" })} style={{ width: "auto", padding: "0 4px", fontSize: 11, background: "none", border: "none", color: "var(--danger-text)" }}>
+                      ✕ wissen
+                    </button>
+                  </p>
+                )}
+              </div>
+
               {autosaveStatus && (
                 <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>{autosaveStatus}</p>
               )}
@@ -377,6 +489,9 @@ export default function ReviewDetail() {
         {article.generated_by && (
           <span className="badge badge-muted">via {article.generated_by}</span>
         )}
+        {article.readability && (
+          <span className="badge badge-muted">📖 {article.readability.label} ({article.readability.score})</span>
+        )}
       </div>
 
       {isAdmin && (
@@ -388,6 +503,98 @@ export default function ReviewDetail() {
             <button disabled={busy} onClick={() => setShowRevisions((s) => !s)}>
               Revisiegeschiedenis ({article.revisions.length})
             </button>
+          )}
+          <button disabled={busy} onClick={() => setShowExtras((s) => !s)}>
+            Extra content genereren
+          </button>
+          <button disabled={busy} onClick={() => act("toggle_liveblog")}>
+            {article.is_liveblog ? "Liveblog uitzetten" : "Als liveblog markeren"}
+          </button>
+        </div>
+      )}
+
+      {article.is_liveblog && (
+        <div style={{ background: "var(--surface-1)", borderRadius: 10, padding: 14, marginBottom: 16 }}>
+          <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 10 }}>🔴 Liveblog-updates</p>
+          <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+            <input
+              type="text"
+              placeholder="Nieuwe update..."
+              value={liveblogText}
+              onChange={(e) => setLiveblogText(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handlePostUpdate()}
+            />
+            <button onClick={handlePostUpdate} disabled={postingUpdate} className="primary" style={{ width: "auto", padding: "8px 16px" }}>
+              {postingUpdate ? "..." : "Plaatsen"}
+            </button>
+          </div>
+          {(article.liveblog_updates || []).map((u) => (
+            <div key={u.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "8px 0", borderTop: "1px solid var(--border)" }}>
+              <div>
+                <p style={{ fontSize: 13, margin: 0 }}>{u.text}</p>
+                <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "2px 0 0" }}>
+                  {new Date(u.created_at).toLocaleString("nl-NL")} · {u.author}
+                </p>
+              </div>
+              <button onClick={() => handleDeleteUpdate(u.id)} style={{ width: "auto", padding: "2px 8px", fontSize: 11, color: "var(--danger-text)" }}>
+                ✕
+              </button>
+            </div>
+          ))}
+          {(article.liveblog_updates || []).length === 0 && (
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen updates geplaatst.</p>
+          )}
+        </div>
+      )}
+
+      {showExtras && (
+        <div style={{ background: "var(--surface-1)", borderRadius: 10, padding: 14, marginBottom: 16 }}>
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
+            <button disabled={extraContentLoading} onClick={() => handleExtraContent("social")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+              {extraContentLoading === "social" ? "Bezig..." : "📱 Social-media-posts"}
+            </button>
+            <button disabled={extraContentLoading} onClick={() => handleExtraContent("push")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+              {extraContentLoading === "push" ? "Bezig..." : "🔔 Pushmelding"}
+            </button>
+            <button disabled={extraContentLoading} onClick={() => handleExtraContent("newsletter")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+              {extraContentLoading === "newsletter" ? "Bezig..." : "✉️ Nieuwsbrief-samenvatting"}
+            </button>
+            <select value={translateLang} onChange={(e) => setTranslateLang(e.target.value)} style={{ width: "auto" }}>
+              <option value="en">Engels</option>
+              <option value="de">Duits</option>
+              <option value="fr">Frans</option>
+              <option value="es">Spaans</option>
+            </select>
+            <button disabled={extraContentLoading} onClick={() => handleExtraContent("translate", { language: translateLang })} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+              {extraContentLoading === "translate" ? "Bezig..." : "🌐 Vertalen"}
+            </button>
+          </div>
+
+          {extraContent && (
+            <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: 12 }}>
+              {extraContent.kind === "social" && (
+                <>
+                  <ExtraField label="X / Twitter" value={extraContent.data.x} />
+                  <ExtraField label="Facebook" value={extraContent.data.facebook} />
+                  <ExtraField label="LinkedIn" value={extraContent.data.linkedin} />
+                </>
+              )}
+              {extraContent.kind === "push" && (
+                <>
+                  <ExtraField label="Pushmelding-titel" value={extraContent.data.push_title} />
+                  <ExtraField label="Pushmelding-tekst" value={extraContent.data.push_body} />
+                </>
+              )}
+              {extraContent.kind === "newsletter" && (
+                <ExtraField label="Nieuwsbrief-samenvatting" value={extraContent.data.newsletter_summary} />
+              )}
+              {extraContent.kind === "translate" && (
+                <>
+                  <ExtraField label={`Titel (${extraContent.data.language})`} value={extraContent.data.title} />
+                  <ExtraField label={`Tekst (${extraContent.data.language})`} value={extraContent.data.body} multiline />
+                </>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -471,4 +678,26 @@ function statusLabel(status) {
     scheduled: "Gepland",
     archived: "Gearchiveerd",
   }[status] || status;
+}
+
+function ExtraField({ label, value, multiline }) {
+  return (
+    <div style={{ marginBottom: 10 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+        <p style={{ fontSize: 11, color: "var(--text-muted)", margin: 0 }}>{label}</p>
+        <button
+          type="button"
+          onClick={() => navigator.clipboard.writeText(value || "")}
+          style={{ width: "auto", padding: "2px 8px", fontSize: 11 }}
+        >
+          Kopiëren
+        </button>
+      </div>
+      {multiline ? (
+        <p style={{ fontSize: 13, whiteSpace: "pre-wrap", margin: 0 }}>{value}</p>
+      ) : (
+        <p style={{ fontSize: 13, margin: 0 }}>{value}</p>
+      )}
+    </div>
+  );
 }

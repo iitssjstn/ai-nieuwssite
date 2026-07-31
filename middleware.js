@@ -13,6 +13,9 @@ const ADMIN_PATH_PREFIXES = [
   "/api/settings",
   "/api/uploads",
   "/api/users",
+  "/api/polls",
+  "/api/webhooks",
+  "/api/keys",
 ];
 
 // Subset die WEL alleen op het admin-subdomein mag bestaan, maar NIET zelf
@@ -25,9 +28,12 @@ const AUTH_EXEMPT_PREFIXES = ["/login", "/api/auth"];
 const ADMIN_ONLY_PREFIXES = [
   "/review/sources",
   "/review/settings",
+  "/review/webhooks",
   "/api/sources",
   "/api/settings",
   "/api/users",
+  "/api/webhooks",
+  "/api/keys",
 ];
 
 // Routes die op BEIDE domeinen moeten blijven werken, ook al zijn ze geen

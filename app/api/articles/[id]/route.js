@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
-import { getArticle, updateArticle, editArticleWithRevision, deleteArticle, addReviewLogEntry } from "@/lib/db";
+import { getArticle, updateArticle, editArticleWithRevision, deleteArticle, addReviewLogEntry, addLiveblogUpdate, deleteLiveblogUpdate } from "@/lib/db";
 import { getSessionFromRequest } from "@/lib/auth";
+import { computeReadability } from "@/lib/readability";
+import { triggerWebhooks } from "@/lib/webhooks";
 
 // Acties die alleen een admin mag uitvoeren — een redacteur mag artikelen
 // aanmaken/bewerken/inleveren, maar niet zelf goedkeuren/publiceren/afkeuren.
@@ -12,7 +14,7 @@ const ADMIN_ONLY_ACTIONS = [
 export async function GET(request, { params }) {
   const article = getArticle(params.id);
   if (!article) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
-  return NextResponse.json(article);
+  return NextResponse.json({ ...article, readability: computeReadability(article.body) });
 }
 
 // action: "approve" | "publish" | "reject" | "edit" | "unpublish" |
@@ -20,7 +22,7 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
   const session = await getSessionFromRequest(request);
   const body = await request.json();
-  const { action, title, articleBody, featuredImage, featuredImageCredit, tags, scheduledAt } = body;
+  const { action, title, articleBody, featuredImage, featuredImageCredit, tags, scheduledAt, liveblogText, updateId, location, pollId } = body;
 
   if (ADMIN_ONLY_ACTIONS.includes(action) && session?.role !== "admin") {
     return NextResponse.json({ error: "Alleen voor admins" }, { status: 403 });
@@ -46,6 +48,7 @@ export async function PATCH(request, { params }) {
       status: "published",
       published_at: new Date().toISOString(),
     });
+    triggerWebhooks("article.published", updated).catch(() => {});
   } else if (action === "reject") {
     updated = updateArticle(params.id, {
       status: "rejected",
@@ -73,6 +76,18 @@ export async function PATCH(request, { params }) {
     });
   } else if (action === "unschedule") {
     updated = updateArticle(params.id, { status: "pending_review", scheduled_at: null });
+  } else if (action === "toggle_liveblog") {
+    updated = updateArticle(params.id, { is_liveblog: !existing.is_liveblog });
+  } else if (action === "add_liveblog_update") {
+    if (!liveblogText || !liveblogText.trim()) {
+      return NextResponse.json({ error: "Tekst voor de update is verplicht" }, { status: 400 });
+    }
+    updated = addLiveblogUpdate(params.id, { text: liveblogText.trim(), author: reviewer });
+  } else if (action === "delete_liveblog_update") {
+    if (!updateId) {
+      return NextResponse.json({ error: "updateId is verplicht" }, { status: 400 });
+    }
+    updated = deleteLiveblogUpdate(params.id, updateId);
   } else if (action === "edit") {
     updated = editArticleWithRevision(params.id, {
       title,
@@ -82,6 +97,12 @@ export async function PATCH(request, { params }) {
     });
     if (tags !== undefined) {
       updated = updateArticle(params.id, { tags });
+    }
+    if (location !== undefined) {
+      updated = updateArticle(params.id, { location });
+    }
+    if (pollId !== undefined) {
+      updated = updateArticle(params.id, { poll_id: pollId || null });
     }
     diff = "titel/body/afbeelding/tags aangepast";
   } else {
