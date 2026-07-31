@@ -14,6 +14,21 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="nl">
+      <head>
+        {/* Vóór React laadt al de juiste modus instellen — anders zie je
+            eerst kort de lichte site en dan een flits naar donker. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                var stored = localStorage.getItem("theme");
+                var wantsDark = stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+                if (wantsDark) document.documentElement.classList.add("dark");
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body>
         {children}
         {adsenseClientId && (

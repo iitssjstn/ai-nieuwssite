@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getArticles } from "@/lib/db";
 import PageviewTracker from "./PageviewTracker";
+import ThemeToggle from "./ThemeToggle";
 
 const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech"];
 
@@ -26,6 +27,7 @@ export default function Header() {
               {c}
             </Link>
           ))}
+          <ThemeToggle />
         </div>
       </div>
     </>

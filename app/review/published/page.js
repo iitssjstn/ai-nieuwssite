@@ -2,11 +2,22 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
 
+const TABS = [
+  { id: "published", label: "Gepubliceerd" },
+  { id: "approved", label: "Goedgekeurd" },
+  { id: "scheduled", label: "Gepland" },
+  { id: "rejected", label: "Afgekeurd" },
+  { id: "archived", label: "Gearchiveerd" },
+];
+
 export default function PublishedArticles() {
-  const [tab, setTab] = useState("published");
+  const searchParams = useSearchParams();
+  const initialTab = searchParams.get("tab");
+  const [tab, setTab] = useState(TABS.some((t) => t.id === initialTab) ? initialTab : "published");
   const [articles, setArticles] = useState([]);
   const [busyId, setBusyId] = useState(null);
   const [me, setMe] = useState(null);
@@ -59,8 +70,8 @@ export default function PublishedArticles() {
       result = result.filter((a) => a.category === categoryFilter);
     }
     result = [...result].sort((a, b) => {
-      const da = new Date(a.published_at || a.created_at);
-      const db = new Date(b.published_at || b.created_at);
+      const da = new Date(a.published_at || a.reviewed_at || a.created_at);
+      const db = new Date(b.published_at || b.reviewed_at || b.created_at);
       if (sortBy === "newest") return db - da;
       if (sortBy === "oldest") return da - db;
       if (sortBy === "most_read") return (b.views || 0) - (a.views || 0);
@@ -70,20 +81,35 @@ export default function PublishedArticles() {
   }, [articles, search, categoryFilter, sortBy]);
 
   const isAdmin = me?.role === "admin";
+  const activeTabLabel = TABS.find((t) => t.id === tab)?.label || "";
+
+  function dateLine(a) {
+    if (tab === "scheduled" && a.scheduled_at) return `Gepland voor: ${new Date(a.scheduled_at).toLocaleString("nl-NL")}`;
+    if ((tab === "approved" || tab === "rejected") && a.reviewed_at) return `Beoordeeld: ${new Date(a.reviewed_at).toLocaleString("nl-NL")}`;
+    if (a.published_at) return `Gepubliceerd: ${new Date(a.published_at).toLocaleString("nl-NL")} · ${a.views || 0} weergaven`;
+    return `Aangemaakt: ${new Date(a.created_at).toLocaleString("nl-NL")}`;
+  }
 
   return (
     <div className="container">
-      <div style={{ display: "flex", gap: 4, marginBottom: 16 }}>
-        <button onClick={() => setTab("published")} style={{ width: "auto", padding: "6px 14px", fontSize: 13, background: tab === "published" ? "var(--accent-bg)" : "transparent", color: tab === "published" ? "var(--accent-text)" : "var(--text-secondary)", border: "none" }}>
-          Gepubliceerd
-        </button>
-        <button onClick={() => setTab("archived")} style={{ width: "auto", padding: "6px 14px", fontSize: 13, background: tab === "archived" ? "var(--accent-bg)" : "transparent", color: tab === "archived" ? "var(--accent-text)" : "var(--text-secondary)", border: "none" }}>
-          Gearchiveerd
-        </button>
+      <div style={{ display: "flex", gap: 4, marginBottom: 16, flexWrap: "wrap" }}>
+        {TABS.map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            style={{
+              width: "auto", padding: "6px 14px", fontSize: 13, border: "none",
+              background: tab === t.id ? "var(--accent-bg)" : "transparent",
+              color: tab === t.id ? "var(--accent-text)" : "var(--text-secondary)",
+            }}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 16 }}>
-        {tab === "published" ? "Gepubliceerde" : "Gearchiveerde"} artikelen ({filtered.length} van {articles.length})
+        {activeTabLabel} ({filtered.length} van {articles.length})
       </h1>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
@@ -108,7 +134,7 @@ export default function PublishedArticles() {
       {filtered.length === 0 && (
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
           {articles.length === 0
-            ? (tab === "published" ? "Nog niets gepubliceerd." : "Nog niets gearchiveerd.")
+            ? `Nog niets in "${activeTabLabel}".`
             : "Geen artikelen komen overeen met je zoekopdracht/filter."}
         </p>
       )}
@@ -119,7 +145,7 @@ export default function PublishedArticles() {
             <span className="badge badge-muted" style={{ marginBottom: 8, display: "inline-block" }}>{a.category}</span>
             <p style={{ fontWeight: 500, margin: 0 }}>{a.title}</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
-              Gepubliceerd: {a.published_at ? new Date(a.published_at).toLocaleString("nl-NL") : "-"} · {a.views || 0} weergaven
+              {dateLine(a)}
             </p>
           </div>
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
@@ -135,6 +161,26 @@ export default function PublishedArticles() {
                   Archiveren
                 </button>
               </>
+            )}
+            {isAdmin && tab === "approved" && (
+              <>
+                <button disabled={busyId === a.id} onClick={() => doAction(a.id, "publish")} className="primary" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+                  Publiceren
+                </button>
+                <button disabled={busyId === a.id} onClick={() => doAction(a.id, "unpublish")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+                  Terug naar wachtrij
+                </button>
+              </>
+            )}
+            {isAdmin && tab === "scheduled" && (
+              <button disabled={busyId === a.id} onClick={() => doAction(a.id, "unschedule")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+                Planning annuleren
+              </button>
+            )}
+            {isAdmin && tab === "rejected" && (
+              <button disabled={busyId === a.id} onClick={() => doAction(a.id, "unpublish")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+                Opnieuw indienen
+              </button>
             )}
             {isAdmin && tab === "archived" && (
               <button disabled={busyId === a.id} onClick={() => doAction(a.id, "unarchive")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>

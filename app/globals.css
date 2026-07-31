@@ -12,6 +12,24 @@
   --success-text: #27500a;
 }
 
+/* Donkere modus voor de publieke site — zelfde palet als het adminpaneel,
+   maar hier bewust een opt-in klasse op <html> i.p.v. altijd aan, zodat
+   bezoekers zelf kiezen. */
+html.dark {
+  --bg: #14151a;
+  --surface-1: #1c1e26;
+  --surface-2: #20222b;
+  --border: #2c2f3a;
+  --text-primary: #f2f2f0;
+  --text-secondary: #a3a5b0;
+  --text-muted: #6e7180;
+  --accent-bg: #1a2c47;
+  --accent-text: #6fa8e8;
+  --danger-text: #f09595;
+  --success-text: #9fd15d;
+}
+html.dark body { background: var(--bg); color: var(--text-primary); }
+
 * { box-sizing: border-box; }
 
 body {
@@ -431,3 +449,4 @@ article img { max-width: 100%; border-radius: 8px; margin: 12px 0; display: bloc
 .admin-shell button.danger { background: transparent; color: #f09595; border-color: #501313; }
 .admin-shell button.primary { background: var(--text-primary); color: var(--bg); }
 .admin-shell .pending-item:hover { border-color: #444759; }
+.stat-card-link:hover { border-color: var(--border) !important; background: var(--surface-2) !important; }

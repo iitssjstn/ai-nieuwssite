@@ -8,6 +8,7 @@ export default function ReviewOverview() {
   const [sources, setSources] = useState([]);
   const [stats, setStats] = useState(null);
   const [pageviews, setPageviews] = useState([]);
+  const [hoveredDay, setHoveredDay] = useState(null);
   const [analyticsPeriod, setAnalyticsPeriod] = useState("today");
   const [analytics, setAnalytics] = useState(null);
   const [sourceId, setSourceId] = useState("");
@@ -85,31 +86,58 @@ export default function ReviewOverview() {
     <div className="container">
       {stats && (
         <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
-          <StatCard label="Gepubliceerd" value={stats.published} text="#9fd15d" />
-          <StatCard label="Te reviewen" value={stats.pending_review} text="#f0b154" />
-          <StatCard label="Goedgekeurd" value={stats.approved} text="#6fa8e8" />
-          <StatCard label="Gepland" value={stats.scheduled} text="#6fa8e8" />
-          <StatCard label="Afgekeurd" value={stats.rejected} text="#f09595" />
-          <StatCard label="Bronnen" value={stats.sources} text="#6fa8e8" />
+          <StatCard label="Gepubliceerd" value={stats.published} text="#9fd15d" href="/review/published?tab=published" />
+          <StatCard label="Te reviewen" value={stats.pending_review} text="#f0b154" href="/review" />
+          <StatCard label="Goedgekeurd" value={stats.approved} text="#6fa8e8" href="/review/published?tab=approved" />
+          <StatCard label="Gepland" value={stats.scheduled} text="#6fa8e8" href="/review/published?tab=scheduled" />
+          <StatCard label="Afgekeurd" value={stats.rejected} text="#f09595" href="/review/published?tab=rejected" />
+          <StatCard label="Bronnen" value={stats.sources} text="#6fa8e8" href="/review/sources" />
         </div>
       )}
 
       {pageviews.length > 0 && (
         <div style={{ background: "var(--surface-1)", borderRadius: 10, padding: 16, marginBottom: 28 }}>
           <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 12 }}>Paginaweergaven — laatste 14 dagen</p>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 60 }}>
-            {pageviews.map((d) => (
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 60, position: "relative" }}>
+            {pageviews.map((d, i) => (
               <div
                 key={d.date}
-                title={`${d.date}: ${d.views}`}
-                style={{
-                  flex: 1,
-                  height: `${Math.max(4, (d.views / maxViews) * 60)}px`,
-                  background: "var(--accent-text)",
-                  borderRadius: 2,
-                  opacity: 0.85,
-                }}
-              />
+                onMouseEnter={() => setHoveredDay(i)}
+                onMouseLeave={() => setHoveredDay(null)}
+                style={{ flex: 1, height: "100%", display: "flex", alignItems: "flex-end", position: "relative", cursor: "default" }}
+              >
+                {hoveredDay === i && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: "100%",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      marginBottom: 8,
+                      background: "var(--bg)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 6,
+                      padding: "6px 10px",
+                      whiteSpace: "nowrap",
+                      fontSize: 12,
+                      zIndex: 10,
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+                    }}
+                  >
+                    <strong>{d.views}</strong> weergave{d.views === 1 ? "" : "n"}
+                    <div style={{ color: "var(--text-muted)", fontSize: 11 }}>{formatDayLabel(d.date)}</div>
+                  </div>
+                )}
+                <div
+                  style={{
+                    width: "100%",
+                    height: `${Math.max(4, (d.views / maxViews) * 60)}px`,
+                    background: "var(--accent-text)",
+                    opacity: hoveredDay === i ? 1 : 0.85,
+                    borderRadius: 2,
+                  }}
+                />
+              </div>
             ))}
           </div>
           <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
@@ -260,11 +288,24 @@ export default function ReviewOverview() {
   );
 }
 
-function StatCard({ label, value, text }) {
+function formatDayLabel(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
+}
+
+function StatCard({ label, value, text, href }) {
   return (
-    <div style={{ background: "var(--surface-1)", borderRadius: 10, padding: "12px 18px", minWidth: 120 }}>
+    <Link
+      href={href}
+      style={{
+        background: "var(--surface-1)", borderRadius: 10, padding: "12px 18px", minWidth: 120,
+        display: "block", textDecoration: "none", border: "1px solid transparent",
+        transition: "border-color 0.15s",
+      }}
+      className="stat-card-link"
+    >
       <p style={{ fontSize: 22, fontWeight: 600, margin: 0, color: text || "var(--text-primary)" }}>{value}</p>
       <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>{label}</p>
-    </div>
+    </Link>
   );
 }
