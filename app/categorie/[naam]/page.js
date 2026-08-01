@@ -14,13 +14,14 @@ function timeAgo(dateStr) {
 
 export default function CategoryPage({ params }) {
   const naam = decodeURIComponent(params.naam);
+  const capitalized = naam.charAt(0).toUpperCase() + naam.slice(1).toLowerCase();
   const articles = getArticles({ status: "published" })
     .filter((a) => a.category?.toLowerCase() === naam.toLowerCase())
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
   return (
     <div className="container">
-      <Header />
+      <Header activeCategory={capitalized} />
       <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16, textTransform: "capitalize" }}>
         {naam}
       </h1>

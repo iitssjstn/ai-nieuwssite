@@ -27,7 +27,7 @@ export default function HomePage() {
 
   const [hero, ...rest] = published;
   const gridItems = rest.slice(0, 2);
-  const latestNews = published.slice(0, 12);
+  const latestNews = published.slice(0, 7);
   const mostRead = [...published].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
 
   return (
@@ -76,26 +76,38 @@ export default function HomePage() {
           )}
 
           <div style={{ marginTop: 8 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Laatste nieuws</h3>
-            {latestNews.map((a) => (
-              <Link key={a.id} href={`/artikel/${a.slug}`} className="latest-news-row">
-                <span className="latest-news-time">{timeAgo(a.published_at)}</span>
-                <span className="latest-news-cat">{a.category}</span>
-                <p className="latest-news-title">{a.title}</p>
-              </Link>
-            ))}
+            {published.length === 0 && (
+              <p style={{ color: "var(--text-secondary)" }}>
+                Nog geen gepubliceerde artikelen.
+              </p>
+            )}
           </div>
-
-          {published.length === 0 && (
-            <p style={{ color: "var(--text-secondary)" }}>
-              Nog geen gepubliceerde artikelen.
-            </p>
-          )}
         </div>
 
         {/* Sidebar */}
         <div>
           <div className="sidebar-box">
+            <h3>Laatste nieuws</h3>
+            {latestNews.length === 0 && (
+              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen artikelen.</p>
+            )}
+            {latestNews.map((a, i) => {
+              const isFresh = a.published_at && Date.now() - new Date(a.published_at).getTime() < 15 * 60 * 1000;
+              return (
+                <Link key={a.id} href={`/artikel/${a.slug}`} className="latest-news-row">
+                  <span className={`latest-news-dot${isFresh ? " fresh" : ""}`} />
+                  <div>
+                    <span className="latest-news-time">
+                      {isFresh ? "Net binnen" : timeAgo(a.published_at)} · {a.category}
+                    </span>
+                    <p className="latest-news-title">{a.title}</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="sidebar-box" style={{ marginTop: 20 }}>
             <h3>Meest gelezen</h3>
             {mostRead.length === 0 && (
               <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven.</p>

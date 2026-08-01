@@ -21,8 +21,8 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                var stored = localStorage.getItem("theme");
-                var wantsDark = stored ? stored === "dark" : window.matchMedia("(prefers-color-scheme: dark)").matches;
+                var stored = localStorage.getItem("theme") || "auto";
+                var wantsDark = stored === "dark" || (stored === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
                 if (wantsDark) document.documentElement.classList.add("dark");
               } catch (e) {}
             `,
