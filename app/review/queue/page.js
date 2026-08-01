@@ -7,6 +7,8 @@ export default function QueuePage() {
   const [pending, setPending] = useState([]);
   const [sources, setSources] = useState([]);
   const [stats, setStats] = useState(null);
+  const [me, setMe] = useState(null);
+  const [busyId, setBusyId] = useState(null);
   const [sourceId, setSourceId] = useState("");
   const [sourceText, setSourceText] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
@@ -29,9 +31,36 @@ export default function QueuePage() {
   }
 
   useEffect(() => {
+    fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)).then(setMe).catch(() => {});
+  }, []);
+
+  useEffect(() => {
     loadAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  async function quickReject(e, id) {
+    e.preventDefault();
+    e.stopPropagation();
+    setBusyId(id);
+    await fetch(`/api/articles/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "reject" }),
+    });
+    await loadAll();
+    setBusyId(null);
+  }
+
+  async function quickDelete(e, id) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm("Dit concept definitief verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
+    setBusyId(id);
+    await fetch(`/api/articles/${id}`, { method: "DELETE" });
+    await loadAll();
+    setBusyId(null);
+  }
 
   async function handleGenerate(e) {
     e.preventDefault();
@@ -164,17 +193,29 @@ export default function QueuePage() {
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Niets te reviewen.</p>
       )}
       {pending.map((a) => (
-        <Link key={a.id} href={`/review/${a.id}`} className="pending-item">
-          <span className="badge badge-muted" style={{ marginBottom: 8, display: "inline-block" }}>{a.category}</span>
-          {a.possible_duplicate && (
-            <span className="flag flag-warn" style={{ marginLeft: 8 }}>⚠ mogelijk duplicaat</span>
+        <div key={a.id} className="pending-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+          <Link href={`/review/${a.id}`} style={{ minWidth: 0, flex: 1, color: "inherit", textDecoration: "none" }}>
+            <span className="badge badge-muted" style={{ marginBottom: 8, display: "inline-block" }}>{a.category}</span>
+            {a.possible_duplicate && (
+              <span className="flag flag-warn" style={{ marginLeft: 8 }}>⚠ mogelijk duplicaat</span>
+            )}
+            <p style={{ fontWeight: 500, margin: 0 }}>{a.title}</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
+              Confidence: {a.confidence_score != null ? Math.round(a.confidence_score * 100) + "%" : "-"}
+              {a.source_url && " · 🔗 bron-link beschikbaar"}
+            </p>
+          </Link>
+          {me?.role === "admin" && (
+            <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+              <button disabled={busyId === a.id} onClick={(e) => quickReject(e, a.id)} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+                Afkeuren
+              </button>
+              <button disabled={busyId === a.id} onClick={(e) => quickDelete(e, a.id)} className="danger" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+                Verwijderen
+              </button>
+            </div>
           )}
-          <p style={{ fontWeight: 500, margin: 0 }}>{a.title}</p>
-          <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
-            Confidence: {a.confidence_score != null ? Math.round(a.confidence_score * 100) + "%" : "-"}
-            {a.source_url && " · 🔗 bron-link beschikbaar"}
-          </p>
-        </Link>
+        </div>
       ))}
     </div>
   );
