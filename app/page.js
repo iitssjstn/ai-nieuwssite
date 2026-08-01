@@ -2,7 +2,7 @@ import Link from "next/link";
 import Header from "./components/Header";
 import LiveTimeLabel from "./components/LiveTimeLabel";
 import { getArticles } from "@/lib/db";
-import { getExcerpt } from "@/lib/content";
+import { getExcerpt, formatImageCredit } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
@@ -52,9 +52,9 @@ export default function HomePage() {
                 {hero.featured_image && (
                   <>
                     <img src={hero.featured_image} alt="" style={{ width: "100%", borderRadius: 8, marginBottom: 4, display: "block" }} />
-                    {hero.featured_image_credit && (
+                    {formatImageCredit(hero.featured_image_credit) && (
                       <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
-                        Foto: {hero.featured_image_credit.name} via {hero.featured_image_credit.source}
+                        {formatImageCredit(hero.featured_image_credit)}
                       </p>
                     )}
                   </>

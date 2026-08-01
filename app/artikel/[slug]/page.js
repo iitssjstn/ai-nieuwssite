@@ -116,9 +116,9 @@ export default function ArticlePage({ params }) {
             <img
               src={article.featured_image}
               alt=""
-              style={{ width: "100%", borderRadius: 12, marginBottom: article.featured_image_credit ? 4 : 20, display: "block" }}
+              style={{ width: "100%", borderRadius: 12, marginBottom: article.featured_image_credit?.name ? 4 : 20, display: "block" }}
             />
-            {article.featured_image_credit && (
+            {article.featured_image_credit?.name && (
               <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>
                 Foto:{" "}
                 {article.featured_image_credit.url ? (
@@ -127,8 +127,8 @@ export default function ArticlePage({ params }) {
                   </a>
                 ) : (
                   article.featured_image_credit.name
-                )}{" "}
-                via {article.featured_image_credit.source}
+                )}
+                {article.featured_image_credit.source && ` via ${article.featured_image_credit.source}`}
               </p>
             )}
           </>

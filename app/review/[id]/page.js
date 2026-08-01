@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import RichEditor from "../../components/RichEditor";
 import ArticleBody from "../../components/ArticleBody";
-import { plainTextToHtml } from "@/lib/content";
+import { plainTextToHtml, formatImageCredit } from "@/lib/content";
 
 export default function ReviewDetail() {
   const { id } = useParams();
@@ -394,17 +394,31 @@ export default function ReviewDetail() {
                 <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Uitgelichte afbeelding</p>
                 {featuredImage && (
                   <>
-                    <img src={featuredImage} alt="" style={{ maxWidth: "100%", borderRadius: 8, marginBottom: 4, display: "block" }} />
-                    {featuredImageCredit && (
-                      <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 6 }}>
-                        Foto: {featuredImageCredit.name} via {featuredImageCredit.source}{" "}
+                    <img src={featuredImage} alt="" style={{ maxWidth: "100%", borderRadius: 8, marginBottom: 6, display: "block" }} />
+                    <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 8 }}>
+                      <input
+                        type="text"
+                        placeholder="Naam van de maker (optioneel — vult zichzelf in bij een stockfoto)"
+                        value={featuredImageCredit?.name || ""}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFeaturedImageCredit(value ? { ...(featuredImageCredit || {}), name: value } : null);
+                        }}
+                        style={{ marginBottom: 0, flex: 1 }}
+                      />
+                      {featuredImageCredit && (
                         <button
                           type="button"
                           onClick={() => setFeaturedImageCredit(null)}
-                          style={{ width: "auto", padding: "0 4px", fontSize: 11, background: "none", border: "none", color: "var(--danger-text)", cursor: "pointer" }}
+                          style={{ width: "auto", padding: "8px 10px", fontSize: 12 }}
                         >
-                          ✕ verwijderen
+                          ✕
                         </button>
+                      )}
+                    </div>
+                    {featuredImageCredit?.source && (
+                      <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: -4, marginBottom: 8 }}>
+                        Bron: {featuredImageCredit.source} (automatisch ingevuld)
                       </p>
                     )}
                   </>
@@ -488,9 +502,9 @@ export default function ReviewDetail() {
               {article.featured_image && (
                 <>
                   <img src={article.featured_image} alt="" style={{ maxWidth: "100%", borderRadius: 8, marginBottom: 4, display: "block" }} />
-                  {article.featured_image_credit && (
+                  {article.featured_image_credit && formatImageCredit(article.featured_image_credit) && (
                     <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
-                      Foto: {article.featured_image_credit.name} via {article.featured_image_credit.source}
+                      {formatImageCredit(article.featured_image_credit)}
                     </p>
                   )}
                 </>
