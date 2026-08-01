@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
+
 export default function QueuePage() {
   const [pending, setPending] = useState([]);
   const [sources, setSources] = useState([]);
@@ -12,6 +14,7 @@ export default function QueuePage() {
   const [sourceId, setSourceId] = useState("");
   const [sourceText, setSourceText] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
+  const [categoryOverride, setCategoryOverride] = useState("");
   const [extraSources, setExtraSources] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -76,6 +79,7 @@ export default function QueuePage() {
           source_text: sourceText,
           source_url: sourceUrl,
           additional_sources: extraSources,
+          category_override: categoryOverride || undefined,
         }),
       });
       const data = await res.json();
@@ -83,6 +87,7 @@ export default function QueuePage() {
       setSourceText("");
       setSourceUrl("");
       setExtraSources([]);
+      setCategoryOverride("");
       await loadAll();
     } catch (err) {
       setError(err.message);
@@ -112,12 +117,22 @@ export default function QueuePage() {
               Nog geen bronnen. Voeg er eerst een toe bij <Link href="/review/sources">Bronnen</Link>.
             </p>
           ) : (
-            <select value={sourceId} onChange={(e) => setSourceId(e.target.value)} style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)" }}>
+            <select value={sourceId} onChange={(e) => setSourceId(e.target.value)} style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)", marginRight: 8 }}>
               {sources.map((s) => (
                 <option key={s.id} value={s.id}>{s.name}</option>
               ))}
             </select>
           )}
+          <select
+            value={categoryOverride}
+            onChange={(e) => setCategoryOverride(e.target.value)}
+            style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)" }}
+          >
+            <option value="">Categorie: AI kiest zelf</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>Categorie: {c}</option>
+            ))}
+          </select>
         </div>
         <input
           type="text"

@@ -4,15 +4,21 @@ import { createArticle, getSources, findPossibleDuplicate, getImageProviderConfi
 import { searchStockPhoto } from "@/lib/image-search";
 import { geocodeLocation } from "@/lib/geocode";
 
+const VALID_CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
+
 export async function POST(request) {
   const body = await request.json();
-  const { source_id, source_text, source_url, additional_sources } = body;
+  const { source_id, source_text, source_url, additional_sources, category_override } = body;
 
   if (!source_id || !source_text) {
     return NextResponse.json(
       { error: "source_id en source_text zijn verplicht" },
       { status: 400 }
     );
+  }
+
+  if (category_override && !VALID_CATEGORIES.includes(category_override)) {
+    return NextResponse.json({ error: "Onbekende categorie" }, { status: 400 });
   }
 
   const source = getSources().find((s) => s.id === source_id);
@@ -68,7 +74,7 @@ export async function POST(request) {
       additional_sources: additionalSources.map(({ name, url }) => ({ name, url })),
       title: draft.title,
       body: draft.body,
-      category: draft.category,
+      category: category_override || draft.category,
       flags: draft.flags,
       confidence_score: draft.confidence_score,
       generated_by: draft.provider,

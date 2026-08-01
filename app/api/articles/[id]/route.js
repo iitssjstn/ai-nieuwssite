@@ -22,7 +22,7 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
   const session = await getSessionFromRequest(request);
   const body = await request.json();
-  const { action, title, articleBody, featuredImage, featuredImageCredit, tags, scheduledAt, liveblogText, updateId, location, pollId } = body;
+  const { action, title, articleBody, featuredImage, featuredImageCredit, tags, scheduledAt, liveblogText, updateId, location, pollId, category } = body;
 
   if (ADMIN_ONLY_ACTIONS.includes(action) && session?.role !== "admin") {
     return NextResponse.json({ error: "Alleen voor admins" }, { status: 403 });
@@ -101,6 +101,7 @@ export async function PATCH(request, { params }) {
       body: articleBody,
       featured_image: featuredImage,
       featured_image_credit: featuredImageCredit,
+      category,
     });
     if (tags !== undefined) {
       updated = updateArticle(params.id, { tags });

@@ -7,6 +7,8 @@ import RichEditor from "../../components/RichEditor";
 import ArticleBody from "../../components/ArticleBody";
 import { plainTextToHtml, formatImageCredit } from "@/lib/content";
 
+const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
+
 export default function ReviewDetail() {
   const { id } = useParams();
   const router = useRouter();
@@ -14,6 +16,7 @@ export default function ReviewDetail() {
   const [me, setMe] = useState(null);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("Overig");
   const [body, setBody] = useState("");
   const [featuredImage, setFeaturedImage] = useState(null);
   const [featuredImageCredit, setFeaturedImageCredit] = useState(null);
@@ -52,13 +55,14 @@ export default function ReviewDetail() {
       .then((a) => {
         setArticle(a);
         setTitle(a.title);
+        setCategory(a.category || "Overig");
         setBody(plainTextToHtml(a.body));
         setFeaturedImage(a.featured_image || null);
         setFeaturedImageCredit(a.featured_image_credit || null);
         setTagsInput((a.tags || []).join(", "));
         setPollIdInput(a.poll_id || "");
         setLocationInput(a.location || { lat: "", lng: "", label: "" });
-        lastSaved.current = { title: a.title, body: plainTextToHtml(a.body), featuredImage: a.featured_image || null };
+        lastSaved.current = { title: a.title, body: plainTextToHtml(a.body), featuredImage: a.featured_image || null, category: a.category || "Overig" };
       });
   }, [id]);
 
@@ -68,7 +72,8 @@ export default function ReviewDetail() {
     const changed =
       title !== lastSaved.current.title ||
       body !== lastSaved.current.body ||
-      featuredImage !== lastSaved.current.featuredImage;
+      featuredImage !== lastSaved.current.featuredImage ||
+      category !== lastSaved.current.category;
     if (!changed) return;
 
     autosaveTimer.current = setTimeout(async () => {
@@ -76,10 +81,10 @@ export default function ReviewDetail() {
       const res = await fetch(`/api/articles/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "edit", title, articleBody: body, featuredImage }),
+        body: JSON.stringify({ action: "edit", title, articleBody: body, featuredImage, category }),
       });
       if (res.ok) {
-        lastSaved.current = { title, body, featuredImage };
+        lastSaved.current = { title, body, featuredImage, category };
         setAutosaveStatus("Automatisch opgeslagen · " + new Date().toLocaleTimeString("nl-NL"));
       } else {
         setAutosaveStatus("Automatisch opslaan mislukt");
@@ -88,7 +93,7 @@ export default function ReviewDetail() {
 
     return () => clearTimeout(autosaveTimer.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [title, body, featuredImage, editing]);
+  }, [title, body, featuredImage, category, editing]);
 
   async function act(action, extra = {}) {
     setBusy(true);
@@ -129,7 +134,7 @@ export default function ReviewDetail() {
   async function saveEdit() {
     const tags = tagsInput.split(",").map((t) => t.trim()).filter(Boolean);
     const location = locationInput.lat && locationInput.lng ? locationInput : null;
-    await act("edit", { title, articleBody: body, featuredImage, featuredImageCredit, tags, pollId: pollIdInput, location });
+    await act("edit", { title, articleBody: body, featuredImage, featuredImageCredit, tags, pollId: pollIdInput, location, category });
   }
 
   async function handleGeocode() {
@@ -369,6 +374,16 @@ export default function ReviewDetail() {
                 onChange={(e) => setTitle(e.target.value)}
                 style={{ marginBottom: 8, fontWeight: 500 }}
               />
+
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                style={{ marginBottom: 10, padding: 8, borderRadius: 8, border: "1px solid var(--border)" }}
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
 
               <div style={{ marginBottom: 10 }}>
                 <button type="button" onClick={handleGenerateTitles} disabled={loadingTitles} style={{ width: "auto", padding: "5px 10px", fontSize: 12 }}>
