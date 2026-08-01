@@ -518,6 +518,7 @@ export default function ReviewDetail() {
           </span>
         )}
         {article.breaking && <span className="flag flag-warn">🔴 Breaking</span>}
+        {article.featured && <span className="badge badge-muted">★ Uitgelicht</span>}
         {(article.status === "published" || article.status === "archived") && (
           <span className="badge badge-muted">{article.views || 0} weergaven</span>
         )}
@@ -542,6 +543,9 @@ export default function ReviewDetail() {
         <div className="actions" style={{ marginBottom: 10 }}>
           <button disabled={busy} onClick={() => act("toggle_breaking")}>
             {article.breaking ? "Breaking-status verwijderen" : "Als breaking news markeren"}
+          </button>
+          <button disabled={busy} onClick={() => act("toggle_featured")}>
+            {article.featured ? "★ Uitgelicht (op hoofdpagina)" : "Uitlichten op hoofdpagina"}
           </button>
           {article.revisions?.length > 0 && (
             <button disabled={busy} onClick={() => setShowRevisions((s) => !s)}>

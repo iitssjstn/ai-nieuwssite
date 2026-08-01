@@ -25,7 +25,15 @@ export default function HomePage() {
     (a, b) => new Date(b.published_at) - new Date(a.published_at)
   );
 
-  const [hero, ...rest] = published;
+  // Hero/grid tonen UITSLUITEND handmatig uitgelichte artikelen (nieuwst-
+  // uitgelicht eerst). Licht je niets uit, dan blijft dit gebied leeg en
+  // staat alles gewoon in "Laatste nieuws" — geen automatische terugval op
+  // "nieuwste eerst" meer, dat was bewust ongewenst.
+  const featured = published
+    .filter((a) => a.featured)
+    .sort((a, b) => new Date(b.featured_at) - new Date(a.featured_at));
+
+  const [hero, ...rest] = featured;
   const gridItems = rest.slice(0, 2);
   const latestNews = published.slice(0, 7);
   const mostRead = [...published].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
@@ -51,6 +59,9 @@ export default function HomePage() {
                   </>
                 )}
                 <span className="badge">{hero.category}</span>
+                {hero.featured && (
+                  <span className="badge badge-muted" style={{ marginLeft: 6 }}>★ Uitgelicht</span>
+                )}
                 <h2>{hero.title}</h2>
                 <p className="excerpt">{getExcerpt(hero.body)}</p>
                 <p className="meta">{timeAgo(hero.published_at)} · Bron: {sourceLabel(hero.source_id)}</p>
@@ -72,6 +83,17 @@ export default function HomePage() {
                   </div>
                 </Link>
               ))}
+            </div>
+          )}
+
+          {!hero && published.length > 0 && (
+            <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: "24px 20px", textAlign: "center" }}>
+              <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: 0 }}>
+                Nog geen artikel uitgelicht op de hoofdpagina.
+              </p>
+              <p style={{ color: "var(--text-muted)", fontSize: 13, margin: "6px 0 0" }}>
+                Bekijk alle nieuwe artikelen in "Laatste nieuws" hiernaast.
+              </p>
             </div>
           )}
 

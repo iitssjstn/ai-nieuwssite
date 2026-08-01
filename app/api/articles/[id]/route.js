@@ -8,7 +8,7 @@ import { triggerWebhooks } from "@/lib/webhooks";
 // aanmaken/bewerken/inleveren, maar niet zelf goedkeuren/publiceren/afkeuren.
 const ADMIN_ONLY_ACTIONS = [
   "approve", "publish", "reject", "unpublish",
-  "schedule", "unschedule", "archive", "unarchive", "toggle_breaking",
+  "schedule", "unschedule", "archive", "unarchive", "toggle_breaking", "toggle_featured",
 ];
 
 export async function GET(request, { params }) {
@@ -63,6 +63,13 @@ export async function PATCH(request, { params }) {
     updated = updateArticle(params.id, { status: "published" });
   } else if (action === "toggle_breaking") {
     updated = updateArticle(params.id, { breaking: !existing.breaking });
+  } else if (action === "toggle_featured") {
+    // featured_at bewaren zodat meerdere uitgelichte artikelen op volgorde
+    // van markeren gesorteerd kunnen worden (nieuwst uitgelicht eerst).
+    updated = updateArticle(params.id, {
+      featured: !existing.featured,
+      featured_at: !existing.featured ? new Date().toISOString() : null,
+    });
   } else if (action === "schedule") {
     if (!scheduledAt) {
       return NextResponse.json({ error: "scheduledAt is verplicht" }, { status: 400 });
