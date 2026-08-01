@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Header from "./components/Header";
+import LiveTimeLabel from "./components/LiveTimeLabel";
 import { getArticles } from "@/lib/db";
 import { getExcerpt } from "@/lib/content";
 
@@ -113,20 +114,13 @@ export default function HomePage() {
             {latestNews.length === 0 && (
               <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen artikelen.</p>
             )}
-            {latestNews.map((a, i) => {
-              const isFresh = a.published_at && Date.now() - new Date(a.published_at).getTime() < 15 * 60 * 1000;
-              return (
-                <Link key={a.id} href={`/artikel/${a.slug}`} className="latest-news-row">
-                  <span className={`latest-news-dot${isFresh ? " fresh" : ""}`} />
-                  <div>
-                    <span className="latest-news-time">
-                      {isFresh ? "Net binnen" : timeAgo(a.published_at)} · {a.category}
-                    </span>
-                    <p className="latest-news-title">{a.title}</p>
-                  </div>
-                </Link>
-              );
-            })}
+            {latestNews.map((a) => (
+              <Link key={a.id} href={`/artikel/${a.slug}`} className="latest-news-row">
+                <LiveTimeLabel publishedAt={a.published_at} category={a.category}>
+                  <p className="latest-news-title">{a.title}</p>
+                </LiveTimeLabel>
+              </Link>
+            ))}
           </div>
 
           <div className="sidebar-box" style={{ marginTop: 20 }}>
