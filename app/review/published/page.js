@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { useConfirmDialog } from "../../components/ConfirmDialog";
 
 const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
 
@@ -15,6 +16,7 @@ const TABS = [
 ];
 
 export default function PublishedArticles() {
+  const { confirm, ConfirmDialog } = useConfirmDialog();
   const searchParams = useSearchParams();
   const initialTab = searchParams.get("tab");
   const [tab, setTab] = useState(TABS.some((t) => t.id === initialTab) ? initialTab : "published");
@@ -51,7 +53,7 @@ export default function PublishedArticles() {
   }
 
   async function remove(id) {
-    if (!confirm("Dit artikel definitief verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
+    if (!(await confirm("Dit artikel definitief verwijderen? Dit kan niet ongedaan worden gemaakt."))) return;
     setBusyId(id);
     await fetch(`/api/articles/${id}`, { method: "DELETE" });
     await load();
@@ -92,6 +94,7 @@ export default function PublishedArticles() {
 
   return (
     <div className="container">
+      {ConfirmDialog}
       <div style={{ display: "flex", gap: 4, marginBottom: 16, flexWrap: "wrap" }}>
         {TABS.map((t) => (
           <button

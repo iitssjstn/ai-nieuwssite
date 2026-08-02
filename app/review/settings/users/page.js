@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useConfirmDialog } from "../../../components/ConfirmDialog";
 
 export default function UsersPage() {
+  const { confirm, ConfirmDialog } = useConfirmDialog();
   const [users, setUsers] = useState([]);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -51,7 +53,7 @@ export default function UsersPage() {
   }
 
   async function remove(id) {
-    if (!confirm("Deze gebruiker verwijderen?")) return;
+    if (!(await confirm("Deze gebruiker verwijderen?"))) return;
     const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
     if (res.ok) {
       await load();
@@ -96,6 +98,7 @@ export default function UsersPage() {
 
   return (
     <>
+      {ConfirmDialog}
       <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Redacteuren</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
         Redacteuren kunnen concepten genereren en bewerken, maar niet goedkeuren, publiceren of

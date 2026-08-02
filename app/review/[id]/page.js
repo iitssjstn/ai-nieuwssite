@@ -5,11 +5,13 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import RichEditor from "../../components/RichEditor";
 import ArticleBody from "../../components/ArticleBody";
+import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { plainTextToHtml, formatImageCredit } from "@/lib/content";
 
 const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
 
 export default function ReviewDetail() {
+  const { confirm, ConfirmDialog } = useConfirmDialog();
   const { id } = useParams();
   const router = useRouter();
   const [article, setArticle] = useState(null);
@@ -119,7 +121,7 @@ export default function ReviewDetail() {
   }
 
   async function remove() {
-    if (!confirm("Dit artikel definitief verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
+    if (!(await confirm("Dit artikel definitief verwijderen? Dit kan niet ongedaan worden gemaakt."))) return;
     setBusy(true);
     const res = await fetch(`/api/articles/${id}`, { method: "DELETE" });
     setBusy(false);
@@ -195,8 +197,8 @@ export default function ReviewDetail() {
     act("schedule", { scheduledAt: new Date(scheduledAt).toISOString() });
   }
 
-  function restoreRevision(rev) {
-    if (!confirm("Deze oudere versie terugzetten? Je huidige concept wordt bewaard in de geschiedenis.")) return;
+  async function restoreRevision(rev) {
+    if (!(await confirm("Deze oudere versie terugzetten? Je huidige concept wordt bewaard in de geschiedenis.", { danger: false, confirmLabel: "Terugzetten" }))) return;
     setTitle(rev.title);
     setBody(plainTextToHtml(rev.body));
     setFeaturedImage(rev.featured_image);
@@ -282,7 +284,7 @@ export default function ReviewDetail() {
   }
 
   async function handleDeleteUpdate(updateId) {
-    if (!confirm("Deze update verwijderen?")) return;
+    if (!(await confirm("Deze update verwijderen?"))) return;
     const res = await fetch(`/api/articles/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -302,6 +304,7 @@ export default function ReviewDetail() {
 
   return (
     <div className="container">
+      {ConfirmDialog}
       <Link href={backHref} style={{ fontSize: 13, color: "var(--text-secondary)" }}>{backLabel}</Link>
 
       {article.possible_duplicate && (

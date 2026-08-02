@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useConfirmDialog } from "../../components/ConfirmDialog";
 
 export default function WebhooksPage() {
+  const { confirm, ConfirmDialog } = useConfirmDialog();
   const [webhooks, setWebhooks] = useState([]);
   const [keys, setKeys] = useState([]);
   const [url, setUrl] = useState("");
@@ -40,7 +42,7 @@ export default function WebhooksPage() {
   }
 
   async function removeWebhook(id) {
-    if (!confirm("Deze webhook verwijderen?")) return;
+    if (!(await confirm("Deze webhook verwijderen?"))) return;
     await fetch(`/api/webhooks/${id}`, { method: "DELETE" });
     await load();
   }
@@ -69,13 +71,14 @@ export default function WebhooksPage() {
   }
 
   async function removeKey(id) {
-    if (!confirm("Deze API-key verwijderen? Applicaties die 'm gebruiken werken dan niet meer.")) return;
+    if (!(await confirm("Deze API-key verwijderen? Applicaties die 'm gebruiken werken dan niet meer."))) return;
     await fetch(`/api/keys/${id}`, { method: "DELETE" });
     await load();
   }
 
   return (
     <div className="container">
+      {ConfirmDialog}
       <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 16 }}>Webhooks & API</h1>
 
       <h2 style={{ fontSize: 15, fontWeight: 500, marginBottom: 8 }}>Webhooks</h2>

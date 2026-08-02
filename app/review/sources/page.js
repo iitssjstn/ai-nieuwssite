@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useConfirmDialog } from "../../components/ConfirmDialog";
 
 export default function SourcesPage() {
+  const { confirm, ConfirmDialog } = useConfirmDialog();
   const [sources, setSources] = useState([]);
   const [name, setName] = useState("");
   const [feedUrl, setFeedUrl] = useState("");
@@ -44,7 +46,7 @@ export default function SourcesPage() {
   }
 
   async function remove(id) {
-    if (!confirm("Deze bron verwijderen?")) return;
+    if (!(await confirm("Deze bron verwijderen?"))) return;
     await fetch(`/api/sources/${id}`, { method: "DELETE" });
     await load();
   }
@@ -69,6 +71,7 @@ export default function SourcesPage() {
 
   return (
     <div className="container">
+      {ConfirmDialog}
       <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 16 }}>Bronnen ({sources.length})</h1>
 
       <form onSubmit={handleAdd} style={{ marginBottom: 32, background: "var(--surface-1)", borderRadius: 12, padding: 16 }}>

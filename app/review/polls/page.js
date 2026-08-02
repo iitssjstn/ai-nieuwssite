@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useConfirmDialog } from "../../components/ConfirmDialog";
 
 export default function PollsPage() {
+  const { confirm, ConfirmDialog } = useConfirmDialog();
   const [polls, setPolls] = useState([]);
   const [question, setQuestion] = useState("");
   const [options, setOptions] = useState(["", ""]);
@@ -40,7 +42,7 @@ export default function PollsPage() {
   }
 
   async function remove(id) {
-    if (!confirm("Deze poll verwijderen?")) return;
+    if (!(await confirm("Deze poll verwijderen?"))) return;
     await fetch(`/api/polls/${id}`, { method: "DELETE" });
     await load();
   }
@@ -58,6 +60,7 @@ export default function PollsPage() {
 
   return (
     <div className="container">
+      {ConfirmDialog}
       <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Polls</h1>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
         Maak een poll aan en koppel het poll-ID bij het bewerken van een artikel om 'm daaronder te tonen.

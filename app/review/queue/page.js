@@ -2,10 +2,12 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useConfirmDialog } from "../../components/ConfirmDialog";
 
 const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
 
 export default function QueuePage() {
+  const { confirm, ConfirmDialog } = useConfirmDialog();
   const [pending, setPending] = useState([]);
   const [sources, setSources] = useState([]);
   const [stats, setStats] = useState(null);
@@ -58,7 +60,7 @@ export default function QueuePage() {
   async function quickDelete(e, id) {
     e.preventDefault();
     e.stopPropagation();
-    if (!confirm("Dit concept definitief verwijderen? Dit kan niet ongedaan worden gemaakt.")) return;
+    if (!(await confirm("Dit concept definitief verwijderen? Dit kan niet ongedaan worden gemaakt."))) return;
     setBusyId(id);
     await fetch(`/api/articles/${id}`, { method: "DELETE" });
     await loadAll();
@@ -98,6 +100,7 @@ export default function QueuePage() {
 
   return (
     <div className="container">
+      {ConfirmDialog}
       {stats && (
         <div style={{ display: "flex", gap: 12, marginBottom: 28, flexWrap: "wrap" }}>
           <StatCard label="Gepubliceerd" value={stats.published} text="#9fd15d" href="/review/published?tab=published" />

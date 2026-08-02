@@ -523,6 +523,38 @@ article img { max-width: 100%; border-radius: 8px; margin: 12px 0; display: bloc
 }
 .settings-content { min-width: 0; }
 
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  padding: 20px;
+}
+.confirm-box {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+}
+.confirm-message {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin: 0 0 18px;
+}
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.confirm-actions button { width: auto; padding: 8px 16px; }
+
 @media (max-width: 720px) {
   .settings-layout { grid-template-columns: 1fr; }
   .settings-subnav { flex-direction: row; overflow-x: auto; position: static; gap: 6px; }
