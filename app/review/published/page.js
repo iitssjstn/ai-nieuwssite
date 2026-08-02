@@ -146,6 +146,11 @@ export default function PublishedArticles() {
         <div key={a.id} className="pending-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
           <div style={{ minWidth: 0 }}>
             <span className="badge badge-muted" style={{ marginBottom: 8, display: "inline-block" }}>{a.category}</span>
+            {a.reviewer_id === "auto" && (
+              <span className="badge" style={{ marginBottom: 8, marginLeft: 6, display: "inline-block", background: "var(--accent-bg)", color: "var(--accent-text)" }}>
+                🤖 Automatisch gepubliceerd
+              </span>
+            )}
             <p style={{ fontWeight: 500, margin: 0 }}>{a.title}</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
               {dateLine(a)}
