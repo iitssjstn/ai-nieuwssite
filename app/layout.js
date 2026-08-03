@@ -1,13 +1,20 @@
 import Script from "next/script";
 import "./globals.css";
-import { getAdsenseClientId } from "@/lib/db";
+import { getAdsenseClientId, getSiteSettings } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "Dagblad",
-  description: "Nieuws, samengesteld met AI en gecontroleerd door de redactie.",
-};
+export function generateMetadata() {
+  const { site_name, site_description, favicon_url } = getSiteSettings();
+  return {
+    title: site_name,
+    description: site_description,
+    // Zonder favicon_url gebruikt Next.js gewoon automatisch app/icon.svg —
+    // hier expliciet overschrijven zodra er via Instellingen een eigen
+    // favicon is geüpload.
+    ...(favicon_url ? { icons: { icon: favicon_url } } : {}),
+  };
+}
 
 export default function RootLayout({ children }) {
   const adsenseClientId = getAdsenseClientId();

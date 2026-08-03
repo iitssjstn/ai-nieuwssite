@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { getArticles } from "@/lib/db";
+import { getArticles, getSiteSettings } from "@/lib/db";
 import PageviewTracker from "./PageviewTracker";
 import SettingsPanel from "./SettingsPanel";
 
 const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
 
 export default function Header({ activeCategory }) {
+  const { site_name } = getSiteSettings();
   const breaking = getArticles({ status: "published" })
     .filter((a) => a.breaking)
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))[0];
@@ -21,7 +22,7 @@ export default function Header({ activeCategory }) {
       )}
 
       <div className="site-header">
-        <Link href="/" className="logo">Dagblad</Link>
+        <Link href="/" className="logo">{site_name}</Link>
         <SettingsPanel />
       </div>
 

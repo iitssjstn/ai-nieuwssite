@@ -1,7 +1,31 @@
 import Link from "next/link";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
-import { getArticles } from "@/lib/db";
+import { getArticles, getSiteSettings } from "@/lib/db";
+import { headers } from "next/headers";
+
+function getBaseUrl() {
+  const h = headers();
+  const host = h.get("host");
+  const proto = h.get("x-forwarded-proto") || "https";
+  return `${proto}://${host}`;
+}
+
+export function generateMetadata({ params }) {
+  const tag = decodeURIComponent(params.tag);
+  const baseUrl = getBaseUrl();
+  const { site_name } = getSiteSettings();
+  const url = `${baseUrl}/tags/${encodeURIComponent(tag.toLowerCase())}`;
+  const title = `#${tag} — ${site_name}`;
+  const description = `Alle artikelen getagd met "${tag}", samengesteld met AI en gecontroleerd door de redactie.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title, description, url, type: "website", siteName: site_name },
+    twitter: { card: "summary", title, description },
+  };
+}
 
 function timeAgo(dateStr) {
   if (!dateStr) return "";

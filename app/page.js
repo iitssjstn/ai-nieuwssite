@@ -2,10 +2,41 @@ import Link from "next/link";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import LiveTimeLabel from "./components/LiveTimeLabel";
-import { getArticles } from "@/lib/db";
+import { getArticles, getSiteSettings } from "@/lib/db";
 import { getExcerpt, formatImageCredit, getCategoryStyle } from "@/lib/content";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
+
+function getBaseUrl() {
+  const h = headers();
+  const host = h.get("host");
+  const proto = h.get("x-forwarded-proto") || "https";
+  return `${proto}://${host}`;
+}
+
+export function generateMetadata() {
+  const baseUrl = getBaseUrl();
+  const { site_name, site_description } = getSiteSettings();
+  const title = `${site_name} — Actueel nieuws`;
+  return {
+    title,
+    description: site_description,
+    alternates: { canonical: baseUrl },
+    openGraph: {
+      title,
+      description: site_description,
+      url: baseUrl,
+      type: "website",
+      siteName: site_name,
+    },
+    twitter: {
+      card: "summary",
+      title,
+      description: site_description,
+    },
+  };
+}
 
 function timeAgo(dateStr) {
   if (!dateStr) return "";
@@ -23,6 +54,16 @@ function sourceLabel(sourceId) {
 }
 
 export default function HomePage() {
+  const baseUrl = getBaseUrl();
+  const { site_name, site_description } = getSiteSettings();
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "NewsMediaOrganization",
+    name: site_name,
+    url: baseUrl,
+    description: site_description,
+  };
+
   const published = getArticles({ status: "published" }).sort(
     (a, b) => new Date(b.published_at) - new Date(a.published_at)
   );
@@ -42,7 +83,12 @@ export default function HomePage() {
 
   return (
     <div className="container" style={{ maxWidth: 1080 }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Header />
+      <h1 className="sr-only">{site_name} — Actueel Nederlands nieuws</h1>
 
       <p style={{ fontSize: 12, color: "var(--text-muted)", textTransform: "capitalize", margin: "0 0 16px" }}>
         {new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
@@ -56,7 +102,7 @@ export default function HomePage() {
               <div className="hero-card">
                 {hero.featured_image && (
                   <>
-                    <img src={hero.featured_image} alt="" style={{ width: "100%", borderRadius: 8, marginBottom: 4, display: "block" }} />
+                    <img src={hero.featured_image} alt={hero.title} style={{ width: "100%", borderRadius: 8, marginBottom: 4, display: "block" }} />
                     {formatImageCredit(hero.featured_image_credit) && (
                       <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
                         {formatImageCredit(hero.featured_image_credit)}
@@ -81,7 +127,7 @@ export default function HomePage() {
                 <Link key={a.id} href={`/artikel/${a.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
                   <div className="card">
                     {a.featured_image && (
-                      <img src={a.featured_image} alt="" style={{ width: "100%", borderRadius: 6, marginBottom: 8, display: "block" }} />
+                      <img src={a.featured_image} alt={a.title} style={{ width: "100%", borderRadius: 6, marginBottom: 8, display: "block" }} />
                     )}
                     <span className="badge badge-muted" style={getCategoryStyle(a.category)}>{a.category}</span>
                     <h3>{a.title}</h3>

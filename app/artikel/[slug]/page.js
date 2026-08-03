@@ -4,7 +4,7 @@ import LiveTimeLabel from "../../components/LiveTimeLabel";
 import Link from "next/link";
 import LiveblogTimeline from "../../components/LiveblogTimeline";
 import PollWidget from "../../components/PollWidget";
-import { getArticle, getArticleBySlug, getArticles, incrementViews } from "@/lib/db";
+import { getArticle, getArticleBySlug, getArticles, getSiteSettings, incrementViews } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { isHtmlBody, getExcerpt, resolveImageUrl, getCategoryStyle } from "@/lib/content";
@@ -44,6 +44,7 @@ export function generateMetadata({ params }) {
   if (!article || article.status !== "published") return {};
 
   const baseUrl = getBaseUrl();
+  const { site_name } = getSiteSettings();
   const url = `${baseUrl}/artikel/${article.slug}`;
   const description = getExcerpt(article.body, 160);
   const images = article.featured_image ? [resolveImageUrl(article.featured_image, baseUrl)] : [];
@@ -58,6 +59,7 @@ export function generateMetadata({ params }) {
       url,
       type: "article",
       images,
+      siteName: site_name,
     },
     twitter: {
       card: images.length ? "summary_large_image" : "summary",
@@ -74,6 +76,7 @@ export default function ArticlePage({ params }) {
 
   incrementViews(article.id);
 
+  const { site_name } = getSiteSettings();
   const latestNews = getArticles({ status: "published" })
     .filter((a) => a.id !== article.id)
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
@@ -91,7 +94,7 @@ export default function ArticlePage({ params }) {
     datePublished: article.published_at,
     dateModified: article.published_at,
     image: article.featured_image ? [resolveImageUrl(article.featured_image, baseUrl)] : undefined,
-    publisher: { "@type": "Organization", name: "Dagblad" },
+    publisher: { "@type": "Organization", name: site_name },
     mainEntityOfPage: `${baseUrl}/artikel/${article.slug}`,
   };
 
@@ -125,7 +128,7 @@ export default function ArticlePage({ params }) {
           <>
             <img
               src={article.featured_image}
-              alt=""
+              alt={article.title}
               style={{ width: "100%", borderRadius: 12, marginBottom: article.featured_image_credit?.name ? 4 : 20, display: "block" }}
             />
             {article.featured_image_credit?.name && (

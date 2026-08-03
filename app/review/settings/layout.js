@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const SECTIONS = [
+  { href: "/review/settings/seo", label: "SEO & Branding", desc: "Sitenaam, beschrijving en favicon" },
   { href: "/review/settings/ai", label: "AI-providers", desc: "Gratis tekst-AI's voor het genereren van concepten" },
   { href: "/review/settings/automation", label: "Automatisering", desc: "De automatische RSS-import aan/uit en instellen" },
   { href: "/review/settings/images", label: "Afbeeldingen", desc: "Gratis stockfoto-providers voor artikelen" },

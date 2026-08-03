@@ -1,17 +1,17 @@
 import Link from "next/link";
+import { getSiteSettings } from "@/lib/db";
 
 const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
 
 export default function Footer() {
+  const { site_name, site_description } = getSiteSettings();
+
   return (
     <footer className="site-footer">
       <div className="site-footer-top">
         <div className="site-footer-about">
-          <p className="site-footer-logo">Dagblad</p>
-          <p className="site-footer-tagline">
-            Artikelen worden opgesteld met behulp van AI op basis van geverifieerde bronnen en
-            gecontroleerd voor publicatie.
-          </p>
+          <p className="site-footer-logo">{site_name}</p>
+          <p className="site-footer-tagline">{site_description}</p>
         </div>
 
         <div className="site-footer-links">
@@ -29,7 +29,7 @@ export default function Footer() {
       </div>
 
       <div className="site-footer-bottom">
-        © {new Date().getFullYear()} Dagblad
+        © {new Date().getFullYear()} {site_name}
       </div>
     </footer>
   );

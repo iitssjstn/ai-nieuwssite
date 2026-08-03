@@ -1,9 +1,32 @@
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import NewsMap from "../components/NewsMap";
-import { getArticles } from "@/lib/db";
+import { getArticles, getSiteSettings } from "@/lib/db";
+import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
+
+function getBaseUrl() {
+  const h = headers();
+  const host = h.get("host");
+  const proto = h.get("x-forwarded-proto") || "https";
+  return `${proto}://${host}`;
+}
+
+export function generateMetadata() {
+  const baseUrl = getBaseUrl();
+  const { site_name } = getSiteSettings();
+  const url = `${baseUrl}/kaart`;
+  const title = `Nieuwskaart — ${site_name}`;
+  const description = `Bekijk waar het nieuws zich afspeelt op de interactieve kaart van ${site_name}.`;
+  return {
+    title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title, description, url, type: "website", siteName: site_name },
+    twitter: { card: "summary", title, description },
+  };
+}
 
 export default function KaartPage() {
   const articles = getArticles({ status: "published" }).filter((a) => a.location?.lat && a.location?.lng);
