@@ -10,6 +10,13 @@
   --accent-text: #0c447c;
   --danger-text: #a32d2d;
   --success-text: #27500a;
+
+  --cat-economie-bg: #fdf3d9;
+  --cat-economie-text: #8a6209;
+  --cat-sport-bg: #e3f5e6;
+  --cat-sport-text: #1f7a34;
+  --cat-tech-bg: #f1e8fb;
+  --cat-tech-text: #6b3fa0;
 }
 
 /* Donkere modus voor de publieke site — zelfde palet als het adminpaneel,
@@ -27,6 +34,13 @@ html.dark {
   --accent-text: #6fa8e8;
   --danger-text: #f09595;
   --success-text: #9fd15d;
+
+  --cat-economie-bg: #3a2f10;
+  --cat-economie-text: #e8c76f;
+  --cat-sport-bg: #163a1e;
+  --cat-sport-text: #7ed492;
+  --cat-tech-bg: #2c1f3a;
+  --cat-tech-text: #c79ef0;
 }
 html.dark body { background: var(--bg); color: var(--text-primary); }
 
@@ -105,10 +119,15 @@ body {
 
 .hero-card {
   background: var(--surface-1);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: box-shadow 0.15s, transform 0.15s;
 }
+.hero-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); }
+html.dark .hero-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
 
 .hero-card h2 { font-size: 20px; margin: 12px 0 6px; line-height: 1.4; font-weight: 500; }
 .hero-card p.excerpt { font-size: 14px; color: var(--text-secondary); margin: 0 0 10px; line-height: 1.6; }
@@ -126,7 +145,11 @@ body {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
 }
+.card:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.08); transform: translateY(-2px); border-color: var(--accent-text); }
+html.dark .card:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
 
 .card h3 { font-size: 15px; margin: 10px 0 6px; font-weight: 500; line-height: 1.4; }
 
@@ -149,9 +172,33 @@ body {
   text-align: center;
 }
 
-.footer-note {
+.site-footer {
   border-top: 1px solid var(--border);
-  margin-top: 24px;
+  margin-top: 40px;
+  padding-top: 28px;
+}
+.site-footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.site-footer-about { max-width: 320px; }
+.site-footer-logo { font-weight: 700; font-size: 16px; margin: 0 0 6px; }
+.site-footer-tagline { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin: 0; }
+.site-footer-heading {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  margin: 0 0 10px;
+}
+.site-footer-links { display: flex; flex-direction: column; gap: 8px; }
+.site-footer-links a { font-size: 13px; color: var(--text-secondary); text-decoration: none; }
+.site-footer-links a:hover { color: var(--accent-text); }
+.site-footer-bottom {
+  border-top: 1px solid var(--border);
   padding-top: 16px;
   font-size: 12px;
   color: var(--text-muted);
@@ -286,7 +333,10 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
   border-top: 1px solid var(--border);
   text-decoration: none;
   color: inherit;
+  transition: color 0.15s;
 }
+.sidebar-item:hover { color: var(--accent-text); }
+.sidebar-item:hover .sidebar-rank { color: var(--accent-text); }
 .sidebar-item:first-of-type { border-top: none; }
 .sidebar-rank {
   font-size: 18px;
@@ -294,6 +344,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
   color: var(--text-muted);
   flex-shrink: 0;
   width: 20px;
+  transition: color 0.15s;
 }
 .sidebar-item p { font-size: 13px; margin: 0; line-height: 1.4; }
 
@@ -305,7 +356,9 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
   text-decoration: none;
   color: inherit;
   align-items: flex-start;
+  transition: color 0.15s;
 }
+.latest-news-row:hover .latest-news-title { color: var(--accent-text); }
 .latest-news-row:first-of-type { border-top: none; }
 .latest-news-dot {
   flex-shrink: 0;
@@ -322,7 +375,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
   color: var(--text-muted);
   margin-bottom: 2px;
 }
-.latest-news-title { font-size: 13px; margin: 0; line-height: 1.4; font-weight: 500; }
+.latest-news-title { font-size: 13px; margin: 0; line-height: 1.4; font-weight: 500; transition: color 0.15s; }
 
 /* HTML-content in artikelen (van de rich-text-editor) */
 article h2 { font-size: 20px; font-weight: 500; margin: 28px 0 10px; line-height: 1.35; }

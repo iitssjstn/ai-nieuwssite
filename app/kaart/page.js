@@ -1,4 +1,5 @@
 import Header from "../components/Header";
+import Footer from "../components/Footer";
 import NewsMap from "../components/NewsMap";
 import { getArticles } from "@/lib/db";
 
@@ -18,6 +19,7 @@ export default function KaartPage() {
       ) : (
         <NewsMap articles={articles} />
       )}
+      <Footer />
     </div>
   );
 }

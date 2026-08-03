@@ -1,11 +1,12 @@
 import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 import Link from "next/link";
 import LiveblogTimeline from "../../components/LiveblogTimeline";
 import PollWidget from "../../components/PollWidget";
 import { getArticle, getArticleBySlug, incrementViews } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { isHtmlBody, getExcerpt, resolveImageUrl } from "@/lib/content";
+import { isHtmlBody, getExcerpt, resolveImageUrl, getCategoryStyle } from "@/lib/content";
 
 function timeAgo(dateStr) {
   if (!dateStr) return "";
@@ -95,7 +96,7 @@ export default function ArticlePage({ params }) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <span className="badge">{article.category}</span>
+      <span className="badge" style={getCategoryStyle(article.category)}>{article.category}</span>
       {article.is_liveblog && (
         <span className="badge" style={{ background: "#a32d2d", color: "#fff", marginLeft: 6 }}>
           🔴 LIVE
@@ -178,9 +179,11 @@ export default function ArticlePage({ params }) {
         )}
       </article>
 
-      <div className="footer-note">
+      <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 24, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
         Dit artikel is opgesteld met behulp van AI op basis van een bron van {article.source_id} en gecontroleerd voor publicatie.
-      </div>
+      </p>
+
+      <Footer />
     </div>
   );
 }

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
 import LiveTimeLabel from "./components/LiveTimeLabel";
 import { getArticles } from "@/lib/db";
-import { getExcerpt, formatImageCredit } from "@/lib/content";
+import { getExcerpt, formatImageCredit, getCategoryStyle } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
@@ -43,6 +44,10 @@ export default function HomePage() {
     <div className="container" style={{ maxWidth: 1080 }}>
       <Header />
 
+      <p style={{ fontSize: 12, color: "var(--text-muted)", textTransform: "capitalize", margin: "0 0 16px" }}>
+        {new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+      </p>
+
       <div className="home-layout">
         {/* Hoofdkolom */}
         <div>
@@ -59,7 +64,7 @@ export default function HomePage() {
                     )}
                   </>
                 )}
-                <span className="badge">{hero.category}</span>
+                <span className="badge" style={getCategoryStyle(hero.category)}>{hero.category}</span>
                 {hero.featured && (
                   <span className="badge badge-muted" style={{ marginLeft: 6 }}>★ Uitgelicht</span>
                 )}
@@ -78,7 +83,7 @@ export default function HomePage() {
                     {a.featured_image && (
                       <img src={a.featured_image} alt="" style={{ width: "100%", borderRadius: 6, marginBottom: 8, display: "block" }} />
                     )}
-                    <span className="badge badge-muted">{a.category}</span>
+                    <span className="badge badge-muted" style={getCategoryStyle(a.category)}>{a.category}</span>
                     <h3>{a.title}</h3>
                     <p className="meta">{timeAgo(a.published_at)}</p>
                   </div>
@@ -142,9 +147,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="footer-note">
-        Artikelen worden opgesteld met behulp van AI op basis van geverifieerde bronnen en gecontroleerd voor publicatie.
-      </div>
+      <Footer />
     </div>
   );
 }

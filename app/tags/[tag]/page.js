@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 import { getArticles } from "@/lib/db";
 
 function timeAgo(dateStr) {
@@ -37,6 +38,7 @@ export default function TagPage({ params }) {
           </div>
         </Link>
       ))}
+      <Footer />
     </div>
   );
 }
