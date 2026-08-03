@@ -1,9 +1,10 @@
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import LiveTimeLabel from "../../components/LiveTimeLabel";
 import Link from "next/link";
 import LiveblogTimeline from "../../components/LiveblogTimeline";
 import PollWidget from "../../components/PollWidget";
-import { getArticle, getArticleBySlug, incrementViews } from "@/lib/db";
+import { getArticle, getArticleBySlug, getArticles, incrementViews } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { isHtmlBody, getExcerpt, resolveImageUrl, getCategoryStyle } from "@/lib/content";
@@ -73,6 +74,11 @@ export default function ArticlePage({ params }) {
 
   incrementViews(article.id);
 
+  const latestNews = getArticles({ status: "published" })
+    .filter((a) => a.id !== article.id)
+    .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
+    .slice(0, 7);
+
   const baseUrl = getBaseUrl();
   const htmlBody = isHtmlBody(article.body);
   const paragraphs = htmlBody ? [] : article.body.split("\n").filter(Boolean);
@@ -90,13 +96,16 @@ export default function ArticlePage({ params }) {
   };
 
   return (
-    <div className="container">
+    <div className="container" style={{ maxWidth: 1080 }}>
       <Header />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <span className="badge" style={getCategoryStyle(article.category)}>{article.category}</span>
+
+      <div className="home-layout">
+        <div>
+          <span className="badge" style={getCategoryStyle(article.category)}>{article.category}</span>
       {article.is_liveblog && (
         <span className="badge" style={{ background: "#a32d2d", color: "#fff", marginLeft: 6 }}>
           🔴 LIVE
@@ -182,6 +191,28 @@ export default function ArticlePage({ params }) {
       <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 24, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
         Dit artikel is opgesteld met behulp van AI op basis van een bron van {article.source_id} en gecontroleerd voor publicatie.
       </p>
+        </div>
+
+        <div>
+          <div className="sidebar-box">
+            <h3>Laatste nieuws</h3>
+            {latestNews.length === 0 && (
+              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen andere artikelen.</p>
+            )}
+            {latestNews.map((a) => (
+              <Link key={a.id} href={`/artikel/${a.slug}`} className="latest-news-row">
+                <LiveTimeLabel publishedAt={a.published_at} category={a.category}>
+                  <p className="latest-news-title">{a.title}</p>
+                </LiveTimeLabel>
+              </Link>
+            ))}
+          </div>
+
+          <div className="ad-slot" style={{ marginTop: 20, border: "1px solid var(--border)", borderRadius: 12 }}>
+            <span className="badge badge-muted">Advertentie</span>
+          </div>
+        </div>
+      </div>
 
       <Footer />
     </div>
