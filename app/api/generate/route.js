@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { generateDraft } from "@/lib/ai";
-import { createArticle, getSources, findPossibleDuplicate, getImageProviderConfig, getCategories } from "@/lib/db";
+import { createArticle, getSources, findPossibleDuplicate, getAllImageProviderConfigs, getCustomImageProviders, getCategories } from "@/lib/db";
 import { searchStockPhoto } from "@/lib/image-search";
 import { geocodeLocation } from "@/lib/geocode";
 
@@ -45,10 +45,7 @@ export async function POST(request) {
     let featuredImageCredit = null;
     if (draft.image_keywords) {
       try {
-        const photo = await searchStockPhoto(draft.image_keywords, {
-          pexels: getImageProviderConfig("pexels"),
-          unsplash: getImageProviderConfig("unsplash"),
-        });
+        const photo = await searchStockPhoto(draft.image_keywords, getAllImageProviderConfigs(), getCustomImageProviders());
         if (photo) {
           featuredImage = photo.url;
           featuredImageCredit = { name: photo.credit_name, url: photo.credit_url, source: photo.source };

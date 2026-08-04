@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getImageProviderConfig } from "@/lib/db";
+import { getAllImageProviderConfigs, getCustomImageProviders } from "@/lib/db";
 import { searchStockPhoto, searchStockPhotoOptions } from "@/lib/image-search";
 
 export async function POST(request) {
@@ -7,14 +7,12 @@ export async function POST(request) {
   if (!query || !query.trim()) {
     return NextResponse.json({ error: "Geef een zoekopdracht op" }, { status: 400 });
   }
-  const providerConfigs = {
-    pexels: getImageProviderConfig("pexels"),
-    unsplash: getImageProviderConfig("unsplash"),
-  };
+  const providerConfigs = getAllImageProviderConfigs();
+  const customProviders = getCustomImageProviders();
 
   try {
     if (multiple) {
-      const options = await searchStockPhotoOptions(query.trim(), providerConfigs);
+      const options = await searchStockPhotoOptions(query.trim(), providerConfigs, customProviders);
       if (options.length === 0) {
         return NextResponse.json(
           { error: "Geen resultaat gevonden — check of er een provider is ingesteld, of probeer een andere zoekopdracht." },
@@ -30,7 +28,7 @@ export async function POST(request) {
       });
     }
 
-    const photo = await searchStockPhoto(query.trim(), providerConfigs);
+    const photo = await searchStockPhoto(query.trim(), providerConfigs, customProviders);
     if (!photo) {
       return NextResponse.json(
         { error: "Geen resultaat gevonden — check of er een provider is ingesteld, of probeer een andere zoekopdracht." },
