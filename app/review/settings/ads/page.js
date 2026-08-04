@@ -102,6 +102,23 @@ export default function AdsPage() {
             {busy ? "Bezig..." : "Opslaan"}
           </button>
         </form>
+
+        {slots && (
+          <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
+            <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Grote, responsive advertentie-eenheid</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
+              De <code>data-ad-slot</code>-waarde van een AdSense-advertentie-eenheid. Verschijnt
+              als brede strook onderaan de hoofdpagina.
+            </p>
+            <input
+              type="text"
+              placeholder="Bijv. 7555171901"
+              defaultValue={slots.adsense_slot || ""}
+              onBlur={(e) => saveSlots({ ...slots, adsense_slot: e.target.value.trim() || null })}
+              disabled={slotBusy}
+            />
+          </div>
+        )}
       </div>
 
       {slots && (

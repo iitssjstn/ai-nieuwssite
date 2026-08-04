@@ -3,7 +3,8 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import LiveTimeLabel from "./components/LiveTimeLabel";
 import AdBanner from "./components/AdBanner";
-import { getArticles, getSiteSettings, getCategories, getAdSlots } from "@/lib/db";
+import AdSenseUnit from "./components/AdSenseUnit";
+import { getArticles, getSiteSettings, getCategories, getAdSlots, getAdsenseClientId } from "@/lib/db";
 import { getExcerpt, formatImageCredit, getCategoryStyle } from "@/lib/content";
 import { headers } from "next/headers";
 
@@ -67,6 +68,7 @@ export default function HomePage() {
 
   const categories = getCategories();
   const adSlots = getAdSlots();
+  const adsenseClientId = getAdsenseClientId();
   const published = getArticles({ status: "published" }).sort(
     (a, b) => new Date(b.published_at) - new Date(a.published_at)
   );
@@ -201,6 +203,12 @@ export default function HomePage() {
           )}
         </div>
       </div>
+
+      {adSlots.adsense_slot && adsenseClientId && (
+        <div style={{ margin: "28px 0" }}>
+          <AdSenseUnit client={adsenseClientId} slot={adSlots.adsense_slot} />
+        </div>
+      )}
 
       <Footer />
     </div>
