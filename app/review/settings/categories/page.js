@@ -59,6 +59,14 @@ export default function CategoriesPage() {
     save(categories.map((c) => (c.name === oldName ? { ...c, name: newName } : c)));
   }
 
+  function move(index, direction) {
+    const target = index + direction;
+    if (target < 0 || target >= categories.length) return;
+    const updated = [...categories];
+    [updated[index], updated[target]] = [updated[target], updated[index]];
+    save(updated);
+  }
+
   async function remove(name) {
     if (categories.length <= 1) {
       alert("Er moet minstens één categorie overblijven.");
@@ -74,15 +82,36 @@ export default function CategoriesPage() {
       <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Categorieën</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
         Deze categorieën gebruikt de AI om artikelen in te delen, en ze bepalen de navigatie op
-        de publieke site. Elke categorie heeft een eigen kleur voor de badges. Wijzigingen zijn
-        direct actief.
+        de publieke site. Elke categorie heeft een eigen kleur voor de badges. De volgorde
+        hieronder bepaalt ook de volgorde in de navigatiebalk en footer — verplaats ze met de
+        pijltjes. Wijzigingen zijn direct actief.
       </p>
 
       {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 12 }}>{error}</p>}
       {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 12 }}>Opgeslagen.</p>}
 
-      {categories.map((c) => (
+      {categories.map((c, i) => (
         <div key={c.name} className="pending-item" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 2, flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={() => move(i, -1)}
+              disabled={busy || i === 0}
+              aria-label="Omhoog verplaatsen"
+              style={{ width: 24, height: 18, padding: 0, fontSize: 11, lineHeight: 1 }}
+            >
+              ▲
+            </button>
+            <button
+              type="button"
+              onClick={() => move(i, 1)}
+              disabled={busy || i === categories.length - 1}
+              aria-label="Omlaag verplaatsen"
+              style={{ width: 24, height: 18, padding: 0, fontSize: 11, lineHeight: 1 }}
+            >
+              ▼
+            </button>
+          </div>
           <input
             type="color"
             value={c.color}
