@@ -1,6 +1,6 @@
 import Script from "next/script";
 import "./globals.css";
-import { getAdsenseClientId, getSiteSettings } from "@/lib/db";
+import { getAdsenseClientId, getSiteSettings, getAdSlots } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +18,7 @@ export function generateMetadata() {
 
 export default function RootLayout({ children }) {
   const adsenseClientId = getAdsenseClientId();
+  const { social_bar_url } = getAdSlots();
 
   return (
     <html lang="nl">
@@ -45,6 +46,9 @@ export default function RootLayout({ children }) {
             crossOrigin="anonymous"
             strategy="afterInteractive"
           />
+        )}
+        {social_bar_url && (
+          <Script src={social_bar_url} strategy="afterInteractive" />
         )}
       </body>
     </html>

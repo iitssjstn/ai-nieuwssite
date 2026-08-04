@@ -4,7 +4,9 @@ import LiveTimeLabel from "../../components/LiveTimeLabel";
 import Link from "next/link";
 import LiveblogTimeline from "../../components/LiveblogTimeline";
 import PollWidget from "../../components/PollWidget";
-import { getArticle, getArticleBySlug, getArticles, getSiteSettings, getCategories, incrementViews } from "@/lib/db";
+import AdBanner from "../../components/AdBanner";
+import NativeAd from "../../components/NativeAd";
+import { getArticle, getArticleBySlug, getArticles, getSiteSettings, getCategories, getAdSlots, incrementViews } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { isHtmlBody, getExcerpt, resolveImageUrl, getCategoryStyle } from "@/lib/content";
@@ -78,6 +80,7 @@ export default function ArticlePage({ params }) {
 
   const { site_name } = getSiteSettings();
   const categories = getCategories();
+  const adSlots = getAdSlots();
   const latestNews = getArticles({ status: "published" })
     .filter((a) => a.id !== article.id)
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
@@ -166,7 +169,10 @@ export default function ArticlePage({ params }) {
             {paragraphs.slice(0, mid).map((p, i) => <p key={i}>{p}</p>)}
             {paragraphs.length > 1 && (
               <div className="ad-slot" style={{ marginBottom: 20 }}>
-                <span className="badge badge-muted">Advertentie</span>
+                <NativeAd
+                  scriptUrl={adSlots.native_banner?.script_url}
+                  containerId={adSlots.native_banner?.container_id}
+                />
               </div>
             )}
             {paragraphs.slice(mid).map((p, i) => <p key={"b" + i}>{p}</p>)}
@@ -174,8 +180,12 @@ export default function ArticlePage({ params }) {
         )}
 
         {htmlBody && (
-          <div className="ad-slot" style={{ marginTop: 20 }}>
-            <span className="badge badge-muted">Advertentie</span>
+          <div className="ad-slot" style={{ marginTop: 20, display: "flex", justifyContent: "center" }}>
+            <AdBanner
+              adKey={adSlots.banners.article_incontent?.key}
+              width={adSlots.banners.article_incontent?.width}
+              height={adSlots.banners.article_incontent?.height}
+            />
           </div>
         )}
 
@@ -212,8 +222,12 @@ export default function ArticlePage({ params }) {
             ))}
           </div>
 
-          <div className="ad-slot" style={{ marginTop: 20, border: "1px solid var(--border)", borderRadius: 12 }}>
-            <span className="badge badge-muted">Advertentie</span>
+          <div className="ad-slot" style={{ marginTop: 20, display: "flex", justifyContent: "center" }}>
+            <AdBanner
+              adKey={adSlots.banners.article_sidebar?.key}
+              width={adSlots.banners.article_sidebar?.width}
+              height={adSlots.banners.article_sidebar?.height}
+            />
           </div>
         </div>
       </div>

@@ -2,7 +2,8 @@ import Link from "next/link";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import LiveTimeLabel from "./components/LiveTimeLabel";
-import { getArticles, getSiteSettings, getCategories } from "@/lib/db";
+import AdBanner from "./components/AdBanner";
+import { getArticles, getSiteSettings, getCategories, getAdSlots } from "@/lib/db";
 import { getExcerpt, formatImageCredit, getCategoryStyle } from "@/lib/content";
 import { headers } from "next/headers";
 
@@ -65,6 +66,7 @@ export default function HomePage() {
   };
 
   const categories = getCategories();
+  const adSlots = getAdSlots();
   const published = getArticles({ status: "published" }).sort(
     (a, b) => new Date(b.published_at) - new Date(a.published_at)
   );
@@ -188,9 +190,15 @@ export default function HomePage() {
             ))}
           </div>
 
-          <div className="ad-slot" style={{ marginTop: 20, border: "1px solid var(--border)", borderRadius: 12 }}>
-            <span className="badge badge-muted">Advertentie</span>
-          </div>
+          {adSlots.banners.homepage_sidebar && (
+            <div style={{ marginTop: 20, display: "flex", justifyContent: "center" }}>
+              <AdBanner
+                adKey={adSlots.banners.homepage_sidebar.key}
+                width={adSlots.banners.homepage_sidebar.width}
+                height={adSlots.banners.homepage_sidebar.height}
+              />
+            </div>
+          )}
         </div>
       </div>
 
