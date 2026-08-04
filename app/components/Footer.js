@@ -1,10 +1,9 @@
 import Link from "next/link";
-import { getSiteSettings } from "@/lib/db";
-
-const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
+import { getSiteSettings, getCategories } from "@/lib/db";
 
 export default function Footer() {
   const { site_name, site_description } = getSiteSettings();
+  const categories = getCategories();
 
   return (
     <footer className="site-footer">
@@ -16,8 +15,8 @@ export default function Footer() {
 
         <div className="site-footer-links">
           <p className="site-footer-heading">Categorieën</p>
-          {CATEGORIES.map((c) => (
-            <Link key={c} href={`/categorie/${encodeURIComponent(c.toLowerCase())}`}>{c}</Link>
+          {categories.map((c) => (
+            <Link key={c.name} href={`/categorie/${encodeURIComponent(c.name.toLowerCase())}`}>{c.name}</Link>
           ))}
         </div>
 

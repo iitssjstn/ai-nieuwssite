@@ -8,8 +8,6 @@ import ArticleBody from "../../components/ArticleBody";
 import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { plainTextToHtml, formatImageCredit } from "@/lib/content";
 
-const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
-
 export default function ReviewDetail() {
   const { confirm, ConfirmDialog } = useConfirmDialog();
   const { id } = useParams();
@@ -18,6 +16,7 @@ export default function ReviewDetail() {
   const [me, setMe] = useState(null);
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState("");
+  const [categories, setCategories] = useState([]);
   const [category, setCategory] = useState("Overig");
   const [body, setBody] = useState("");
   const [featuredImage, setFeaturedImage] = useState(null);
@@ -49,6 +48,7 @@ export default function ReviewDetail() {
 
   useEffect(() => {
     fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)).then(setMe).catch(() => {});
+    fetch("/api/categories").then((r) => r.json()).then((d) => setCategories(d.categories || [])).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -96,6 +96,11 @@ export default function ReviewDetail() {
     return () => clearTimeout(autosaveTimer.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [title, body, featuredImage, category, editing]);
+
+  function categoryStyle(name) {
+    const c = categories.find((c) => c.name === name);
+    return c ? { background: c.color + "22", color: c.color } : undefined;
+  }
 
   async function act(action, extra = {}) {
     setBusy(true);
@@ -383,8 +388,8 @@ export default function ReviewDetail() {
                 onChange={(e) => setCategory(e.target.value)}
                 style={{ marginBottom: 10, padding: 8, borderRadius: 8, border: "1px solid var(--border)" }}
               >
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
+                {categories.map((c) => (
+                  <option key={c.name} value={c.name}>{c.name}</option>
                 ))}
               </select>
 
@@ -629,7 +634,7 @@ export default function ReviewDetail() {
                 color: "#1c1c1a",
               }}
             >
-              <span className="badge">{article.category}</span>
+              <span className="badge" style={categoryStyle(article.category)}>{article.category}</span>
               <h1 style={{ fontSize: previewWidth === "mobile" ? 20 : 26, margin: "10px 0", color: "#1c1c1a" }}>
                 {editing ? title : article.title}
               </h1>

@@ -5,8 +5,6 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useConfirmDialog } from "../../components/ConfirmDialog";
 
-const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
-
 const TABS = [
   { id: "published", label: "Gepubliceerd" },
   { id: "approved", label: "Goedgekeurd" },
@@ -25,6 +23,7 @@ export default function PublishedArticles() {
   const [me, setMe] = useState(null);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [categories, setCategories] = useState([]);
   const [sortBy, setSortBy] = useState("newest");
 
   async function load() {
@@ -34,12 +33,18 @@ export default function PublishedArticles() {
 
   useEffect(() => {
     fetch("/api/auth/me").then((r) => (r.ok ? r.json() : null)).then(setMe).catch(() => {});
+    fetch("/api/categories").then((r) => r.json()).then((d) => setCategories(d.categories || [])).catch(() => {});
   }, []);
 
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab]);
+
+  function categoryStyle(name) {
+    const c = categories.find((c) => c.name === name);
+    return c ? { background: c.color + "22", color: c.color } : {};
+  }
 
   async function doAction(id, action) {
     setBusyId(id);
@@ -125,7 +130,7 @@ export default function PublishedArticles() {
         />
         <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} style={{ width: "auto" }}>
           <option value="">Alle categorieën</option>
-          {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+          {categories.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
         </select>
         <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ width: "auto" }}>
           <option value="newest">Nieuwste eerst</option>
@@ -145,7 +150,7 @@ export default function PublishedArticles() {
       {filtered.map((a) => (
         <div key={a.id} className="pending-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
           <div style={{ minWidth: 0 }}>
-            <span className="badge badge-muted" style={{ marginBottom: 8, display: "inline-block" }}>{a.category}</span>
+            <span className="badge badge-muted" style={{ marginBottom: 8, display: "inline-block", ...categoryStyle(a.category) }}>{a.category}</span>
             {a.reviewer_id === "auto" && (
               <span className="badge" style={{ marginBottom: 8, marginLeft: 6, display: "inline-block", background: "var(--accent-bg)", color: "var(--accent-text)" }}>
                 🤖 Automatisch gepubliceerd

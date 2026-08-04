@@ -4,8 +4,6 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useConfirmDialog } from "../../components/ConfirmDialog";
 
-const CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
-
 export default function QueuePage() {
   const { confirm, ConfirmDialog } = useConfirmDialog();
   const [pending, setPending] = useState([]);
@@ -17,21 +15,24 @@ export default function QueuePage() {
   const [sourceText, setSourceText] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [categoryOverride, setCategoryOverride] = useState("");
+  const [categories, setCategories] = useState([]);
   const [extraSources, setExtraSources] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   async function loadAll() {
-    const [pendingRes, sourcesRes, statsRes] = await Promise.all([
+    const [pendingRes, sourcesRes, statsRes, categoriesRes] = await Promise.all([
       fetch("/api/articles?status=pending_review"),
       fetch("/api/sources"),
       fetch("/api/stats"),
+      fetch("/api/categories"),
     ]);
     const pendingData = await pendingRes.json();
     const sourcesData = await sourcesRes.json();
     setPending(pendingData);
     setSources(sourcesData);
     setStats(await statsRes.json());
+    setCategories((await categoriesRes.json()).categories || []);
     if (sourcesData.length > 0 && !sourceId) setSourceId(sourcesData[0].id);
   }
 
@@ -132,8 +133,8 @@ export default function QueuePage() {
             style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)" }}
           >
             <option value="">Categorie: AI kiest zelf</option>
-            {CATEGORIES.map((c) => (
-              <option key={c} value={c}>Categorie: {c}</option>
+            {categories.map((c) => (
+              <option key={c.name} value={c.name}>Categorie: {c.name}</option>
             ))}
           </select>
         </div>

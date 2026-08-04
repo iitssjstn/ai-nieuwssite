@@ -16,6 +16,7 @@ const ADMIN_PATH_PREFIXES = [
   "/api/polls",
   "/api/webhooks",
   "/api/keys",
+  "/api/categories",
 ];
 
 // Subset die WEL alleen op het admin-subdomein mag bestaan, maar NIET zelf

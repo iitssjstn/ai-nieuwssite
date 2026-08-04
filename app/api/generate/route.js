@@ -1,10 +1,8 @@
 import { NextResponse } from "next/server";
 import { generateDraft } from "@/lib/ai";
-import { createArticle, getSources, findPossibleDuplicate, getImageProviderConfig } from "@/lib/db";
+import { createArticle, getSources, findPossibleDuplicate, getImageProviderConfig, getCategories } from "@/lib/db";
 import { searchStockPhoto } from "@/lib/image-search";
 import { geocodeLocation } from "@/lib/geocode";
-
-const VALID_CATEGORIES = ["Binnenland", "Economie", "Sport", "Tech", "Overig"];
 
 export async function POST(request) {
   const body = await request.json();
@@ -17,7 +15,7 @@ export async function POST(request) {
     );
   }
 
-  if (category_override && !VALID_CATEGORIES.includes(category_override)) {
+  if (category_override && !getCategories().some((c) => c.name === category_override)) {
     return NextResponse.json({ error: "Onbekende categorie" }, { status: 400 });
   }
 

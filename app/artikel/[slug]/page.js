@@ -4,7 +4,7 @@ import LiveTimeLabel from "../../components/LiveTimeLabel";
 import Link from "next/link";
 import LiveblogTimeline from "../../components/LiveblogTimeline";
 import PollWidget from "../../components/PollWidget";
-import { getArticle, getArticleBySlug, getArticles, getSiteSettings, incrementViews } from "@/lib/db";
+import { getArticle, getArticleBySlug, getArticles, getSiteSettings, getCategories, incrementViews } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { isHtmlBody, getExcerpt, resolveImageUrl, getCategoryStyle } from "@/lib/content";
@@ -77,6 +77,7 @@ export default function ArticlePage({ params }) {
   incrementViews(article.id);
 
   const { site_name } = getSiteSettings();
+  const categories = getCategories();
   const latestNews = getArticles({ status: "published" })
     .filter((a) => a.id !== article.id)
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))
@@ -108,7 +109,7 @@ export default function ArticlePage({ params }) {
 
       <div className="home-layout">
         <div>
-          <span className="badge" style={getCategoryStyle(article.category)}>{article.category}</span>
+          <span className="badge" style={getCategoryStyle(article.category, categories)}>{article.category}</span>
       {article.is_liveblog && (
         <span className="badge" style={{ background: "#a32d2d", color: "#fff", marginLeft: 6 }}>
           🔴 LIVE

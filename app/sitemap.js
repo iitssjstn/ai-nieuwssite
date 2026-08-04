@@ -1,4 +1,4 @@
-import { getArticles } from "@/lib/db";
+import { getArticles, getCategories } from "@/lib/db";
 import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +18,7 @@ export default function sitemap() {
     priority: 0.8,
   }));
 
-  const categories = ["binnenland", "economie", "sport", "tech", "overig"];
+  const categories = getCategories().map((c) => c.name.toLowerCase());
   const categoryEntries = categories.map((c) => ({
     url: `${baseUrl}/categorie/${c}`,
     changeFrequency: "hourly",

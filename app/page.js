@@ -2,7 +2,7 @@ import Link from "next/link";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import LiveTimeLabel from "./components/LiveTimeLabel";
-import { getArticles, getSiteSettings } from "@/lib/db";
+import { getArticles, getSiteSettings, getCategories } from "@/lib/db";
 import { getExcerpt, formatImageCredit, getCategoryStyle } from "@/lib/content";
 import { headers } from "next/headers";
 
@@ -64,6 +64,7 @@ export default function HomePage() {
     description: site_description,
   };
 
+  const categories = getCategories();
   const published = getArticles({ status: "published" }).sort(
     (a, b) => new Date(b.published_at) - new Date(a.published_at)
   );
@@ -110,7 +111,7 @@ export default function HomePage() {
                     )}
                   </>
                 )}
-                <span className="badge" style={getCategoryStyle(hero.category)}>{hero.category}</span>
+                <span className="badge" style={getCategoryStyle(hero.category, categories)}>{hero.category}</span>
                 {hero.featured && (
                   <span className="badge badge-muted" style={{ marginLeft: 6 }}>★ Uitgelicht</span>
                 )}
@@ -129,7 +130,7 @@ export default function HomePage() {
                     {a.featured_image && (
                       <img src={a.featured_image} alt={a.title} style={{ width: "100%", borderRadius: 6, marginBottom: 8, display: "block" }} />
                     )}
-                    <span className="badge badge-muted" style={getCategoryStyle(a.category)}>{a.category}</span>
+                    <span className="badge badge-muted" style={getCategoryStyle(a.category, categories)}>{a.category}</span>
                     <h3>{a.title}</h3>
                     <p className="meta">{timeAgo(a.published_at)}</p>
                   </div>
