@@ -82,7 +82,7 @@ export default function HomePage() {
 
   const [hero, ...rest] = featured;
   const gridItems = rest.slice(0, 4);
-  const latestNews = published.slice(0, 7);
+  const latestNews = published.slice(0, 5);
   const mostRead = [...published].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
   const trendingTags = getTrendingTags();
   const { enabled: newsletterEnabled } = getNewsletterSettings();
@@ -112,7 +112,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 1080 }}>
+    <div className="container" style={{ maxWidth: 1350 }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -187,6 +187,11 @@ export default function HomePage() {
               </LiveTimeLabel>
             </Link>
           ))}
+          {published.length > 5 && (
+            <Link href="/nieuws" style={{ display: "block", textAlign: "center", fontSize: 13, color: "var(--accent-text)", marginTop: 12, paddingTop: 12, borderTop: "1px dashed var(--border)" }}>
+              Meer nieuws →
+            </Link>
+          )}
         </div>
 
         {/* Meest gelezen */}
