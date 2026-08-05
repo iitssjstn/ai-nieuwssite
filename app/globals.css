@@ -394,7 +394,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
   display: grid;
   grid-template-columns: minmax(0, 2fr) 260px 260px;
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
   margin-bottom: 24px;
 }
 @media (max-width: 960px) {
@@ -406,6 +406,8 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px;
+  height: 100%;
+  box-sizing: border-box;
 }
 .sidebar-box h3 {
   font-size: 14px;
