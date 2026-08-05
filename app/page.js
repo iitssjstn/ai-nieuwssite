@@ -7,6 +7,7 @@ import AdSenseUnit from "./components/AdSenseUnit";
 import CategoryTabs from "./components/CategoryTabs";
 import NewsletterWidget from "./components/NewsletterWidget";
 import Sparkline from "./components/Sparkline";
+import PollWidget from "./components/PollWidget";
 import { getArticles, getSiteSettings, getCategories, getAdSlots, getAdsenseClientId, getTrendingTags, getPolls, getNewsletterSettings } from "@/lib/db";
 import { getExcerpt, formatImageCredit, getCategoryStyle, getReadingTime } from "@/lib/content";
 import { headers } from "next/headers";
@@ -89,8 +90,6 @@ export default function HomePage() {
   const activePoll = getPolls()
     .filter((p) => p.active)
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
-  const pollTotalVotes = activePoll ? activePoll.options.reduce((sum, o) => sum + o.votes, 0) : 0;
-  const pollArticle = activePoll ? published.find((a) => a.poll_id === activePoll.id) : null;
 
   // Per categorie de 3 meest recente artikelen klaarzetten, met vooraf
   // berekende leestijd/tijdsaanduiding/samenvatting — CategoryTabs is een
@@ -129,8 +128,8 @@ export default function HomePage() {
         {new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
       </p>
 
-      <div className="home-layout">
-        {/* Hoofdkolom */}
+      <div className="hero-row">
+        {/* Hero */}
         <div>
           {hero && (
             <Link href={`/artikel/${hero.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
@@ -157,7 +156,58 @@ export default function HomePage() {
             </Link>
           )}
 
-          <p style={{ fontSize: 13, fontWeight: 500, margin: "20px 0 10px" }}>Direct naar</p>
+          {!hero && published.length > 0 && (
+            <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: "24px 20px", textAlign: "center" }}>
+              <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: 0 }}>
+                Nog geen artikel uitgelicht op de hoofdpagina.
+              </p>
+              <p style={{ color: "var(--text-muted)", fontSize: 13, margin: "6px 0 0" }}>
+                Bekijk alle nieuwe artikelen in "Laatste nieuws" hiernaast.
+              </p>
+            </div>
+          )}
+
+          {published.length === 0 && (
+            <p style={{ color: "var(--text-secondary)" }}>
+              Nog geen gepubliceerde artikelen.
+            </p>
+          )}
+        </div>
+
+        {/* Laatste nieuws */}
+        <div className="sidebar-box">
+          <h3>Laatste nieuws</h3>
+          {latestNews.length === 0 && (
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen artikelen.</p>
+          )}
+          {latestNews.map((a) => (
+            <Link key={a.id} href={`/artikel/${a.slug}`} className="latest-news-row">
+              <LiveTimeLabel publishedAt={a.published_at} category={a.category}>
+                <p className="latest-news-title">{a.title}</p>
+              </LiveTimeLabel>
+            </Link>
+          ))}
+        </div>
+
+        {/* Meest gelezen */}
+        <div className="sidebar-box">
+          <h3>Meest gelezen</h3>
+          {mostRead.length === 0 && (
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven.</p>
+          )}
+          {mostRead.map((a, i) => (
+            <Link key={a.id} href={`/artikel/${a.slug}`} className="sidebar-item">
+              <span className="sidebar-rank">{i + 1}</span>
+              <p>{a.title}</p>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="home-layout">
+        {/* Hoofdkolom */}
+        <div>
+          <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>Direct naar</p>
           <div style={{ display: "flex", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
             {[
               { href: "/kaart", label: "Kaart", icon: "🗺️" },
@@ -201,25 +251,6 @@ export default function HomePage() {
             </>
           )}
 
-          {!hero && published.length > 0 && (
-            <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: "24px 20px", textAlign: "center" }}>
-              <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: 0 }}>
-                Nog geen artikel uitgelicht op de hoofdpagina.
-              </p>
-              <p style={{ color: "var(--text-muted)", fontSize: 13, margin: "6px 0 0" }}>
-                Bekijk alle nieuwe artikelen in "Laatste nieuws" hiernaast.
-              </p>
-            </div>
-          )}
-
-          <div style={{ marginTop: 8 }}>
-            {published.length === 0 && (
-              <p style={{ color: "var(--text-secondary)" }}>
-                Nog geen gepubliceerde artikelen.
-              </p>
-            )}
-          </div>
-
           {categories.length > 0 && (
             <div style={{ marginTop: 28 }}>
               <h2 style={{ fontSize: 15, fontWeight: 500, marginBottom: 12 }}>Nieuws per categorie</h2>
@@ -230,34 +261,7 @@ export default function HomePage() {
 
         {/* Sidebar */}
         <div>
-          <div className="sidebar-box">
-            <h3>Laatste nieuws</h3>
-            {latestNews.length === 0 && (
-              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen artikelen.</p>
-            )}
-            {latestNews.map((a) => (
-              <Link key={a.id} href={`/artikel/${a.slug}`} className="latest-news-row">
-                <LiveTimeLabel publishedAt={a.published_at} category={a.category}>
-                  <p className="latest-news-title">{a.title}</p>
-                </LiveTimeLabel>
-              </Link>
-            ))}
-          </div>
-
-          <div className="sidebar-box" style={{ marginTop: 20 }}>
-            <h3>Meest gelezen</h3>
-            {mostRead.length === 0 && (
-              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven.</p>
-            )}
-            {mostRead.map((a, i) => (
-              <Link key={a.id} href={`/artikel/${a.slug}`} className="sidebar-item">
-                <span className="sidebar-rank">{i + 1}</span>
-                <p>{a.title}</p>
-              </Link>
-            ))}
-          </div>
-
-          <div style={{ marginTop: 20 }}>
+          <div style={{ marginTop: 0 }}>
             <AdSlot config={{ ...adSlots.banners.homepage_sidebar, width: adSlots.banners.homepage_sidebar?.width || 300, height: adSlots.banners.homepage_sidebar?.height || 250 }} />
           </div>
 
@@ -280,27 +284,9 @@ export default function HomePage() {
             <div className="sidebar-box" style={{ marginTop: 20 }}>
               <h3>Poll van de dag</h3>
               <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>{activePoll.question}</p>
-              {activePoll.options.map((o) => {
-                const pct = pollTotalVotes > 0 ? Math.round((o.votes / pollTotalVotes) * 100) : 0;
-                return (
-                  <div key={o.id} style={{ margin: "8px 0" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
-                      <span>{o.text}</span>
-                      <span>{pct}%</span>
-                    </div>
-                    <div style={{ background: "var(--border)", borderRadius: 4, height: 5 }}>
-                      <div style={{ background: "var(--accent-text)", borderRadius: 4, height: 5, width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
+              <PollWidget pollId={activePoll.id} compact />
               <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
-                Totaal {pollTotalVotes} stemmen ·{" "}
-                {pollArticle ? (
-                  <Link href={`/artikel/${pollArticle.slug}`} style={{ color: "var(--accent-text)" }}>Bekijk alle polls</Link>
-                ) : (
-                  <Link href="/polls" style={{ color: "var(--accent-text)" }}>Bekijk alle polls</Link>
-                )}
+                <Link href="/polls" style={{ color: "var(--accent-text)" }}>Bekijk alle polls</Link>
               </p>
             </div>
           )}

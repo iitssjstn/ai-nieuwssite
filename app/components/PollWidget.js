@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export default function PollWidget({ pollId }) {
+export default function PollWidget({ pollId, compact = false }) {
   const [poll, setPoll] = useState(null);
   const [voted, setVoted] = useState(false);
   const [voting, setVoting] = useState(false);
@@ -46,8 +46,8 @@ export default function PollWidget({ pollId }) {
   const total = poll.options.reduce((s, o) => s + o.votes, 0);
 
   return (
-    <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 18, margin: "24px 0" }}>
-      <p style={{ fontWeight: 500, fontSize: 15, marginBottom: 12 }}>{poll.question}</p>
+    <div style={compact ? undefined : { background: "var(--surface-1)", borderRadius: 12, padding: 18, margin: "24px 0" }}>
+      {!compact && <p style={{ fontWeight: 500, fontSize: 15, marginBottom: 12 }}>{poll.question}</p>}
       {poll.options.map((o) => {
         const pct = total > 0 ? Math.round((o.votes / total) * 100) : 0;
         return voted ? (

@@ -192,7 +192,9 @@ html.dark .hero-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
   grid-template-columns: repeat(4, minmax(0,1fr));
   gap: 14px;
   margin-bottom: 20px;
+  align-items: stretch;
 }
+.grid-4 > a { display: flex; }
 @media (max-width: 720px) {
   .grid-4 { grid-template-columns: repeat(2, minmax(0,1fr)); }
 }
@@ -201,6 +203,9 @@ html.dark .hero-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
 }
 
 .card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 12px;
@@ -211,7 +216,17 @@ html.dark .hero-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.35); }
 .card:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.08); transform: translateY(-2px); border-color: var(--accent-text); }
 html.dark .card:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
 
-.card h3 { font-size: 15px; margin: 10px 0 6px; font-weight: 500; line-height: 1.4; }
+.card h3 {
+  font-size: 15px;
+  margin: 10px 0 6px;
+  font-weight: 500;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.card .meta { margin-top: auto; padding-top: 4px; }
 
 .list-row {
   display: flex;
@@ -373,6 +388,17 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
 }
 @media (max-width: 720px) {
   .home-layout { grid-template-columns: 1fr; }
+}
+
+.hero-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) 260px 260px;
+  gap: 20px;
+  align-items: start;
+  margin-bottom: 24px;
+}
+@media (max-width: 960px) {
+  .hero-row { grid-template-columns: 1fr; }
 }
 
 .sidebar-box {
