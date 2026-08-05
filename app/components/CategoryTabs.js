@@ -41,7 +41,7 @@ export default function CategoryTabs({ categories, articlesByCategory }) {
       {items.map((a) => (
         <Link key={a.id} href={`/artikel/${a.slug}`} className="list-row" style={{ gap: 14, justifyContent: "flex-start" }}>
           {a.featured_image && (
-            <img src={a.featured_image} alt={a.title} style={{ width: 130, height: 88, objectFit: "cover", borderRadius: 8, flexShrink: 0 }} />
+            <img src={a.featured_image} alt={a.title} className="list-row-thumb" />
           )}
           <div style={{ minWidth: 0 }}>
             <span className="cat">{a.category} · {a.timeAgo} · {a.readingTime}</span>
