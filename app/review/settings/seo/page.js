@@ -11,6 +11,16 @@ export default function SeoPage() {
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
 
+  const [newsletter, setNewsletter] = useState(null);
+  const [newsletterDraft, setNewsletterDraft] = useState("");
+  const [newsletterBusy, setNewsletterBusy] = useState(false);
+  const [newsletterSaved, setNewsletterSaved] = useState(false);
+  const [newsletterError, setNewsletterError] = useState(null);
+
+  const [social, setSocial] = useState(null);
+  const [socialBusy, setSocialBusy] = useState(false);
+  const [socialSaved, setSocialSaved] = useState(false);
+
   async function load() {
     const res = await fetch("/api/settings/site");
     const data = await res.json();
@@ -19,9 +29,58 @@ export default function SeoPage() {
     setDescDraft(data.site_description);
   }
 
+  async function loadNewsletter() {
+    const res = await fetch("/api/settings/newsletter");
+    const data = await res.json();
+    setNewsletter(data);
+    setNewsletterDraft(data.sender_email || "");
+  }
+
+  async function loadSocial() {
+    const res = await fetch("/api/settings/social");
+    setSocial(await res.json());
+  }
+
   useEffect(() => {
     load();
+    loadNewsletter();
+    loadSocial();
   }, []);
+
+  async function handleSaveNewsletter(e) {
+    e.preventDefault();
+    setNewsletterError(null);
+    setNewsletterSaved(false);
+    setNewsletterBusy(true);
+    const res = await fetch("/api/settings/newsletter", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ sender_email: newsletterDraft.trim() || null }),
+    });
+    setNewsletterBusy(false);
+    if (res.ok) {
+      setNewsletter(await res.json());
+      setNewsletterSaved(true);
+    } else {
+      const data = await res.json();
+      setNewsletterError(data.error || "Opslaan mislukt");
+    }
+  }
+
+  async function saveSocial(updated) {
+    setSocialBusy(true);
+    setSocialSaved(false);
+    const res = await fetch("/api/settings/social", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(updated),
+    });
+    setSocialBusy(false);
+    if (res.ok) {
+      setSocial(await res.json());
+      setSocialSaved(true);
+    }
+  }
 
   async function handleSaveText(e) {
     e.preventDefault();
@@ -134,6 +193,58 @@ export default function SeoPage() {
         <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={handleFaviconUpload} disabled={uploadingFavicon} />
         {uploadingFavicon && <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 8 }}>Bezig met uploaden...</p>}
       </div>
+
+      {newsletter && (
+        <form onSubmit={handleSaveNewsletter} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
+          <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Nieuwsbrief</p>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
+            Zonder afzender-e-mailadres blijft het aanmeldformulier voor bezoekers verborgen — pas
+            als je hier iets invult, verschijnt het op de site. Aanmeldingen worden opgeslagen in
+            een lijst die je hier kunt zien; er wordt nog geen nieuwsbrief automatisch verstuurd.
+          </p>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Afzender-e-mailadres</p>
+          <input
+            type="text"
+            placeholder="redactie@novapers.nl"
+            value={newsletterDraft}
+            onChange={(e) => setNewsletterDraft(e.target.value)}
+            style={{ marginBottom: 10 }}
+          />
+          {newsletterError && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 8 }}>{newsletterError}</p>}
+          {newsletterSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Opgeslagen.</p>}
+          {newsletter.subscriber_count !== undefined && (
+            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>
+              {newsletter.subscriber_count} aanmelding(en) tot nu toe.
+            </p>
+          )}
+          <button type="submit" className="primary" disabled={newsletterBusy} style={{ width: "auto", padding: "8px 16px" }}>
+            Opslaan
+          </button>
+        </form>
+      )}
+
+      {social && (
+        <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
+          <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Social media</p>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
+            Alleen ingevulde profielen krijgen een icoontje in de footer — laat een veld leeg om
+            dat icoon te verbergen.
+          </p>
+          {["twitter", "facebook", "instagram", "youtube"].map((key) => (
+            <div key={key} style={{ marginBottom: 8 }}>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4, textTransform: "capitalize" }}>{key}</p>
+              <input
+                type="text"
+                placeholder={`https://${key}.com/...`}
+                defaultValue={social[key] || ""}
+                onBlur={(e) => saveSocial({ ...social, [key]: e.target.value.trim() || null })}
+                disabled={socialBusy}
+              />
+            </div>
+          ))}
+          {socialSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginTop: 8 }}>Opgeslagen.</p>}
+        </div>
+      )}
     </>
   );
 }
