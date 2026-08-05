@@ -104,7 +104,7 @@ export default function ArticlePage({ params }) {
   };
 
   return (
-    <div className="container" style={{ maxWidth: 1080 }}>
+    <div className="container" style={{ maxWidth: 1350 }}>
       <Header />
       <script
         type="application/ld+json"
