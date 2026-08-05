@@ -4,7 +4,7 @@ import LiveTimeLabel from "../../components/LiveTimeLabel";
 import Link from "next/link";
 import LiveblogTimeline from "../../components/LiveblogTimeline";
 import PollWidget from "../../components/PollWidget";
-import AdBanner from "../../components/AdBanner";
+import AdSlot from "../../components/AdSlot";
 import NativeAd from "../../components/NativeAd";
 import KeyClaims from "../../components/KeyClaims";
 import { getArticle, getArticleBySlug, getArticles, getSiteSettings, getCategories, getAdSlots, incrementViews } from "@/lib/db";
@@ -188,12 +188,8 @@ export default function ArticlePage({ params }) {
         )}
 
         {htmlBody && (
-          <div className="ad-slot" style={{ marginTop: 20, display: "flex", justifyContent: "center" }}>
-            <AdBanner
-              adKey={adSlots.banners.article_incontent?.key}
-              width={adSlots.banners.article_incontent?.width}
-              height={adSlots.banners.article_incontent?.height}
-            />
+          <div className="ad-slot" style={{ marginTop: 20 }}>
+            <AdSlot config={{ ...adSlots.banners.article_incontent, width: adSlots.banners.article_incontent?.width || 468, height: adSlots.banners.article_incontent?.height || 60 }} />
           </div>
         )}
 
@@ -230,12 +226,8 @@ export default function ArticlePage({ params }) {
             ))}
           </div>
 
-          <div className="ad-slot" style={{ marginTop: 20, display: "flex", justifyContent: "center" }}>
-            <AdBanner
-              adKey={adSlots.banners.article_sidebar?.key}
-              width={adSlots.banners.article_sidebar?.width}
-              height={adSlots.banners.article_sidebar?.height}
-            />
+          <div className="ad-slot" style={{ marginTop: 20 }}>
+            <AdSlot config={{ ...adSlots.banners.article_sidebar, width: adSlots.banners.article_sidebar?.width || 160, height: adSlots.banners.article_sidebar?.height || 300 }} />
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 const BANNER_SLOTS = [
+  { id: "top_banner", label: "Bovenaan de homepage", hint: "Brede banner, bijv. 728×90" },
   { id: "homepage_sidebar", label: "Zijbalk homepage", hint: "Kleine banner, bijv. 320×50" },
   { id: "article_sidebar", label: "Zijbalk artikelpagina", hint: "Staande banner, bijv. 160×300" },
   { id: "article_incontent", label: "Onder het artikel", hint: "Brede banner, bijv. 468×60" },
