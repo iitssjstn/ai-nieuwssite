@@ -2,7 +2,7 @@ import Link from "next/link";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import LiveTimeLabel from "./components/LiveTimeLabel";
-import AdBanner from "./components/AdBanner";
+import AdSlot from "./components/AdSlot";
 import AdSenseUnit from "./components/AdSenseUnit";
 import CategoryTabs from "./components/CategoryTabs";
 import NewsletterWidget from "./components/NewsletterWidget";
@@ -118,20 +118,35 @@ export default function HomePage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <Header />
+
+      <div style={{ margin: "16px 0" }}>
+        <AdSlot config={{ ...adSlots.banners.top_banner, width: adSlots.banners.top_banner?.width || 728, height: adSlots.banners.top_banner?.height || 90 }} />
+      </div>
       <h1 className="sr-only">{site_name} — Actueel Nederlands nieuws</h1>
 
       <p style={{ fontSize: 12, color: "var(--text-muted)", textTransform: "capitalize", margin: "0 0 16px" }}>
         {new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
       </p>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
+      <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>Direct naar</p>
+      <div style={{ display: "flex", gap: 10, marginBottom: 28, flexWrap: "wrap" }}>
         {[
-          { href: "/kaart", label: "Kaart" },
-          { href: "/polls", label: "Polls" },
-          { href: "/liveblog", label: "Liveblog" },
-          ...(newsletterEnabled ? [{ href: "/#nieuwsbrief", label: "Nieuwsbrief" }] : []),
+          { href: "/kaart", label: "Kaart", icon: "🗺️" },
+          { href: "/polls", label: "Polls", icon: "📊" },
+          { href: "/liveblog", label: "Liveblog", icon: "🔴" },
+          ...(newsletterEnabled ? [{ href: "/#nieuwsbrief", label: "Nieuwsbrief", icon: "📧" }] : []),
         ].map((item) => (
-          <Link key={item.href} href={item.href} className="badge badge-muted" style={{ padding: "8px 16px", textDecoration: "none" }}>
+          <Link
+            key={item.href}
+            href={item.href}
+            style={{
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+              width: 92, padding: "14px 8px", borderRadius: 12, border: "1px solid var(--border)",
+              background: "var(--surface-1)", textDecoration: "none", color: "var(--text-primary)",
+              fontSize: 12, textAlign: "center",
+            }}
+          >
+            <span style={{ fontSize: 18 }}>{item.icon}</span>
             {item.label}
           </Link>
         ))}
@@ -240,15 +255,9 @@ export default function HomePage() {
             ))}
           </div>
 
-          {adSlots.banners.homepage_sidebar && (
-            <div style={{ marginTop: 20, display: "flex", justifyContent: "center" }}>
-              <AdBanner
-                adKey={adSlots.banners.homepage_sidebar.key}
-                width={adSlots.banners.homepage_sidebar.width}
-                height={adSlots.banners.homepage_sidebar.height}
-              />
-            </div>
-          )}
+          <div style={{ marginTop: 20 }}>
+            <AdSlot config={{ ...adSlots.banners.homepage_sidebar, width: adSlots.banners.homepage_sidebar?.width || 300, height: adSlots.banners.homepage_sidebar?.height || 250 }} />
+          </div>
 
           {trendingTags.length > 0 && (
             <div className="sidebar-box" style={{ marginTop: 20 }}>
