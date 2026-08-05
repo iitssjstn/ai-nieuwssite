@@ -6,5 +6,7 @@ export const dynamic = "force-dynamic";
 export async function GET(request, { params }) {
   const poll = getPoll(params.id);
   if (!poll) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
-  return NextResponse.json(poll);
+
+  const votedOptionId = request.cookies.get(`voted_${params.id}`)?.value || null;
+  return NextResponse.json({ ...poll, votedOptionId });
 }
