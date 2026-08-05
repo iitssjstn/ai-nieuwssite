@@ -17,23 +17,24 @@
   --cat-sport-text: #1f7a34;
   --cat-tech-bg: #f1e8fb;
   --cat-tech-text: #6b3fa0;
+  --ad-bg: transparent;
 }
 
 /* Donkere modus voor de publieke site — zelfde palet als het adminpaneel,
    maar hier bewust een opt-in klasse op <html> i.p.v. altijd aan, zodat
    bezoekers zelf kiezen. */
 html.dark {
-  --bg: #14151a;
-  --surface-1: #1c1e26;
-  --surface-2: #20222b;
-  --border: #2c2f3a;
-  --text-primary: #f2f2f0;
-  --text-secondary: #a3a5b0;
+  --bg: #080C14;
+  --surface-1: #0D121C;
+  --surface-2: #111722;
+  --border: #202A3A;
+  --text-primary: #F1F5F9;
+  --text-secondary: #94A3B8;
   --text-muted: #6e7180;
-  --accent-bg: #1a2c47;
-  --accent-text: #6fa8e8;
-  --danger-text: #f09595;
-  --success-text: #9fd15d;
+  --accent-bg: #1683F822;
+  --accent-text: #1683F8;
+  --danger-text: #EF3340;
+  --success-text: #22C55E;
 
   --cat-economie-bg: #3a2f10;
   --cat-economie-text: #e8c76f;
@@ -41,6 +42,7 @@ html.dark {
   --cat-sport-text: #7ed492;
   --cat-tech-bg: #2c1f3a;
   --cat-tech-text: #c79ef0;
+  --ad-bg: #0B111B;
 }
 html.dark body { background: var(--bg); color: var(--text-primary); }
 
@@ -360,7 +362,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #a32d2d;
+  background: #EF3340;
   color: #fff;
   text-decoration: none;
   padding: 8px 20px;
@@ -368,7 +370,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
 }
 .breaking-label {
   background: #fff;
-  color: #a32d2d;
+  color: #EF3340;
   font-weight: 700;
   font-size: 11px;
   padding: 2px 8px;
