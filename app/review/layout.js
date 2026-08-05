@@ -128,6 +128,7 @@ export default function ReviewLayout({ children }) {
   const router = useRouter();
   const [me, setMe] = useState(null);
   const [pendingCount, setPendingCount] = useState(0);
+  const [pendingUpdatesCount, setPendingUpdatesCount] = useState(0);
   const [notifPermission, setNotifPermission] = useState("default");
   const lastCount = useRef(0);
   const notifiedOnce = useRef(false);
@@ -163,6 +164,7 @@ export default function ReviewLayout({ children }) {
         notifiedOnce.current = true;
         lastCount.current = count;
         setPendingCount(count);
+        setPendingUpdatesCount(stats.pending_updates || 0);
       } catch {
         // volgende poll probeert het gewoon opnieuw
       }
@@ -190,6 +192,7 @@ export default function ReviewLayout({ children }) {
         {visibleNav.map((item) => {
           const active = item.href === "/review" ? pathname === "/review" : pathname.startsWith(item.href);
           const showBadge = item.href === "/review/queue" && pendingCount > 0;
+          const showUpdateBadge = item.href === "/review/published" && pendingUpdatesCount > 0;
           return (
             <Link key={item.href} href={item.href} className={`admin-nav-item${active ? " active" : ""}`}>
               {item.icon}
@@ -200,6 +203,14 @@ export default function ReviewLayout({ children }) {
                   fontSize: 11, padding: "1px 7px", fontWeight: 600,
                 }}>
                   {pendingCount}
+                </span>
+              )}
+              {showUpdateBadge && (
+                <span title="Artikelen met een nieuwe-informatie-melding" style={{
+                  marginLeft: "auto", background: "var(--accent-text)", color: "#fff", borderRadius: 10,
+                  fontSize: 11, padding: "1px 7px", fontWeight: 600,
+                }}>
+                  🔔 {pendingUpdatesCount}
                 </span>
               )}
             </Link>

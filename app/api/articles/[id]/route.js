@@ -9,6 +9,7 @@ import { triggerWebhooks } from "@/lib/webhooks";
 const ADMIN_ONLY_ACTIONS = [
   "approve", "publish", "reject", "unpublish",
   "schedule", "unschedule", "archive", "unarchive", "toggle_breaking", "toggle_featured",
+  "apply_pending_update", "dismiss_pending_update",
 ];
 
 export async function GET(request, { params }) {
@@ -113,6 +114,19 @@ export async function PATCH(request, { params }) {
       updated = updateArticle(params.id, { poll_id: pollId || null });
     }
     diff = "titel/body/afbeelding/tags aangepast";
+  } else if (action === "apply_pending_update") {
+    if (!existing.pending_update) {
+      return NextResponse.json({ error: "Geen voorgestelde update aanwezig" }, { status: 400 });
+    }
+    editArticleWithRevision(params.id, { title: existing.title, body: existing.pending_update.updated_body });
+    updated = updateArticle(params.id, {
+      updated_at: new Date().toISOString(),
+      last_update_summary: existing.pending_update.update_summary,
+      pending_update: null,
+    });
+    triggerWebhooks("article.updated", updated).catch(() => {});
+  } else if (action === "dismiss_pending_update") {
+    updated = updateArticle(params.id, { pending_update: null });
   } else {
     return NextResponse.json({ error: "Onbekende actie" }, { status: 400 });
   }

@@ -6,6 +6,7 @@ import LiveblogTimeline from "../../components/LiveblogTimeline";
 import PollWidget from "../../components/PollWidget";
 import AdBanner from "../../components/AdBanner";
 import NativeAd from "../../components/NativeAd";
+import KeyClaims from "../../components/KeyClaims";
 import { getArticle, getArticleBySlug, getArticles, getSiteSettings, getCategories, getAdSlots, incrementViews } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { headers } from "next/headers";
@@ -118,6 +119,11 @@ export default function ArticlePage({ params }) {
           🔴 LIVE
         </span>
       )}
+      {article.updated_at && (
+        <span className="badge badge-muted" style={{ marginLeft: 6 }} title={article.last_update_summary || undefined}>
+          🔄 Bijgewerkt: {article.last_update_summary || new Date(article.updated_at).toLocaleDateString("nl-NL")}
+        </span>
+      )}
       <article>
         <h1>{article.title}</h1>
         <div className="byline">
@@ -150,6 +156,8 @@ export default function ArticlePage({ params }) {
             )}
           </>
         )}
+
+        <KeyClaims claims={article.claims} />
 
         {article.is_liveblog ? (
           <>

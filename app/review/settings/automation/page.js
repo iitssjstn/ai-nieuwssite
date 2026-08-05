@@ -68,6 +68,19 @@ export default function AutomationPage() {
     setSaved(true);
   }
 
+  async function patchField(field, value) {
+    setBusy(true);
+    setSaved(false);
+    const res = await fetch("/api/settings/automation", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ [field]: value }),
+    });
+    setSettings(await res.json());
+    setBusy(false);
+    setSaved(true);
+  }
+
   if (!settings) return null;
 
   return (
@@ -139,6 +152,64 @@ export default function AutomationPage() {
           step="0.05"
           value={settings.auto_publish_min_confidence}
           onChange={(e) => updateMinConfidence(e.target.value)}
+          disabled={busy}
+          style={{ width: "100%" }}
+        />
+      </div>
+
+      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Bronnen automatisch samenvoegen</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
+              {settings.auto_gather_sources ? "Actief" : "Uitgeschakeld"}
+            </p>
+          </div>
+          <button onClick={() => patchField("auto_gather_sources", !settings.auto_gather_sources)} disabled={busy} className={settings.auto_gather_sources ? "danger" : "primary"} style={{ width: "auto", padding: "8px 16px" }}>
+            {settings.auto_gather_sources ? "Uitzetten" : "Aanzetten"}
+          </button>
+        </div>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>
+          Komt een nieuw RSS-item binnen dat waarschijnlijk over hetzelfde onderwerp gaat als een
+          concept dat nog in de wachtrij staat (op basis van titel-overeenkomst), dan wordt de
+          nieuwe bron er automatisch bij samengevoegd tot één beter onderbouwd concept — i.p.v.
+          een los, mogelijk dubbel concept aan te maken. Er komt hoe dan ook nog gewoon jouw
+          goedkeuring aan te pas vóór publicatie.
+        </p>
+      </div>
+
+      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16, border: settings.auto_update_published ? "1px solid var(--danger-text)" : "1px solid transparent" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Gepubliceerde artikelen automatisch bijwerken</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
+              {settings.auto_update_published ? "Actief — content die al live staat kan wijzigen" : "Uitgeschakeld — alles wacht op jouw goedkeuring"}
+            </p>
+          </div>
+          <button onClick={() => patchField("auto_update_published", !settings.auto_update_published)} disabled={busy} className={settings.auto_update_published ? "danger" : "primary"} style={{ width: "auto", padding: "8px 16px" }}>
+            {settings.auto_update_published ? "Uitzetten" : "Aanzetten"}
+          </button>
+        </div>
+
+        <p style={{ fontSize: 12, color: "var(--danger-text)", marginBottom: 14, lineHeight: 1.5 }}>
+          ⚠ Voor "levende" onderwerpen (bijv. een doorlopende gebeurtenis): komt er een nieuwe
+          bron binnen die aantoonbaar nieuwe informatie bevat over een al gepubliceerd artikel,
+          dan werkt het systeem de artikeltekst zelf bij — zonder dat jij het ooit hebt gezien.
+          De vorige versie blijft altijd bewaard in de revisiegeschiedenis. Alleen als de nieuwe
+          informatie én de confidence-score hieronder halen, wordt de update toegepast; anders
+          gebeurt er niets.
+        </p>
+
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
+          Minimale confidence-score om automatisch bij te werken ({Math.round(settings.auto_update_min_confidence * 100)}%)
+        </p>
+        <input
+          type="range"
+          min="0.5"
+          max="1"
+          step="0.05"
+          value={settings.auto_update_min_confidence}
+          onChange={(e) => patchField("auto_update_min_confidence", parseFloat(e.target.value))}
           disabled={busy}
           style={{ width: "100%" }}
         />

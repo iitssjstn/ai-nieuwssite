@@ -60,7 +60,10 @@ export default function SourcesPage() {
       if (!res.ok) throw new Error(data.error);
       setFetchResult((r) => ({
         ...r,
-        [id]: `${data.created} nieuw(e) concept(en) aangemaakt${data.errors?.length ? `, ${data.errors.length} fout(en)` : ""}`,
+        [id]: `${data.created} nieuw(e) concept(en)` +
+          (data.merged > 0 ? `, ${data.merged} bron(nen) samengevoegd` : "") +
+          (data.updated > 0 ? `, ${data.updated} artikel(en) automatisch bijgewerkt` : "") +
+          (data.errors?.length ? `, ${data.errors.length} fout(en)` : ""),
       }));
     } catch (err) {
       setFetchResult((r) => ({ ...r, [id]: "Fout: " + err.message }));

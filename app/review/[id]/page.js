@@ -321,6 +321,26 @@ export default function ReviewDetail() {
         </div>
       )}
 
+      {article.pending_update && (
+        <div style={{ background: "var(--accent-bg)", color: "var(--accent-text)", borderRadius: 8, padding: "12px 14px", margin: "16px 0", fontSize: 13 }}>
+          <p style={{ margin: "0 0 6px", fontWeight: 500 }}>
+            🔔 Nieuwe informatie gevonden — artikel kan worden bijgewerkt
+          </p>
+          <p style={{ margin: "0 0 10px" }}>
+            {article.pending_update.update_summary} (bron: {article.pending_update.source_name},
+            confidence {Math.round(article.pending_update.confidence_score * 100)}%)
+          </p>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button onClick={() => act("apply_pending_update")} disabled={busy} className="primary" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+              Update toepassen
+            </button>
+            <button onClick={() => act("dismiss_pending_update")} disabled={busy} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+              Negeren
+            </button>
+          </div>
+        </div>
+      )}
+
       {article.consistency_notes?.length > 0 && (
         <div style={{ background: "#412402", color: "#f0b154", borderRadius: 8, padding: "10px 14px", margin: "16px 0", fontSize: 13 }}>
           <p style={{ margin: "0 0 6px", fontWeight: 500 }}>⚠ Bronnen spreken elkaar mogelijk tegen:</p>
@@ -338,7 +358,12 @@ export default function ReviewDetail() {
           {article.claims.map((c, i) => (
             <p key={i} style={{ margin: "4px 0", display: "flex", alignItems: "flex-start", gap: 6 }}>
               <span style={{ flexShrink: 0 }}>{c.verified ? "✅" : "⚠️"}</span>
-              <span>{c.text}</span>
+              <span>
+                {c.text}
+                {c.confirmed_by_sources > 1 && (
+                  <span style={{ color: "var(--text-muted)" }}> — bevestigd door {c.confirmed_by_sources} bronnen</span>
+                )}
+              </span>
             </p>
           ))}
         </div>

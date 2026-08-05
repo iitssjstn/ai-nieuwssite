@@ -156,6 +156,11 @@ export default function PublishedArticles() {
                 🤖 Automatisch gepubliceerd
               </span>
             )}
+            {a.pending_update && (
+              <Link href={`/review/${a.id}`} className="badge" style={{ marginBottom: 8, marginLeft: 6, display: "inline-block", background: "var(--accent-bg)", color: "var(--accent-text)", textDecoration: "none" }}>
+                🔔 Nieuwe informatie gevonden
+              </Link>
+            )}
             <p style={{ fontWeight: 500, margin: 0 }}>{a.title}</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
               {dateLine(a)}
