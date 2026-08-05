@@ -6,6 +6,7 @@ import AdSlot from "./components/AdSlot";
 import AdSenseUnit from "./components/AdSenseUnit";
 import CategoryTabs from "./components/CategoryTabs";
 import NewsletterWidget from "./components/NewsletterWidget";
+import Sparkline from "./components/Sparkline";
 import { getArticles, getSiteSettings, getCategories, getAdSlots, getAdsenseClientId, getTrendingTags, getPolls, getNewsletterSettings } from "@/lib/db";
 import { getExcerpt, formatImageCredit, getCategoryStyle, getReadingTime } from "@/lib/content";
 import { headers } from "next/headers";
@@ -128,66 +129,67 @@ export default function HomePage() {
         {new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
       </p>
 
-      <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>Direct naar</p>
-      <div style={{ display: "flex", gap: 10, marginBottom: 28, flexWrap: "wrap" }}>
-        {[
-          { href: "/kaart", label: "Kaart", icon: "🗺️" },
-          { href: "/polls", label: "Polls", icon: "📊" },
-          { href: "/liveblog", label: "Liveblog", icon: "🔴" },
-          ...(newsletterEnabled ? [{ href: "/#nieuwsbrief", label: "Nieuwsbrief", icon: "📧" }] : []),
-        ].map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            style={{
-              display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-              width: 92, padding: "14px 8px", borderRadius: 12, border: "1px solid var(--border)",
-              background: "var(--surface-1)", textDecoration: "none", color: "var(--text-primary)",
-              fontSize: 12, textAlign: "center",
-            }}
-          >
-            <span style={{ fontSize: 18 }}>{item.icon}</span>
-            {item.label}
-          </Link>
-        ))}
-      </div>
-
       <div className="home-layout">
         {/* Hoofdkolom */}
         <div>
           {hero && (
             <Link href={`/artikel/${hero.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
-              <div className="hero-card">
+              <div className={`hero-card${hero.featured_image ? " has-image" : ""}`}>
                 {hero.featured_image && (
                   <>
-                    <img src={hero.featured_image} alt={hero.title} style={{ width: "100%", borderRadius: 8, marginBottom: 4, display: "block" }} />
-                    {formatImageCredit(hero.featured_image_credit) && (
-                      <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 8 }}>
-                        {formatImageCredit(hero.featured_image_credit)}
-                      </p>
-                    )}
+                    <img src={hero.featured_image} alt={hero.title} className="hero-card-image" />
+                    <div className="hero-card-overlay" />
                   </>
                 )}
-                <span className="badge" style={getCategoryStyle(hero.category, categories)}>{hero.category}</span>
-                {hero.featured && (
-                  <span className="badge badge-muted" style={{ marginLeft: 6 }}>★ Uitgelicht</span>
-                )}
-                <h2>{hero.title}</h2>
-                <p className="excerpt">{getExcerpt(hero.body)}</p>
-                <p className="meta">Redactie {site_name} · {timeAgo(hero.published_at)} · {getReadingTime(hero.body)}</p>
+                <div className={hero.featured_image ? "hero-card-content" : undefined}>
+                  <span className="badge" style={getCategoryStyle(hero.category, categories)}>{hero.category}</span>
+                  {hero.featured && (
+                    <span className="badge badge-muted" style={{ marginLeft: 6 }}>★ Uitgelicht</span>
+                  )}
+                  <h2>{hero.title}</h2>
+                  <p className="excerpt">{getExcerpt(hero.body)}</p>
+                  <p className="meta">
+                    Redactie {site_name} · {timeAgo(hero.published_at)} · {getReadingTime(hero.body)}
+                    {formatImageCredit(hero.featured_image_credit) && ` · ${formatImageCredit(hero.featured_image_credit)}`}
+                  </p>
+                </div>
               </div>
             </Link>
           )}
 
+          <p style={{ fontSize: 13, fontWeight: 500, margin: "20px 0 10px" }}>Direct naar</p>
+          <div style={{ display: "flex", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
+            {[
+              { href: "/kaart", label: "Kaart", icon: "🗺️" },
+              { href: "/polls", label: "Polls", icon: "📊" },
+              { href: "/liveblog", label: "Liveblog", icon: "🔴" },
+              ...(newsletterEnabled ? [{ href: "/#nieuwsbrief", label: "Nieuwsbrief", icon: "📧" }] : []),
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                style={{
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+                  width: 92, padding: "14px 8px", borderRadius: 12, border: "1px solid var(--border)",
+                  background: "var(--surface-1)", textDecoration: "none", color: "var(--text-primary)",
+                  fontSize: 12, textAlign: "center",
+                }}
+              >
+                <span style={{ fontSize: 18 }}>{item.icon}</span>
+                {item.label}
+              </Link>
+            ))}
+          </div>
+
           {gridItems.length > 0 && (
             <>
               <h2 style={{ fontSize: 15, fontWeight: 500, margin: "24px 0 12px" }}>Uitgelicht</h2>
-              <div className="grid-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
+              <div className="grid-4">
               {gridItems.map((a) => (
                 <Link key={a.id} href={`/artikel/${a.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
                   <div className="card">
                     {a.featured_image && (
-                      <img src={a.featured_image} alt={a.title} style={{ width: "100%", borderRadius: 6, marginBottom: 8, display: "block" }} />
+                      <img src={a.featured_image} alt={a.title} style={{ width: "100%", borderRadius: 6, marginBottom: 12, display: "block" }} />
                     )}
                     <span className="badge badge-muted" style={getCategoryStyle(a.category, categories)}>{a.category}</span>
                     <h3>{a.title}</h3>
@@ -263,9 +265,12 @@ export default function HomePage() {
             <div className="sidebar-box" style={{ marginTop: 20 }}>
               <h3>Trending onderwerpen</h3>
               {trendingTags.map((t, i) => (
-                <Link key={t.tag} href={`/tags/${encodeURIComponent(t.tag.toLowerCase())}`} className="sidebar-item">
-                  <span className="sidebar-rank">{i + 1}</span>
-                  <p>{t.tag}</p>
+                <Link key={t.tag} href={`/tags/${encodeURIComponent(t.tag.toLowerCase())}`} className="sidebar-item" style={{ justifyContent: "space-between" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+                    <span className="sidebar-rank">{i + 1}</span>
+                    <p style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{t.tag}</p>
+                  </span>
+                  <Sparkline data={t.sparkline} />
                 </Link>
               ))}
             </div>
