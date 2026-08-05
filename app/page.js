@@ -4,8 +4,10 @@ import Footer from "./components/Footer";
 import LiveTimeLabel from "./components/LiveTimeLabel";
 import AdBanner from "./components/AdBanner";
 import AdSenseUnit from "./components/AdSenseUnit";
-import { getArticles, getSiteSettings, getCategories, getAdSlots, getAdsenseClientId } from "@/lib/db";
-import { getExcerpt, formatImageCredit, getCategoryStyle } from "@/lib/content";
+import CategoryTabs from "./components/CategoryTabs";
+import NewsletterWidget from "./components/NewsletterWidget";
+import { getArticles, getSiteSettings, getCategories, getAdSlots, getAdsenseClientId, getTrendingTags, getPolls, getNewsletterSettings } from "@/lib/db";
+import { getExcerpt, formatImageCredit, getCategoryStyle, getReadingTime } from "@/lib/content";
 import { headers } from "next/headers";
 
 export const dynamic = "force-dynamic";
@@ -50,11 +52,6 @@ function timeAgo(dateStr) {
   return `${Math.floor(hours / 24)} dag(en) geleden`;
 }
 
-function sourceLabel(sourceId) {
-  const map = { "src-anp": "ANP", "src-rijksoverheid": "Rijksoverheid" };
-  return map[sourceId] || sourceId;
-}
-
 export default function HomePage() {
   const baseUrl = getBaseUrl();
   const { site_name, site_description } = getSiteSettings();
@@ -82,9 +79,37 @@ export default function HomePage() {
     .sort((a, b) => new Date(b.featured_at) - new Date(a.featured_at));
 
   const [hero, ...rest] = featured;
-  const gridItems = rest.slice(0, 2);
+  const gridItems = rest.slice(0, 4);
   const latestNews = published.slice(0, 7);
   const mostRead = [...published].sort((a, b) => (b.views || 0) - (a.views || 0)).slice(0, 5);
+  const trendingTags = getTrendingTags();
+  const { enabled: newsletterEnabled } = getNewsletterSettings();
+
+  const activePoll = getPolls()
+    .filter((p) => p.active)
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+  const pollTotalVotes = activePoll ? activePoll.options.reduce((sum, o) => sum + o.votes, 0) : 0;
+  const pollArticle = activePoll ? published.find((a) => a.poll_id === activePoll.id) : null;
+
+  // Per categorie de 3 meest recente artikelen klaarzetten, met vooraf
+  // berekende leestijd/tijdsaanduiding/samenvatting — CategoryTabs is een
+  // client-component en kan deze server-only helpers niet zelf aanroepen.
+  const articlesByCategory = {};
+  for (const c of categories) {
+    articlesByCategory[c.name] = published
+      .filter((a) => a.category === c.name)
+      .slice(0, 3)
+      .map((a) => ({
+        id: a.id,
+        slug: a.slug,
+        title: a.title,
+        category: a.category,
+        featured_image: a.featured_image,
+        timeAgo: timeAgo(a.published_at),
+        readingTime: getReadingTime(a.body),
+        excerpt: getExcerpt(a.body, 140),
+      }));
+  }
 
   return (
     <div className="container" style={{ maxWidth: 1080 }}>
@@ -98,6 +123,19 @@ export default function HomePage() {
       <p style={{ fontSize: 12, color: "var(--text-muted)", textTransform: "capitalize", margin: "0 0 16px" }}>
         {new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
       </p>
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 24, flexWrap: "wrap" }}>
+        {[
+          { href: "/kaart", label: "Kaart" },
+          { href: "/polls", label: "Polls" },
+          { href: "/liveblog", label: "Liveblog" },
+          ...(newsletterEnabled ? [{ href: "/#nieuwsbrief", label: "Nieuwsbrief" }] : []),
+        ].map((item) => (
+          <Link key={item.href} href={item.href} className="badge badge-muted" style={{ padding: "8px 16px", textDecoration: "none" }}>
+            {item.label}
+          </Link>
+        ))}
+      </div>
 
       <div className="home-layout">
         {/* Hoofdkolom */}
@@ -121,13 +159,15 @@ export default function HomePage() {
                 )}
                 <h2>{hero.title}</h2>
                 <p className="excerpt">{getExcerpt(hero.body)}</p>
-                <p className="meta">{timeAgo(hero.published_at)} · Bron: {sourceLabel(hero.source_id)}</p>
+                <p className="meta">Redactie {site_name} · {timeAgo(hero.published_at)} · {getReadingTime(hero.body)}</p>
               </div>
             </Link>
           )}
 
           {gridItems.length > 0 && (
-            <div className="grid-2">
+            <>
+              <h2 style={{ fontSize: 15, fontWeight: 500, margin: "24px 0 12px" }}>Uitgelicht</h2>
+              <div className="grid-2" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
               {gridItems.map((a) => (
                 <Link key={a.id} href={`/artikel/${a.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
                   <div className="card">
@@ -141,6 +181,7 @@ export default function HomePage() {
                 </Link>
               ))}
             </div>
+            </>
           )}
 
           {!hero && published.length > 0 && (
@@ -161,6 +202,13 @@ export default function HomePage() {
               </p>
             )}
           </div>
+
+          {categories.length > 0 && (
+            <div style={{ marginTop: 28 }}>
+              <h2 style={{ fontSize: 15, fontWeight: 500, marginBottom: 12 }}>Nieuws per categorie</h2>
+              <CategoryTabs categories={categories} articlesByCategory={articlesByCategory} />
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}
@@ -199,6 +247,53 @@ export default function HomePage() {
                 width={adSlots.banners.homepage_sidebar.width}
                 height={adSlots.banners.homepage_sidebar.height}
               />
+            </div>
+          )}
+
+          {trendingTags.length > 0 && (
+            <div className="sidebar-box" style={{ marginTop: 20 }}>
+              <h3>Trending onderwerpen</h3>
+              {trendingTags.map((t, i) => (
+                <Link key={t.tag} href={`/tags/${encodeURIComponent(t.tag.toLowerCase())}`} className="sidebar-item">
+                  <span className="sidebar-rank">{i + 1}</span>
+                  <p>{t.tag}</p>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {activePoll && (
+            <div className="sidebar-box" style={{ marginTop: 20 }}>
+              <h3>Poll van de dag</h3>
+              <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>{activePoll.question}</p>
+              {activePoll.options.map((o) => {
+                const pct = pollTotalVotes > 0 ? Math.round((o.votes / pollTotalVotes) * 100) : 0;
+                return (
+                  <div key={o.id} style={{ margin: "8px 0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                      <span>{o.text}</span>
+                      <span>{pct}%</span>
+                    </div>
+                    <div style={{ background: "var(--border)", borderRadius: 4, height: 5 }}>
+                      <div style={{ background: "var(--accent-text)", borderRadius: 4, height: 5, width: `${pct}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+              <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
+                Totaal {pollTotalVotes} stemmen ·{" "}
+                {pollArticle ? (
+                  <Link href={`/artikel/${pollArticle.slug}`} style={{ color: "var(--accent-text)" }}>Bekijk alle polls</Link>
+                ) : (
+                  <Link href="/polls" style={{ color: "var(--accent-text)" }}>Bekijk alle polls</Link>
+                )}
+              </p>
+            </div>
+          )}
+
+          {newsletterEnabled && (
+            <div style={{ marginTop: 20 }}>
+              <NewsletterWidget />
             </div>
           )}
         </div>

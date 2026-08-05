@@ -22,7 +22,15 @@ export default function Header({ activeCategory }) {
 
       <div className="site-header">
         <Link href="/" className="logo">{site_name}</Link>
-        <SettingsPanel />
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Link href="/zoeken" aria-label="Zoeken" style={{ display: "flex", alignItems: "center", padding: "6px 8px", borderRadius: 8, border: "1px solid var(--border)" }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+          </Link>
+          <SettingsPanel />
+        </div>
       </div>
 
       <nav className="category-bar">
