@@ -115,7 +115,7 @@ export default function ArticlePage({ params }) {
         <div>
           <span className="badge" style={getCategoryStyle(article.category, categories)}>{article.category}</span>
       {article.is_liveblog && (
-        <span className="badge" style={{ background: "#a32d2d", color: "#fff", marginLeft: 6 }}>
+        <span className="badge" style={{ background: "#FF3B4D", color: "#fff", marginLeft: 6 }}>
           🔴 LIVE
         </span>
       )}
