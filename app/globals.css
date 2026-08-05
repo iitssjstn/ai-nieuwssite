@@ -68,7 +68,7 @@ body {
 }
 
 .container {
-  max-width: 1000px;
+  max-width: 780px;
   margin: 0 auto;
   padding: 24px 20px 60px;
 }
@@ -242,6 +242,17 @@ html.dark .card:hover { box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
 
 .list-row .cat { font-size: 12px; color: var(--text-muted); }
 .list-row p { font-size: 14px; margin: 4px 0 0; }
+
+.list-row-thumb {
+  width: 130px;
+  height: 88px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+@media (max-width: 480px) {
+  .list-row-thumb { width: 84px; height: 64px; }
+}
 
 .ad-slot {
   border-top: 1px solid var(--border);
