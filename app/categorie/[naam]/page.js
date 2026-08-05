@@ -52,7 +52,7 @@ export default function CategoryPage({ params }) {
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
   return (
-    <div className="container">
+    <div className="container" style={{ maxWidth: 1000 }}>
       <Header activeCategory={capitalized} />
       <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>
         {capitalized}
