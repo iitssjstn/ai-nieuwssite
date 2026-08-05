@@ -5,12 +5,20 @@ import { useEffect, useState } from "react";
 export default function PollWidget({ pollId, compact = false }) {
   const [poll, setPoll] = useState(null);
   const [voted, setVoted] = useState(false);
+  const [votedOptionId, setVotedOptionId] = useState(null);
   const [voting, setVoting] = useState(false);
   const [error, setError] = useState(null);
 
   async function load() {
     const res = await fetch(`/api/public/polls/${pollId}`);
-    if (res.ok) setPoll(await res.json());
+    if (res.ok) {
+      const data = await res.json();
+      setPoll(data);
+      if (data.votedOptionId) {
+        setVoted(true);
+        setVotedOptionId(data.votedOptionId);
+      }
+    }
   }
 
   useEffect(() => {
@@ -30,6 +38,7 @@ export default function PollWidget({ pollId, compact = false }) {
     if (res.ok) {
       setPoll(await res.json());
       setVoted(true);
+      setVotedOptionId(optionId);
     } else {
       const data = await res.json();
       if (res.status === 409) {
@@ -52,8 +61,8 @@ export default function PollWidget({ pollId, compact = false }) {
         const pct = total > 0 ? Math.round((o.votes / total) * 100) : 0;
         return voted ? (
           <div key={o.id} style={{ marginBottom: 8 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 3 }}>
-              <span>{o.text}</span>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 13, marginBottom: 3, color: o.id === votedOptionId ? "var(--accent-text)" : "inherit", fontWeight: o.id === votedOptionId ? 600 : 400 }}>
+              <span>{o.id === votedOptionId && "✓ "}{o.text}</span>
               <span>{pct}%</span>
             </div>
             <div style={{ background: "var(--border)", borderRadius: 4, height: 8 }}>
