@@ -15,6 +15,7 @@ export default function AdSlot({ config, label }) {
         maxWidth: width,
         height,
         border: "1px dashed var(--border)",
+        background: "var(--ad-bg)",
         borderRadius: 8,
         display: "flex",
         alignItems: "center",
