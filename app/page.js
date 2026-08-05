@@ -132,8 +132,8 @@ export default function HomePage() {
         {/* Hero */}
         <div>
           {hero && (
-            <Link href={`/artikel/${hero.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
-              <div className={`hero-card${hero.featured_image ? " has-image" : ""}`}>
+            <Link href={`/artikel/${hero.slug}`} style={{ textDecoration: "none", color: "inherit", display: "block", height: "100%" }}>
+              <div className={`hero-card${hero.featured_image ? " has-image" : ""}`} style={{ height: "100%" }}>
                 {hero.featured_image && (
                   <>
                     <img src={hero.featured_image} alt={hero.title} className="hero-card-image" />
