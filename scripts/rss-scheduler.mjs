@@ -34,6 +34,12 @@ async function pollAllSources() {
       if (result.created > 0) {
         console.log(`[RSS-scheduler] ${source.name}: ${result.created} nieuw(e) concept(en)`);
       }
+      if (result.merged > 0) {
+        console.log(`[RSS-scheduler] ${source.name}: ${result.merged} bron(nen) samengevoegd met bestaand concept`);
+      }
+      if (result.updated > 0) {
+        console.log(`[RSS-scheduler] ${source.name}: ${result.updated} gepubliceerd artikel automatisch bijgewerkt`);
+      }
       if (result.errors?.length > 0) {
         console.error(`[RSS-scheduler] ${source.name}: ${result.errors.length} fout(en) — ${result.errors[0]}`);
       }
