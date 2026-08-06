@@ -215,10 +215,42 @@ export default function HomePage() {
           <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>Direct naar</p>
           <div style={{ display: "flex", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
             {[
-              { href: "/kaart", label: "Kaart", icon: "🗺️" },
-              { href: "/polls", label: "Polls", icon: "📊" },
-              { href: "/liveblog", label: "Liveblog", icon: "🔴" },
-              ...(newsletterEnabled ? [{ href: "/#nieuwsbrief", label: "Nieuwsbrief", icon: "📧" }] : []),
+              {
+                href: "/kaart", label: "Kaart",
+                icon: (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 13V4m0 3-6-3" />
+                  </svg>
+                ),
+              },
+              {
+                href: "/polls", label: "Polls",
+                icon: (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <path d="M4 20V10m7 10V4m7 16v-7" />
+                  </svg>
+                ),
+              },
+              {
+                href: "/liveblog", label: "Liveblog",
+                icon: (
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                    <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+                    <path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8" />
+                  </svg>
+                ),
+              },
+              ...(newsletterEnabled
+                ? [{
+                    href: "/#nieuwsbrief", label: "Nieuwsbrief",
+                    icon: (
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                        <rect x="3" y="5" width="18" height="14" rx="2" />
+                        <path d="m3 7 9 6 9-6" />
+                      </svg>
+                    ),
+                  }]
+                : []),
             ].map((item) => (
               <Link
                 key={item.href}
@@ -230,7 +262,7 @@ export default function HomePage() {
                   fontSize: 12, textAlign: "center",
                 }}
               >
-                <span style={{ fontSize: 18 }}>{item.icon}</span>
+                {item.icon}
                 {item.label}
               </Link>
             ))}
