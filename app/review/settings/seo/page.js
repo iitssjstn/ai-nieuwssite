@@ -21,6 +21,25 @@ export default function SeoPage() {
   const [socialBusy, setSocialBusy] = useState(false);
   const [socialSaved, setSocialSaved] = useState(false);
 
+  const [infoPages, setInfoPages] = useState(null);
+  const [infoPagesBusy, setInfoPagesBusy] = useState(false);
+
+  async function loadInfoPages() {
+    const res = await fetch("/api/settings/info-pages");
+    setInfoPages(await res.json());
+  }
+
+  async function toggleInfoPage(field) {
+    setInfoPagesBusy(true);
+    const res = await fetch("/api/settings/info-pages", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ [field]: !infoPages[field] }),
+    });
+    setInfoPagesBusy(false);
+    if (res.ok) setInfoPages(await res.json());
+  }
+
   async function load() {
     const res = await fetch("/api/settings/site");
     const data = await res.json();
@@ -45,6 +64,7 @@ export default function SeoPage() {
     load();
     loadNewsletter();
     loadSocial();
+    loadInfoPages();
   }, []);
 
   async function handleSaveNewsletter(e) {
@@ -243,6 +263,36 @@ export default function SeoPage() {
             </div>
           ))}
           {socialSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginTop: 8 }}>Opgeslagen.</p>}
+        </div>
+      )}
+
+      {infoPages && (
+        <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
+          <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Informatiepagina's</p>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 14 }}>
+            Zet je een pagina uit, dan verdwijnt de link uit de footer én geeft de pagina zelf een
+            "niet gevonden" i.p.v. de inhoud.
+          </p>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <span style={{ fontSize: 13 }}>Over ons</span>
+            <div style={{ display: "flex", gap: 8 }}>
+              <a href="/review/settings/info-pages/about" style={{ fontSize: 13, color: "var(--accent-text)", alignSelf: "center" }}>Bewerken</a>
+              <button onClick={() => toggleInfoPage("about_enabled")} disabled={infoPagesBusy} className={infoPages.about_enabled ? "danger" : "primary"} style={{ width: "auto", padding: "6px 14px", fontSize: 13 }}>
+                {infoPages.about_enabled ? "Uitzetten" : "Aanzetten"}
+              </button>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontSize: 13 }}>Privacy</span>
+            <div style={{ display: "flex", gap: 8 }}>
+              <a href="/review/settings/info-pages/privacy" style={{ fontSize: 13, color: "var(--accent-text)", alignSelf: "center" }}>Bewerken</a>
+              <button onClick={() => toggleInfoPage("privacy_enabled")} disabled={infoPagesBusy} className={infoPages.privacy_enabled ? "danger" : "primary"} style={{ width: "auto", padding: "6px 14px", fontSize: 13 }}>
+                {infoPages.privacy_enabled ? "Uitzetten" : "Aanzetten"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </>
