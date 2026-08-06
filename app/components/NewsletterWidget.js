@@ -28,7 +28,7 @@ export default function NewsletterWidget() {
 
   return (
     <div id="nieuwsbrief" className="sidebar-box">
-      <h3>📧 Nieuwsbrief</h3>
+      <h3>Nieuwsbrief</h3>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: "0 0 10px" }}>
         Ontvang het belangrijkste nieuws in je inbox.
       </p>
