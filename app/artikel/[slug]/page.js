@@ -115,8 +115,9 @@ export default function ArticlePage({ params }) {
         <div>
           <span className="badge" style={getCategoryStyle(article.category, categories)}>{article.category}</span>
       {article.is_liveblog && (
-        <span className="badge" style={{ background: "#FF3B4D", color: "#fff", marginLeft: 6 }}>
-          🔴 LIVE
+        <span className="badge" style={{ background: "#FF3B4D", color: "#fff", marginLeft: 6, display: "inline-flex", alignItems: "center", gap: 5 }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff", display: "inline-block" }} />
+          LIVE
         </span>
       )}
       {article.updated_at && (
@@ -127,7 +128,7 @@ export default function ArticlePage({ params }) {
       <article>
         <h1>{article.title}</h1>
         <div className="byline">
-          <div className="icon-circle">✦</div>
+          <div className="icon-circle">{site_name.charAt(0)}</div>
           <div>
             <p>Opgesteld met AI, gecontroleerd door redactie</p>
             <p className="small">{timeAgo(article.published_at)} · Bron: {article.source_id}</p>
