@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getSiteSettings, getCategories, getNewsletterSettings, getSocialLinks } from "@/lib/db";
+import { getSiteSettings, getCategories, getNewsletterSettings, getSocialLinks, getInfoPagesSettings } from "@/lib/db";
 
 const SOCIAL_ICONS = {
   twitter: (
@@ -20,6 +20,7 @@ export default function Footer() {
   const { site_name, site_description } = getSiteSettings();
   const categories = getCategories();
   const { enabled: newsletterEnabled } = getNewsletterSettings();
+  const { about_enabled, privacy_enabled } = getInfoPagesSettings();
   const social = getSocialLinks();
   const socialEntries = Object.entries(social).filter(([, url]) => url);
 
@@ -62,6 +63,14 @@ export default function Footer() {
           {newsletterEnabled && <Link href="/#nieuwsbrief">Nieuwsbrief</Link>}
           <Link href="/feed.xml">RSS Feed</Link>
         </div>
+
+        {(about_enabled || privacy_enabled) && (
+          <div className="site-footer-links">
+            <p className="site-footer-heading">Informatie</p>
+            {about_enabled && <Link href="/over-ons">Over ons</Link>}
+            {privacy_enabled && <Link href="/privacy">Privacy</Link>}
+          </div>
+        )}
       </div>
 
       <div className="site-footer-bottom">
