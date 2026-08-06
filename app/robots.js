@@ -16,6 +16,6 @@ export default function robots() {
         disallow: ["/review", "/login", "/api"],
       },
     ],
-    sitemap: `${baseUrl}/sitemap.xml`,
+    sitemap: [`${baseUrl}/sitemap.xml`, `${baseUrl}/news-sitemap.xml`],
   };
 }
