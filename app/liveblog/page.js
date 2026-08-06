@@ -26,7 +26,10 @@ export default function LiveblogHubPage() {
         <Link key={a.id} href={`/artikel/${a.slug}`} className="list-row">
           <div>
             <span className="cat">
-              <span className="badge" style={{ background: "#FF3B4D", color: "#fff", marginRight: 6 }}>🔴 LIVE</span>
+              <span className="badge" style={{ background: "#FF3B4D", color: "#fff", marginRight: 6, display: "inline-flex", alignItems: "center", gap: 5 }}>
+                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#fff", display: "inline-block" }} />
+                LIVE
+              </span>
               {a.category}
             </span>
             <p>{a.title}</p>
