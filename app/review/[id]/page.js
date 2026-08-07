@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import RichEditor from "../../components/RichEditor";
 import ArticleBody from "../../components/ArticleBody";
+import ShareButtons from "../../components/ShareButtons";
 import { useConfirmDialog } from "../../components/ConfirmDialog";
 import { plainTextToHtml, formatImageCredit } from "@/lib/content";
 
@@ -600,6 +601,12 @@ export default function ReviewDetail() {
           <span className="badge badge-muted">📖 {article.readability.label} ({article.readability.score})</span>
         )}
       </div>
+
+      {article.status === "published" && (
+        <div style={{ marginBottom: 16 }}>
+          <ShareButtons slug={article.slug} title={article.title} />
+        </div>
+      )}
 
       {isAdmin && (
         <div className="actions" style={{ marginBottom: 10 }}>
