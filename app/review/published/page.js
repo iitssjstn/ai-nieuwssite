@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useConfirmDialog } from "../../components/ConfirmDialog";
+import ShareButtons from "../../components/ShareButtons";
 
 const TABS = [
   { id: "published", label: "Gepubliceerd" },
@@ -166,10 +167,11 @@ export default function PublishedArticles() {
               {dateLine(a)}
             </p>
           </div>
-          <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
             <Link href={`/review/${a.id}`}>
               <button disabled={busyId === a.id} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>Bewerken</button>
             </Link>
+            {tab === "published" && <ShareButtons slug={a.slug} title={a.title} />}
             {isAdmin && tab === "published" && (
               <>
                 <button disabled={busyId === a.id} onClick={() => doAction(a.id, "unpublish")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
