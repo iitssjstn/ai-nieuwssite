@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function CategoryTabs({ categories, articlesByCategory }) {
   const [active, setActive] = useState(categories[0]?.name);
@@ -41,7 +42,7 @@ export default function CategoryTabs({ categories, articlesByCategory }) {
       {items.map((a) => (
         <Link key={a.id} href={`/artikel/${a.slug}`} className="list-row" style={{ gap: 14, justifyContent: "flex-start" }}>
           {a.featured_image && (
-            <img src={a.featured_image} alt={a.title} className="list-row-thumb" />
+            <Image src={a.featured_image} alt={a.title} width={130} height={88} className="list-row-thumb" />
           )}
           <div style={{ minWidth: 0 }}>
             <span className="cat">{a.category} · {a.timeAgo} · {a.readingTime}</span>
