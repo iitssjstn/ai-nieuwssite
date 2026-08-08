@@ -189,6 +189,12 @@ export default function ReviewLayout({ children }) {
       <aside className="admin-sidebar">
         <span className="admin-brand">Novapers</span>
 
+        <div className="admin-sidebar-profile">
+          <div className="admin-sidebar-avatar">{(me?.full_name || me?.username || "?")[0].toUpperCase()}</div>
+          <p className="name">{me?.full_name || me?.username || "..."}</p>
+          <p className="role">{me?.role === "admin" ? "Admin" : "Redacteur"}</p>
+        </div>
+
         {visibleNav.map((item) => {
           const active = item.href === "/review" ? pathname === "/review" : pathname.startsWith(item.href);
           const showBadge = item.href === "/review/queue" && pendingCount > 0;
@@ -241,21 +247,18 @@ export default function ReviewLayout({ children }) {
           </button>
         )}
 
-        <div className="admin-user-chip">
-          <div className="admin-user-avatar">{(me?.full_name || me?.username || "?")[0].toUpperCase()}</div>
-          <div>
-            <p>{me?.full_name || me?.username || "..."}</p>
-            <p className="role">{me?.role === "admin" ? "Admin" : "Redacteur"}</p>
-          </div>
+        <div className="admin-user-chip" style={{ justifyContent: "center" }}>
           <button
             className="admin-logout-btn"
             aria-label="Uitloggen"
+            style={{ marginLeft: 0, display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}
             onClick={async () => {
               await fetch("/api/auth/logout", { method: "POST" });
               router.push("/login");
             }}
           >
             <LogoutIcon />
+            Uitloggen
           </button>
         </div>
       </aside>
