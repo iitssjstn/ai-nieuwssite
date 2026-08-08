@@ -10,6 +10,9 @@ export default function ReviewOverview() {
   const [analyticsPeriod, setAnalyticsPeriod] = useState("today");
   const [analytics, setAnalytics] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [recentArticles, setRecentArticles] = useState([]);
+  const [me, setMe] = useState(null);
 
   async function loadOnlineUsers() {
     const res = await fetch("/api/users/online");
@@ -17,13 +20,22 @@ export default function ReviewOverview() {
   }
 
   async function loadAll() {
-    const [statsRes, pvRes] = await Promise.all([
+    const [statsRes, pvRes, catRes, artRes, meRes] = await Promise.all([
       fetch("/api/stats"),
       fetch("/api/stats/pageviews"),
+      fetch("/api/categories"),
+      fetch("/api/articles?status=published"),
+      fetch("/api/auth/me"),
     ]);
     setStats(await statsRes.json());
     const pvData = await pvRes.json();
     setPageviews(pvData.days || []);
+    setCategories((await catRes.json()).categories || []);
+    const articles = await artRes.json();
+    setRecentArticles(
+      [...articles].sort((a, b) => new Date(b.published_at) - new Date(a.published_at)).slice(0, 5)
+    );
+    if (meRes.ok) setMe(await meRes.json());
   }
 
   async function loadAnalytics(period) {
@@ -48,75 +60,120 @@ export default function ReviewOverview() {
 
   const maxViews = Math.max(1, ...pageviews.map((d) => d.views));
 
+  // Echte trend: laatste 7 dagen vs. de 7 dagen daarvoor (geen verzonnen
+  // percentage — als er niet genoeg data is voor een zinnige vergelijking,
+  // laten we het gewoon weg i.p.v. iets te verzinnen).
+  let viewsTrend = null;
+  if (pageviews.length >= 14) {
+    const last7 = pageviews.slice(-7).reduce((s, d) => s + d.views, 0);
+    const prev7 = pageviews.slice(-14, -7).reduce((s, d) => s + d.views, 0);
+    if (prev7 > 0) viewsTrend = Math.round(((last7 - prev7) / prev7) * 100);
+  }
+
+  const categoryData = (analytics?.by_category || [])
+    .map((c) => ({
+      label: c.category,
+      value: c.views,
+      color: categories.find((cat) => cat.name === c.category)?.color || "#6fa8e8",
+    }))
+    .filter((c) => c.value > 0);
+
+  const alerts = [];
+  if (stats?.pending_review > 0) {
+    alerts.push({ type: "warn", text: `${stats.pending_review} artikel(en) wachten op review`, href: "/review/queue" });
+  }
+  if (stats?.pending_updates > 0) {
+    alerts.push({ type: "info", text: `${stats.pending_updates} artikel(en) hebben een update-melding`, href: "/review/published" });
+  }
+  if (alerts.length === 0 && stats) {
+    alerts.push({ type: "ok", text: "Alles is bijgewerkt — niets wacht op actie", href: null });
+  }
+
+  const firstName = (me?.full_name || me?.username || "").split(" ")[0];
+
   return (
     <div className="container">
+      {/* Begroeting */}
+      <div style={{ marginBottom: 24 }}>
+        <h1 style={{ fontSize: 26, fontWeight: 600, margin: 0 }}>
+          {firstName ? `Welkom terug, ${firstName}` : "Welkom terug"}
+        </h1>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: "6px 0 0" }}>
+          {stats ? `${stats.published} artikelen live, ${stats.pending_review} wachten op jouw review.` : "Even laden..."}
+        </p>
+      </div>
+
+      {/* Cirkelvormige kernstatistieken */}
       {stats && (
-        <div style={{ display: "flex", gap: 12, marginBottom: 20, flexWrap: "wrap" }}>
-          <StatCard label="Gepubliceerd" value={stats.published} text="#9fd15d" href="/review/published?tab=published" />
-          <StatCard label="Te reviewen" value={stats.pending_review} text="#f0b154" href="/review/queue" />
-          <StatCard label="Goedgekeurd" value={stats.approved} text="#6fa8e8" href="/review/published?tab=approved" />
-          <StatCard label="Gepland" value={stats.scheduled} text="#6fa8e8" href="/review/published?tab=scheduled" />
-          <StatCard label="Afgekeurd" value={stats.rejected} text="#f09595" href="/review/published?tab=rejected" />
-          <StatCard label="Bronnen" value={stats.sources} text="#6fa8e8" href="/review/sources" />
+        <div style={{ display: "flex", gap: 14, marginBottom: 24, flexWrap: "wrap" }}>
+          <CircularStat label="Gepubliceerd" value={stats.published} color="#9fd15d" href="/review/published?tab=published" />
+          <CircularStat label="Te reviewen" value={stats.pending_review} color="#f0b154" href="/review/queue" />
+          <CircularStat label="Goedgekeurd" value={stats.approved} color="#6fa8e8" href="/review/published?tab=approved" />
+          <CircularStat label="Gepland" value={stats.scheduled} color="#6fa8e8" href="/review/published?tab=scheduled" />
+          <CircularStat label="Afgekeurd" value={stats.rejected} color="#f09595" href="/review/published?tab=rejected" />
+          <CircularStat label="Bronnen" value={stats.sources} color="#c79ef0" href="/review/sources" />
         </div>
       )}
 
-      {pageviews.length > 0 && (
-        <div style={{ background: "var(--surface-1)", borderRadius: 10, padding: 16, marginBottom: 28 }}>
-          <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 12 }}>Paginaweergaven — laatste 14 dagen</p>
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: 60, position: "relative" }}>
-            {pageviews.map((d, i) => (
-              <div
-                key={d.date}
-                onMouseEnter={() => setHoveredDay(i)}
-                onMouseLeave={() => setHoveredDay(null)}
-                style={{ flex: 1, height: "100%", display: "flex", alignItems: "flex-end", position: "relative", cursor: "default" }}
-              >
-                {hoveredDay === i && (
-                  <div
-                    style={{
-                      position: "absolute",
-                      bottom: "100%",
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      marginBottom: 8,
-                      background: "var(--bg)",
-                      border: "1px solid var(--border)",
-                      borderRadius: 6,
-                      padding: "6px 10px",
-                      whiteSpace: "nowrap",
-                      fontSize: 12,
-                      zIndex: 10,
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-                    }}
-                  >
-                    <strong>{d.views}</strong> weergave{d.views === 1 ? "" : "n"}
-                    <div style={{ color: "var(--text-muted)", fontSize: 11 }}>{formatDayLabel(d.date)}</div>
-                  </div>
-                )}
-                <div
-                  style={{
-                    width: "100%",
-                    height: `${Math.max(4, (d.views / maxViews) * 60)}px`,
-                    background: "var(--accent-text)",
-                    opacity: hoveredDay === i ? 1 : 0.85,
-                    borderRadius: 2,
-                  }}
-                />
-              </div>
-            ))}
+      {/* Grafiek + donut naast elkaar */}
+      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 16 }}>
+        {pageviews.length > 0 && (
+          <div className="admin-glass-card" style={{ padding: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
+              <p style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>Paginaweergaven — laatste 14 dagen</p>
+              {viewsTrend !== null && (
+                <span style={{ fontSize: 12, color: viewsTrend >= 0 ? "var(--success-text)" : "var(--danger-text)" }}>
+                  {viewsTrend >= 0 ? "+" : ""}{viewsTrend}% t.o.v. vorige week
+                </span>
+              )}
+            </div>
+            <p style={{ fontSize: 22, fontWeight: 700, margin: "2px 0 14px" }}>
+              {pageviews.reduce((sum, d) => sum + d.views, 0)} <span style={{ fontSize: 13, fontWeight: 400, color: "var(--text-muted)" }}>weergaven totaal</span>
+            </p>
+            <PageviewsChart data={pageviews} maxViews={maxViews} hoveredDay={hoveredDay} setHoveredDay={setHoveredDay} />
           </div>
-          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
-            Totaal deze periode: {pageviews.reduce((sum, d) => sum + d.views, 0)} weergaven
-          </p>
-        </div>
-      )}
+        )}
 
-      {analytics && (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
-          <div style={{ background: "var(--surface-1)", borderRadius: 10, padding: 16 }}>
+        <div className="admin-glass-card" style={{ padding: 20, display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 14px", alignSelf: "flex-start" }}>Categorieën</p>
+          {categoryData.length === 0 ? (
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven.</p>
+          ) : (
+            <>
+              <DonutChart data={categoryData} />
+              <div style={{ width: "100%", marginTop: 14 }}>
+                {categoryData.map((c) => (
+                  <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, marginBottom: 6 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: c.color, flexShrink: 0 }} />
+                    <span style={{ flex: 1 }}>{c.label}</span>
+                    <span style={{ color: "var(--text-muted)" }}>{Math.round((c.value / categoryData.reduce((s, d) => s + d.value, 0)) * 100)}%</span>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Waarschuwingen + meest gelezen naast elkaar */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+        <div className="admin-glass-card" style={{ padding: 20 }}>
+          <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 12px" }}>Meldingen</p>
+          {alerts.map((a, i) => {
+            const content = (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 0", borderTop: i > 0 ? "1px solid var(--border)" : "none" }}>
+                <AlertIcon type={a.type} />
+                <span style={{ fontSize: 13 }}>{a.text}</span>
+              </div>
+            );
+            return a.href ? <Link key={i} href={a.href} style={{ color: "inherit", textDecoration: "none", display: "block" }}>{content}</Link> : content;
+          })}
+        </div>
+
+        {analytics && (
+          <div className="admin-glass-card" style={{ padding: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <p style={{ fontSize: 13, fontWeight: 500, margin: 0 }}>Meest gelezen</p>
+              <p style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>Meest gelezen</p>
               <select value={analyticsPeriod} onChange={(e) => setAnalyticsPeriod(e.target.value)} style={{ width: "auto", padding: "3px 6px", fontSize: 12 }}>
                 <option value="today">Vandaag</option>
                 <option value="week">Deze week</option>
@@ -127,22 +184,30 @@ export default function ReviewOverview() {
               <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven in deze periode.</p>
             )}
             {analytics.top_articles.map((a, i) => (
-              <Link key={a.id} href={`/review/${a.id}`} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "5px 0", color: "inherit", textDecoration: "none" }}>
+              <Link key={a.id} href={`/review/${a.id}`} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "6px 0", color: "inherit", textDecoration: "none" }}>
                 <span>{i + 1}. {a.title}</span>
                 <span style={{ color: "var(--text-muted)", flexShrink: 0, marginLeft: 8 }}>{a.views}</span>
               </Link>
             ))}
           </div>
+        )}
+      </div>
 
-          <div style={{ background: "var(--surface-1)", borderRadius: 10, padding: 16 }}>
-            <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 10 }}>Weergaven per categorie</p>
-            {analytics.by_category.length === 0 && (
-              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen data.</p>
-            )}
-            {analytics.by_category.map((c) => (
-              <div key={c.category} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "5px 0" }}>
-                <span>{c.category}</span>
-                <span style={{ color: "var(--text-muted)" }}>{c.views}</span>
+      {/* Recente artikelen — tabel */}
+      {recentArticles.length > 0 && (
+        <div className="admin-glass-card" style={{ padding: 20, marginBottom: 16 }}>
+          <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 14px" }}>Recent gepubliceerd</p>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {recentArticles.map((a, i) => (
+              <div key={a.id} style={{ display: "flex", alignItems: "center", gap: 14, padding: "10px 0", borderTop: i > 0 ? "1px solid var(--border)" : "none" }}>
+                <span className="badge badge-muted" style={{ flexShrink: 0 }}>{a.category}</span>
+                <span style={{ flex: 1, fontSize: 13, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.title}</span>
+                <span style={{ fontSize: 12, color: "var(--text-muted)", flexShrink: 0 }}>
+                  {new Date(a.published_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}
+                </span>
+                <Link href={`/review/${a.id}`} style={{ flexShrink: 0 }}>
+                  <button style={{ width: "auto", padding: "5px 12px", fontSize: 12 }}>Bewerken</button>
+                </Link>
               </div>
             ))}
           </div>
@@ -151,13 +216,11 @@ export default function ReviewOverview() {
 
       {onlineUsers.length > 0 && (
         <div
+          className="admin-glass-card"
           style={{
             position: "fixed",
             bottom: 16,
             right: 16,
-            background: "var(--surface-1)",
-            border: "1px solid var(--border)",
-            borderRadius: 10,
             padding: "8px 12px",
             boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
             maxWidth: 220,
@@ -181,24 +244,145 @@ export default function ReviewOverview() {
   );
 }
 
-function formatDayLabel(dateStr) {
-  const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
-}
-
-function StatCard({ label, value, text, href }) {
+function CircularStat({ label, value, color, href }) {
   return (
     <Link
       href={href}
+      className="admin-glass-card"
       style={{
-        background: "var(--surface-1)", borderRadius: 10, padding: "12px 18px", minWidth: 120,
-        display: "block", textDecoration: "none", border: "1px solid transparent",
-        transition: "border-color 0.15s",
+        display: "flex", flexDirection: "column", alignItems: "center",
+        padding: "18px 20px", textDecoration: "none", minWidth: 120,
+        transition: "transform 0.15s",
       }}
-      className="stat-card-link"
     >
-      <p style={{ fontSize: 22, fontWeight: 600, margin: 0, color: text || "var(--text-primary)" }}>{value}</p>
-      <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>{label}</p>
+      <div style={{
+        width: 58, height: 58, borderRadius: "50%",
+        border: `3px solid ${color}`,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: 17, fontWeight: 700, color: "var(--text-primary)",
+        marginBottom: 8,
+      }}>
+        {value}
+      </div>
+      <p style={{ margin: 0, fontSize: 12, color: "var(--text-secondary)", textAlign: "center" }}>{label}</p>
     </Link>
   );
+}
+
+function PageviewsChart({ data, maxViews, hoveredDay, setHoveredDay }) {
+  const width = 600;
+  const height = 140;
+  const stepX = data.length > 1 ? width / (data.length - 1) : width;
+  const points = data.map((d, i) => ({
+    x: i * stepX,
+    y: height - (d.views / maxViews) * (height - 20) - 10,
+    views: d.views,
+    date: d.date,
+  }));
+  const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+  const areaPath = `${linePath} L${points[points.length - 1].x},${height} L0,${height} Z`;
+
+  return (
+    <div style={{ position: "relative" }}>
+      <svg viewBox={`0 0 ${width} ${height}`} width="100%" height={height} preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="pv-area-fill" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#6fa8e8" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="#6fa8e8" stopOpacity="0" />
+          </linearGradient>
+        </defs>
+        <path d={areaPath} fill="url(#pv-area-fill)" />
+        <path d={linePath} fill="none" stroke="#6fa8e8" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+        {points.map((p, i) => (
+          <circle
+            key={i}
+            cx={p.x}
+            cy={p.y}
+            r={hoveredDay === i ? 5 : 3}
+            fill="#6fa8e8"
+            stroke="#0d0e14"
+            strokeWidth="1.5"
+            onMouseEnter={() => setHoveredDay(i)}
+            onMouseLeave={() => setHoveredDay(null)}
+            style={{ cursor: "default" }}
+          />
+        ))}
+      </svg>
+      {hoveredDay !== null && (
+        <div
+          style={{
+            position: "absolute",
+            left: `${(points[hoveredDay].x / width) * 100}%`,
+            top: `${(points[hoveredDay].y / height) * 100}%`,
+            transform: "translate(-50%, -130%)",
+            background: "#1a1b23",
+            border: "1px solid var(--border)",
+            borderRadius: 6,
+            padding: "6px 10px",
+            whiteSpace: "nowrap",
+            fontSize: 12,
+            zIndex: 10,
+            pointerEvents: "none",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+          }}
+        >
+          <strong>{points[hoveredDay].views}</strong> weergave{points[hoveredDay].views === 1 ? "" : "n"}
+          <div style={{ color: "var(--text-muted)", fontSize: 11 }}>{formatDayLabel(points[hoveredDay].date)}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DonutChart({ data }) {
+  const total = data.reduce((s, d) => s + d.value, 0) || 1;
+  const radius = 62;
+  const circumference = 2 * Math.PI * radius;
+  let offset = 0;
+
+  return (
+    <svg viewBox="0 0 160 160" width={160} height={160}>
+      <g transform="rotate(-90 80 80)">
+        <circle cx={80} cy={80} r={radius} fill="none" stroke="var(--border)" strokeWidth={16} />
+        {data.map((d) => {
+          const pct = d.value / total;
+          const dash = pct * circumference;
+          const el = (
+            <circle
+              key={d.label}
+              cx={80} cy={80} r={radius} fill="none" stroke={d.color} strokeWidth={16}
+              strokeDasharray={`${dash} ${circumference - dash}`}
+              strokeDashoffset={-offset}
+              strokeLinecap="butt"
+            />
+          );
+          offset += dash;
+          return el;
+        })}
+      </g>
+      <text x={80} y={76} textAnchor="middle" fontSize={22} fontWeight={700} fill="var(--text-primary)">{total}</text>
+      <text x={80} y={95} textAnchor="middle" fontSize={11} fill="var(--text-muted)">weergaven</text>
+    </svg>
+  );
+}
+
+function AlertIcon({ type }) {
+  const config = {
+    warn: { bg: "#412402", color: "#f0b154", symbol: "!" },
+    info: { bg: "#1a2c47", color: "#6fa8e8", symbol: "i" },
+    ok: { bg: "#173404", color: "#9fd15d", symbol: "✓" },
+  }[type];
+  return (
+    <span style={{
+      width: 22, height: 22, borderRadius: "50%", background: config.bg, color: config.color,
+      display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 700, flexShrink: 0,
+    }}>
+      {config.symbol}
+    </span>
+  );
+}
+
+function formatDayLabel(dateStr) {
+  const d = new Date(dateStr + "T00:00:00");
+  return d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
 }
