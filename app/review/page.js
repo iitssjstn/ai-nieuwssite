@@ -7,6 +7,7 @@ export default function ReviewOverview() {
   const [stats, setStats] = useState(null);
   const [pageviews, setPageviews] = useState([]);
   const [hoveredDay, setHoveredDay] = useState(null);
+  const [hoveredCategory, setHoveredCategory] = useState(null);
   const [analyticsPeriod, setAnalyticsPeriod] = useState("today");
   const [analytics, setAnalytics] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -157,15 +158,30 @@ export default function ReviewOverview() {
               <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven.</p>
             ) : (
               <>
-                <DonutChart data={categoryData} />
+                <DonutChart data={categoryData} hoveredLabel={hoveredCategory} onHover={setHoveredCategory} />
                 <div style={{ width: "100%", marginTop: 14 }}>
-                  {categoryData.map((c) => (
-                    <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, marginBottom: 6 }}>
-                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: c.color, flexShrink: 0 }} />
-                      <span style={{ flex: 1 }}>{c.label}</span>
-                      <span style={{ color: "var(--text-muted)" }}>{Math.round((c.value / categoryData.reduce((s, d) => s + d.value, 0)) * 100)}%</span>
-                    </div>
-                  ))}
+                  {categoryData.map((c) => {
+                    const isHovered = c.label === hoveredCategory;
+                    return (
+                      <div
+                        key={c.label}
+                        onMouseEnter={() => setHoveredCategory(c.label)}
+                        onMouseLeave={() => setHoveredCategory(null)}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 8, fontSize: 12, marginBottom: 6,
+                          padding: "3px 6px", marginLeft: -6, marginRight: -6, borderRadius: 6,
+                          background: isHovered ? "rgba(255,255,255,0.06)" : "transparent",
+                          fontWeight: isHovered ? 600 : 400,
+                          transition: "background 0.12s",
+                          cursor: "default",
+                        }}
+                      >
+                        <span style={{ width: 8, height: 8, borderRadius: "50%", background: c.color, flexShrink: 0 }} />
+                        <span style={{ flex: 1 }}>{c.label}</span>
+                        <span style={{ color: isHovered ? c.color : "var(--text-muted)" }}>{Math.round((c.value / categoryData.reduce((s, d) => s + d.value, 0)) * 100)}%</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </>
             )}
@@ -325,11 +341,14 @@ function PageviewsChart({ data, maxViews, hoveredDay, setHoveredDay }) {
   );
 }
 
-function DonutChart({ data }) {
+function DonutChart({ data, hoveredLabel, onHover }) {
   const total = data.reduce((s, d) => s + d.value, 0) || 1;
   const radius = 62;
   const circumference = 2 * Math.PI * radius;
   let offset = 0;
+
+  const hovered = data.find((d) => d.label === hoveredLabel);
+  const hoveredPct = hovered ? Math.round((hovered.value / total) * 100) : null;
 
   return (
     <svg viewBox="0 0 160 160" width={160} height={160}>
@@ -338,21 +357,36 @@ function DonutChart({ data }) {
         {data.map((d) => {
           const pct = d.value / total;
           const dash = pct * circumference;
+          const isHovered = d.label === hoveredLabel;
           const el = (
             <circle
               key={d.label}
-              cx={80} cy={80} r={radius} fill="none" stroke={d.color} strokeWidth={16}
+              cx={80} cy={80} r={radius} fill="none" stroke={d.color}
+              strokeWidth={isHovered ? 20 : 16}
+              strokeOpacity={hoveredLabel && !isHovered ? 0.45 : 1}
               strokeDasharray={`${dash} ${circumference - dash}`}
               strokeDashoffset={-offset}
               strokeLinecap="butt"
+              onMouseEnter={() => onHover(d.label)}
+              onMouseLeave={() => onHover(null)}
+              style={{ cursor: "default", transition: "stroke-width 0.12s, stroke-opacity 0.12s" }}
             />
           );
           offset += dash;
           return el;
         })}
       </g>
-      <text x={80} y={76} textAnchor="middle" fontSize={22} fontWeight={700} fill="var(--text-primary)">{total}</text>
-      <text x={80} y={95} textAnchor="middle" fontSize={11} fill="var(--text-muted)">weergaven</text>
+      {hovered ? (
+        <>
+          <text x={80} y={76} textAnchor="middle" fontSize={20} fontWeight={700} fill={hovered.color}>{hoveredPct}%</text>
+          <text x={80} y={95} textAnchor="middle" fontSize={11} fill="var(--text-muted)">{hovered.label}</text>
+        </>
+      ) : (
+        <>
+          <text x={80} y={76} textAnchor="middle" fontSize={22} fontWeight={700} fill="var(--text-primary)">{total}</text>
+          <text x={80} y={95} textAnchor="middle" fontSize={11} fill="var(--text-muted)">weergaven</text>
+        </>
+      )}
     </svg>
   );
 }
