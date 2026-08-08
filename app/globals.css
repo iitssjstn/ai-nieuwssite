@@ -359,6 +359,14 @@ textarea::placeholder,
 input::placeholder { color: var(--text-muted); }
 input[type="file"] { color: var(--text-secondary); font-size: 13px; }
 
+.admin-shell select {
+  color-scheme: dark;
+}
+.admin-shell select option {
+  background: #1a1b23;
+  color: var(--text-primary);
+}
+
 .pending-item {
   display: block;
   border: 1px solid var(--border);
@@ -520,11 +528,9 @@ article img { max-width: 100%; border-radius: 8px; margin: 12px 0; display: bloc
 }
 
 .admin-glass-card {
-  background: var(--surface-1);
+  background: rgba(255,255,255,0.055);
   border: 1px solid var(--border);
   border-radius: 16px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
 .admin-shell .container {
@@ -538,8 +544,8 @@ article img { max-width: 100%; border-radius: 8px; margin: 12px 0; display: bloc
   flex-shrink: 0;
   background: rgba(255,255,255,0.03);
   border-right: 1px solid var(--border);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   flex-direction: column;
   padding: 22px 16px;
@@ -649,8 +655,8 @@ article img { max-width: 100%; border-radius: 8px; margin: 12px 0; display: bloc
   padding: 18px 32px;
   border-bottom: 1px solid var(--border);
   background: rgba(255,255,255,0.02);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .admin-breadcrumb { font-size: 13px; color: var(--text-muted); }
 .admin-breadcrumb strong { color: var(--text-primary); font-weight: 500; }
