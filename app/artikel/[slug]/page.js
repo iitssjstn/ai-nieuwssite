@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import LiveTimeLabel from "../../components/LiveTimeLabel";
@@ -137,10 +138,14 @@ export default function ArticlePage({ params }) {
 
         {article.featured_image && (
           <>
-            <img
+            <Image
               src={article.featured_image}
               alt={article.title}
-              style={{ width: "100%", borderRadius: 12, marginBottom: article.featured_image_credit?.name ? 4 : 20, display: "block" }}
+              width={800}
+              height={450}
+              sizes="(max-width: 780px) 100vw, 780px"
+              style={{ width: "100%", height: "auto", borderRadius: 12, marginBottom: article.featured_image_credit?.name ? 4 : 20, display: "block" }}
+              priority
             />
             {article.featured_image_credit?.name && (
               <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>
