@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import LiveTimeLabel from "./components/LiveTimeLabel";
@@ -136,7 +137,7 @@ export default function HomePage() {
               <div className={`hero-card${hero.featured_image ? " has-image" : ""}`} style={{ height: "100%" }}>
                 {hero.featured_image && (
                   <>
-                    <img src={hero.featured_image} alt={hero.title} className="hero-card-image" />
+                    <Image src={hero.featured_image} alt={hero.title} fill sizes="(max-width: 780px) 100vw, 900px" className="hero-card-image" style={{ objectFit: "cover" }} priority />
                     <div className="hero-card-overlay" />
                   </>
                 )}
@@ -276,7 +277,7 @@ export default function HomePage() {
                 <Link key={a.id} href={`/artikel/${a.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
                   <div className="card">
                     {a.featured_image && (
-                      <img src={a.featured_image} alt={a.title} style={{ width: "100%", borderRadius: 6, marginBottom: 12, display: "block" }} />
+                      <Image src={a.featured_image} alt={a.title} width={400} height={225} sizes="(max-width: 720px) 50vw, 25vw" style={{ width: "100%", height: "auto", borderRadius: 6, marginBottom: 12, display: "block" }} />
                     )}
                     <span className="badge badge-muted" style={getCategoryStyle(a.category, categories)}>{a.category}</span>
                     <h3>{a.title}</h3>
