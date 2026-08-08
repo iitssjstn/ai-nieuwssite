@@ -214,6 +214,27 @@ export default function AutomationPage() {
           style={{ width: "100%" }}
         />
       </div>
+
+      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16, border: settings.use_source_image ? "1px solid var(--danger-text)" : "1px solid transparent" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Bron-afbeelding gebruiken</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
+              {settings.use_source_image ? "Actief" : "Uitgeschakeld — er wordt een stockfoto gezocht"}
+            </p>
+          </div>
+          <button onClick={() => patchField("use_source_image", !settings.use_source_image)} disabled={busy} className={settings.use_source_image ? "danger" : "primary"} style={{ width: "auto", padding: "8px 16px" }}>
+            {settings.use_source_image ? "Uitzetten" : "Aanzetten"}
+          </button>
+        </div>
+        <p style={{ fontSize: 12, color: "var(--danger-text)", lineHeight: 1.5 }}>
+          ⚠ Als een RSS-bron zelf een afbeelding meelevert (via hun feed), gebruiken we die
+          i.p.v. een stockfoto te zoeken. Let op: die foto is vaak eigendom van de bron of hun
+          fotograaf — controleer of hergebruik is toegestaan volgens de voorwaarden van je
+          bronnen, wij controleren dit niet automatisch. Staat dit uit, dan blijft alles zoals
+          voorheen (Pexels/Unsplash/Pixabay-stockfoto's).
+        </p>
+      </div>
     </>
   );
 }
