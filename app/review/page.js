@@ -134,24 +134,42 @@ export default function ReviewOverview() {
           </div>
         )}
 
-        <div className="admin-glass-card" style={{ padding: 20, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 14px", alignSelf: "flex-start" }}>Categorieën</p>
-          {categoryData.length === 0 ? (
-            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven.</p>
-          ) : (
-            <>
-              <DonutChart data={categoryData} />
-              <div style={{ width: "100%", marginTop: 14 }}>
-                {categoryData.map((c) => (
-                  <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, marginBottom: 6 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: c.color, flexShrink: 0 }} />
-                    <span style={{ flex: 1 }}>{c.label}</span>
-                    <span style={{ color: "var(--text-muted)" }}>{Math.round((c.value / categoryData.reduce((s, d) => s + d.value, 0)) * 100)}%</span>
-                  </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {onlineUsers.length > 0 && (
+            <div className="admin-glass-card" style={{ padding: "12px 16px" }}>
+              <p style={{ fontSize: 10, color: "var(--text-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.03em" }}>
+                Nu online
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                {onlineUsers.map((u) => (
+                  <span key={u.id} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
+                    <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#9fd15d", display: "inline-block", flexShrink: 0 }} />
+                    {u.full_name || u.username}
+                  </span>
                 ))}
               </div>
-            </>
+            </div>
           )}
+
+          <div className="admin-glass-card" style={{ padding: 20, display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 14px", alignSelf: "flex-start" }}>Categorieën</p>
+            {categoryData.length === 0 ? (
+              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven.</p>
+            ) : (
+              <>
+                <DonutChart data={categoryData} />
+                <div style={{ width: "100%", marginTop: 14 }}>
+                  {categoryData.map((c) => (
+                    <div key={c.label} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, marginBottom: 6 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: "50%", background: c.color, flexShrink: 0 }} />
+                      <span style={{ flex: 1 }}>{c.label}</span>
+                      <span style={{ color: "var(--text-muted)" }}>{Math.round((c.value / categoryData.reduce((s, d) => s + d.value, 0)) * 100)}%</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
@@ -209,33 +227,6 @@ export default function ReviewOverview() {
                   <button style={{ width: "auto", padding: "5px 12px", fontSize: 12 }}>Bewerken</button>
                 </Link>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {onlineUsers.length > 0 && (
-        <div
-          className="admin-glass-card"
-          style={{
-            position: "fixed",
-            bottom: 16,
-            right: 16,
-            padding: "8px 12px",
-            boxShadow: "0 4px 16px rgba(0,0,0,0.3)",
-            maxWidth: 220,
-            zIndex: 20,
-          }}
-        >
-          <p style={{ fontSize: 10, color: "var(--text-muted)", margin: "0 0 5px", textTransform: "uppercase", letterSpacing: "0.03em" }}>
-            Nu online
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            {onlineUsers.map((u) => (
-              <span key={u.id} style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 12 }}>
-                <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#9fd15d", display: "inline-block", flexShrink: 0 }} />
-                {u.full_name || u.username}
-              </span>
             ))}
           </div>
         </div>
