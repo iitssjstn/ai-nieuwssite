@@ -4,6 +4,17 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useConfirmDialog } from "../../components/ConfirmDialog";
 
+function timeAgo(dateStr) {
+  if (!dateStr) return "";
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return "zojuist";
+  if (mins < 60) return `${mins} min. geleden`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} uur geleden`;
+  return `${Math.floor(hours / 24)} dag(en) geleden`;
+}
+
 export default function QueuePage() {
   const { confirm, ConfirmDialog } = useConfirmDialog();
   const [pending, setPending] = useState([]);
@@ -220,7 +231,7 @@ export default function QueuePage() {
             )}
             <p style={{ fontWeight: 500, margin: 0 }}>{a.title}</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
-              Confidence: {a.confidence_score != null ? Math.round(a.confidence_score * 100) + "%" : "-"}
+              {timeAgo(a.created_at)} · Confidence: {a.confidence_score != null ? Math.round(a.confidence_score * 100) + "%" : "-"}
               {a.source_url && " · 🔗 bron-link beschikbaar"}
             </p>
           </Link>
