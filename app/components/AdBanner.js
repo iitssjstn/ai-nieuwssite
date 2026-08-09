@@ -1,5 +1,7 @@
 "use client";
 
+import { useHasAdConsent } from "./useHasAdConsent";
+
 // Adsterra-achtige bannerformaten werken met een globale "atOptions"-
 // variabele die het invoke.js-script uitleest. Staan er meerdere van deze
 // advertenties op dezelfde pagina (met verschillende keys), dan overschrijven
@@ -7,7 +9,8 @@
 // advertentie in zijn eigen iframe te laden, krijgt elke advertentie een
 // volledig geïsoleerde omgeving — dat voorkomt dat ze elkaar breken.
 export default function AdBanner({ adKey, width, height }) {
-  if (!adKey) return null;
+  const hasConsent = useHasAdConsent();
+  if (!adKey || !hasConsent) return null;
 
   const html = `<!DOCTYPE html><html><head><style>body{margin:0;padding:0;overflow:hidden;}</style></head><body>
 <script>
