@@ -2,126 +2,138 @@
 
 import { useEffect, useState } from "react";
 
-const BANNER_SLOTS = [
-  { id: "top_banner", label: "Bovenaan de homepage", hint: "Brede banner, bijv. 728×90" },
-  { id: "homepage_sidebar", label: "Zijbalk homepage", hint: "Kleine banner, bijv. 320×50" },
-  { id: "article_sidebar", label: "Zijbalk artikelpagina", hint: "Staande banner, bijv. 160×300" },
-  { id: "article_incontent", label: "Onder het artikel", hint: "Brede banner, bijv. 468×60" },
-];
+export default function SeoPage() {
+  const [settings, setSettings] = useState(null);
+  const [nameDraft, setNameDraft] = useState("");
+  const [descDraft, setDescDraft] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [uploadingFavicon, setUploadingFavicon] = useState(false);
+  const [error, setError] = useState(null);
+  const [saved, setSaved] = useState(false);
 
-export default function AdsterraPage() {
-  const [slots, setSlots] = useState(null);
-  const [slotBusy, setSlotBusy] = useState(false);
-  const [slotSaved, setSlotSaved] = useState(false);
-
-  async function loadSlots() {
-    const res = await fetch("/api/settings/ad-slots");
-    setSlots(await res.json());
+  async function load() {
+    const res = await fetch("/api/settings/site");
+    const data = await res.json();
+    setSettings(data);
+    setNameDraft(data.site_name);
+    setDescDraft(data.site_description);
   }
 
   useEffect(() => {
-    loadSlots();
+    load();
   }, []);
 
-  async function saveSlots(updated) {
-    setSlotBusy(true);
-    setSlotSaved(false);
-    const res = await fetch("/api/settings/ad-slots", {
+  async function handleSaveText(e) {
+    e.preventDefault();
+    setError(null);
+    setSaved(false);
+    setBusy(true);
+    const res = await fetch("/api/settings/site", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updated),
+      body: JSON.stringify({ site_name: nameDraft, site_description: descDraft }),
     });
-    setSlotBusy(false);
+    setBusy(false);
     if (res.ok) {
-      setSlots(await res.json());
-      setSlotSaved(true);
+      setSettings(await res.json());
+      setSaved(true);
+    } else {
+      const data = await res.json();
+      setError(data.error || "Opslaan mislukt");
     }
   }
 
-  if (!slots) return null;
+  async function handleFaviconUpload(e) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setUploadingFavicon(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const uploadRes = await fetch("/api/uploads", { method: "POST", body: formData });
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(uploadData.error || "Upload mislukt");
+
+      const res = await fetch("/api/settings/site", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ favicon_url: uploadData.url }),
+      });
+      if (!res.ok) throw new Error("Favicon opslaan mislukt");
+      setSettings(await res.json());
+      setSaved(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploadingFavicon(false);
+    }
+  }
+
+  async function removeFavicon() {
+    setBusy(true);
+    const res = await fetch("/api/settings/site", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ favicon_url: null }),
+    });
+    setBusy(false);
+    if (res.ok) setSettings(await res.json());
+  }
+
+  if (!settings) return null;
 
   return (
     <>
-      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Adsterra</h2>
+      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>SEO & Branding</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Voor netwerken als Adsterra, die met losse code-snippets werken i.p.v. één publisher-ID.
-        Elk veld is optioneel — laat leeg om die advertentie niet te tonen.
+        Deze naam en beschrijving verschijnen in Google-zoekresultaten, browsertabbladen, en als
+        je site wordt gedeeld op social media. Wijzigingen zijn direct actief, geen herbuild nodig.
       </p>
 
-      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Social Bar</p>
-        <p style={{ fontSize: 12, color: "var(--danger-text)", marginBottom: 10, lineHeight: 1.5 }}>
-          ⚠ Dit is doorgaans het meest opdringerige advertentieformaat (zwevende
-          meldingen/pop-up-achtige balken, site-breed). Overweeg dit uit te laten als je
-          bezoekerservaring belangrijker vindt dan maximale inkomsten.
+      <form onSubmit={handleSaveText} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Sitenaam & beschrijving</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Sitenaam</p>
+        <input
+          type="text"
+          value={nameDraft}
+          onChange={(e) => setNameDraft(e.target.value)}
+          style={{ marginBottom: 10 }}
+        />
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
+          Beschrijving (voor zoekmachines, max. ~160 tekens werkt het best)
         </p>
-        <input
-          type="text"
-          placeholder="Volledige script-URL (bijv. https://.../invoke.js)"
-          defaultValue={slots.social_bar_url || ""}
-          onBlur={(e) => saveSlots({ ...slots, social_bar_url: e.target.value.trim() || null })}
-          disabled={slotBusy}
+        <textarea
+          rows={3}
+          value={descDraft}
+          onChange={(e) => setDescDraft(e.target.value)}
+          style={{ marginBottom: 10 }}
         />
-      </div>
+        {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 8 }}>{error}</p>}
+        {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Opgeslagen.</p>}
+        <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px" }}>
+          Opslaan
+        </button>
+      </form>
 
-      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Native banner (blendt met content)</p>
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Script-URL</p>
-        <input
-          type="text"
-          placeholder="https://.../invoke.js"
-          defaultValue={slots.native_banner?.script_url || ""}
-          onBlur={(e) => saveSlots({ ...slots, native_banner: { ...slots.native_banner, script_url: e.target.value.trim() || null } })}
-          disabled={slotBusy}
-          style={{ marginBottom: 8 }}
-        />
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Container-ID</p>
-        <input
-          type="text"
-          placeholder="container-xxxxxxxx"
-          defaultValue={slots.native_banner?.container_id || ""}
-          onBlur={(e) => saveSlots({ ...slots, native_banner: { ...slots.native_banner, container_id: e.target.value.trim() || null } })}
-          disabled={slotBusy}
-        />
-      </div>
-
-      {BANNER_SLOTS.map((slot) => {
-        const current = slots.banners[slot.id] || {};
-        return (
-          <div key={slot.id} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
-            <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 2px" }}>{slot.label}</p>
-            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>{slot.hint}</p>
-            <div style={{ display: "flex", gap: 8 }}>
-              <input
-                type="text"
-                placeholder="Ad key"
-                defaultValue={current.key || ""}
-                onBlur={(e) => saveSlots({ ...slots, banners: { ...slots.banners, [slot.id]: { ...current, key: e.target.value.trim() || null } } })}
-                disabled={slotBusy}
-                style={{ flex: 2 }}
-              />
-              <input
-                type="number"
-                placeholder="Breedte"
-                defaultValue={current.width || ""}
-                onBlur={(e) => saveSlots({ ...slots, banners: { ...slots.banners, [slot.id]: { ...current, width: parseInt(e.target.value, 10) || null } } })}
-                disabled={slotBusy}
-                style={{ flex: 1 }}
-              />
-              <input
-                type="number"
-                placeholder="Hoogte"
-                defaultValue={current.height || ""}
-                onBlur={(e) => saveSlots({ ...slots, banners: { ...slots.banners, [slot.id]: { ...current, height: parseInt(e.target.value, 10) || null } } })}
-                disabled={slotBusy}
-                style={{ flex: 1 }}
-              />
-            </div>
+      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16 }}>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Favicon</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
+          Het icoontje in het browsertabblad. Vierkante afbeelding werkt het best (bijv. 512×512px).
+          Geen eigen favicon geüpload? Dan gebruikt de site een eigen standaardicoon.
+        </p>
+        {settings.favicon_url && (
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <img src={settings.favicon_url} alt="Huidige favicon" style={{ width: 32, height: 32, borderRadius: 6, border: "1px solid var(--border)" }} />
+            <button onClick={removeFavicon} disabled={busy} style={{ width: "auto", padding: "5px 10px", fontSize: 12 }}>
+              Terugzetten naar standaard
+            </button>
           </div>
-        );
-      })}
-
-      {slotSaved && <p style={{ color: "var(--success-text)", fontSize: 13 }}>Opgeslagen.</p>}
+        )}
+        <input type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/gif" onChange={handleFaviconUpload} disabled={uploadingFavicon} />
+        {uploadingFavicon && <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 8 }}>Bezig met uploaden...</p>}
+      </div>
     </>
   );
 }
