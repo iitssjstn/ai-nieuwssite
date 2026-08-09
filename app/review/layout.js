@@ -8,6 +8,7 @@ const NAV = [
   {
     href: "/review",
     label: "Dashboard",
+    group: null,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <rect x="3" y="3" width="8" height="8" rx="2" />
@@ -20,6 +21,7 @@ const NAV = [
   {
     href: "/review/queue",
     label: "Wachtrij",
+    group: "Content",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M12 3v18M5 8l7-5 7 5M5 16l7 5 7-5" />
@@ -29,6 +31,7 @@ const NAV = [
   {
     href: "/review/published",
     label: "Gepubliceerd",
+    group: "Content",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M4 4h13a2 2 0 0 1 2 2v14l-3-2-3 2-3-2-3 2-3-2V6a2 2 0 0 1 2-2Z" />
@@ -39,6 +42,7 @@ const NAV = [
   {
     href: "/review/polls",
     label: "Polls",
+    group: "Content",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <rect x="4" y="10" width="4" height="10" rx="1" />
@@ -50,6 +54,7 @@ const NAV = [
   {
     href: "/review/kaart",
     label: "Kaart",
+    group: "Content",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11Z" />
@@ -61,6 +66,7 @@ const NAV = [
     href: "/review/sources",
     label: "Bronnen",
     adminOnly: true,
+    group: "Beheer",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M5 5c8 0 14 6 14 14" />
@@ -73,6 +79,7 @@ const NAV = [
     href: "/review/webhooks",
     label: "Webhooks & API",
     adminOnly: true,
+    group: "Beheer",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" />
@@ -84,6 +91,7 @@ const NAV = [
     href: "/review/settings",
     label: "Instellingen",
     adminOnly: true,
+    group: "Beheer",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <circle cx="12" cy="12" r="3" />
@@ -195,31 +203,42 @@ export default function ReviewLayout({ children }) {
           <p className="role">{me?.role === "admin" ? "Admin" : "Redacteur"}</p>
         </div>
 
-        {visibleNav.map((item) => {
+        {visibleNav.map((item, i) => {
           const active = item.href === "/review" ? pathname === "/review" : pathname.startsWith(item.href);
           const showBadge = item.href === "/review/queue" && pendingCount > 0;
           const showUpdateBadge = item.href === "/review/published" && pendingUpdatesCount > 0;
+          const showGroupHeader = item.group && item.group !== visibleNav[i - 1]?.group;
           return (
-            <Link key={item.href} href={item.href} className={`admin-nav-item${active ? " active" : ""}`}>
-              {item.icon}
-              {item.label}
-              {showBadge && (
-                <span style={{
-                  marginLeft: "auto", background: "#a32d2d", color: "#fff", borderRadius: 10,
-                  fontSize: 11, padding: "1px 7px", fontWeight: 600,
+            <div key={item.href}>
+              {showGroupHeader && (
+                <p style={{
+                  fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em",
+                  color: "var(--text-muted)", margin: "16px 12px 6px", fontWeight: 600,
                 }}>
-                  {pendingCount}
-                </span>
+                  {item.group}
+                </p>
               )}
-              {showUpdateBadge && (
-                <span title="Artikelen met een nieuwe-informatie-melding" style={{
-                  marginLeft: "auto", background: "var(--accent-text)", color: "#fff", borderRadius: 10,
-                  fontSize: 11, padding: "1px 7px", fontWeight: 600,
-                }}>
-                  🔔 {pendingUpdatesCount}
-                </span>
-              )}
-            </Link>
+              <Link href={item.href} className={`admin-nav-item${active ? " active" : ""}`}>
+                {item.icon}
+                {item.label}
+                {showBadge && (
+                  <span style={{
+                    marginLeft: "auto", background: "#a32d2d", color: "#fff", borderRadius: 10,
+                    fontSize: 11, padding: "1px 7px", fontWeight: 600,
+                  }}>
+                    {pendingCount}
+                  </span>
+                )}
+                {showUpdateBadge && (
+                  <span title="Artikelen met een nieuwe-informatie-melding" style={{
+                    marginLeft: "auto", background: "var(--accent-text)", color: "#fff", borderRadius: 10,
+                    fontSize: 11, padding: "1px 7px", fontWeight: 600,
+                  }}>
+                    🔔 {pendingUpdatesCount}
+                  </span>
+                )}
+              </Link>
+            </div>
           );
         })}
 
