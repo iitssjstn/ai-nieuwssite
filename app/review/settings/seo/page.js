@@ -2,299 +2,126 @@
 
 import { useEffect, useState } from "react";
 
-export default function SeoPage() {
-  const [settings, setSettings] = useState(null);
-  const [nameDraft, setNameDraft] = useState("");
-  const [descDraft, setDescDraft] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [uploadingFavicon, setUploadingFavicon] = useState(false);
-  const [error, setError] = useState(null);
-  const [saved, setSaved] = useState(false);
+const BANNER_SLOTS = [
+  { id: "top_banner", label: "Bovenaan de homepage", hint: "Brede banner, bijv. 728×90" },
+  { id: "homepage_sidebar", label: "Zijbalk homepage", hint: "Kleine banner, bijv. 320×50" },
+  { id: "article_sidebar", label: "Zijbalk artikelpagina", hint: "Staande banner, bijv. 160×300" },
+  { id: "article_incontent", label: "Onder het artikel", hint: "Brede banner, bijv. 468×60" },
+];
 
-  const [newsletter, setNewsletter] = useState(null);
-  const [newsletterDraft, setNewsletterDraft] = useState("");
-  const [newsletterBusy, setNewsletterBusy] = useState(false);
-  const [newsletterSaved, setNewsletterSaved] = useState(false);
-  const [newsletterError, setNewsletterError] = useState(null);
+export default function AdsterraPage() {
+  const [slots, setSlots] = useState(null);
+  const [slotBusy, setSlotBusy] = useState(false);
+  const [slotSaved, setSlotSaved] = useState(false);
 
-  const [social, setSocial] = useState(null);
-  const [socialBusy, setSocialBusy] = useState(false);
-  const [socialSaved, setSocialSaved] = useState(false);
-
-  const [infoPages, setInfoPages] = useState(null);
-  const [infoPagesBusy, setInfoPagesBusy] = useState(false);
-
-  async function loadInfoPages() {
-    const res = await fetch("/api/settings/info-pages");
-    setInfoPages(await res.json());
-  }
-
-  async function toggleInfoPage(field) {
-    setInfoPagesBusy(true);
-    const res = await fetch("/api/settings/info-pages", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ [field]: !infoPages[field] }),
-    });
-    setInfoPagesBusy(false);
-    if (res.ok) setInfoPages(await res.json());
-  }
-
-  async function load() {
-    const res = await fetch("/api/settings/site");
-    const data = await res.json();
-    setSettings(data);
-    setNameDraft(data.site_name);
-    setDescDraft(data.site_description);
-  }
-
-  async function loadNewsletter() {
-    const res = await fetch("/api/settings/newsletter");
-    const data = await res.json();
-    setNewsletter(data);
-    setNewsletterDraft(data.sender_email || "");
-  }
-
-  async function loadSocial() {
-    const res = await fetch("/api/settings/social");
-    setSocial(await res.json());
+  async function loadSlots() {
+    const res = await fetch("/api/settings/ad-slots");
+    setSlots(await res.json());
   }
 
   useEffect(() => {
-    load();
-    loadNewsletter();
-    loadSocial();
-    loadInfoPages();
+    loadSlots();
   }, []);
 
-  async function handleSaveNewsletter(e) {
-    e.preventDefault();
-    setNewsletterError(null);
-    setNewsletterSaved(false);
-    setNewsletterBusy(true);
-    const res = await fetch("/api/settings/newsletter", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ sender_email: newsletterDraft.trim() || null }),
-    });
-    setNewsletterBusy(false);
-    if (res.ok) {
-      setNewsletter(await res.json());
-      setNewsletterSaved(true);
-    } else {
-      const data = await res.json();
-      setNewsletterError(data.error || "Opslaan mislukt");
-    }
-  }
-
-  async function saveSocial(updated) {
-    setSocialBusy(true);
-    setSocialSaved(false);
-    const res = await fetch("/api/settings/social", {
+  async function saveSlots(updated) {
+    setSlotBusy(true);
+    setSlotSaved(false);
+    const res = await fetch("/api/settings/ad-slots", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(updated),
     });
-    setSocialBusy(false);
+    setSlotBusy(false);
     if (res.ok) {
-      setSocial(await res.json());
-      setSocialSaved(true);
+      setSlots(await res.json());
+      setSlotSaved(true);
     }
   }
 
-  async function handleSaveText(e) {
-    e.preventDefault();
-    setError(null);
-    setSaved(false);
-    setBusy(true);
-    const res = await fetch("/api/settings/site", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ site_name: nameDraft, site_description: descDraft }),
-    });
-    setBusy(false);
-    if (res.ok) {
-      setSettings(await res.json());
-      setSaved(true);
-    } else {
-      const data = await res.json();
-      setError(data.error || "Opslaan mislukt");
-    }
-  }
-
-  async function handleFaviconUpload(e) {
-    const file = e.target.files?.[0];
-    e.target.value = "";
-    if (!file) return;
-    setUploadingFavicon(true);
-    setError(null);
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const uploadRes = await fetch("/api/uploads", { method: "POST", body: formData });
-      const uploadData = await uploadRes.json();
-      if (!uploadRes.ok) throw new Error(uploadData.error || "Upload mislukt");
-
-      const res = await fetch("/api/settings/site", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ favicon_url: uploadData.url }),
-      });
-      if (!res.ok) throw new Error("Favicon opslaan mislukt");
-      setSettings(await res.json());
-      setSaved(true);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setUploadingFavicon(false);
-    }
-  }
-
-  async function removeFavicon() {
-    setBusy(true);
-    const res = await fetch("/api/settings/site", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ favicon_url: null }),
-    });
-    setBusy(false);
-    if (res.ok) setSettings(await res.json());
-  }
-
-  if (!settings) return null;
+  if (!slots) return null;
 
   return (
     <>
-      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>SEO & Branding</h2>
+      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Adsterra</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Deze naam en beschrijving verschijnen in Google-zoekresultaten, browsertabbladen, en als
-        je site wordt gedeeld op social media. Wijzigingen zijn direct actief, geen herbuild nodig.
+        Voor netwerken als Adsterra, die met losse code-snippets werken i.p.v. één publisher-ID.
+        Elk veld is optioneel — laat leeg om die advertentie niet te tonen.
       </p>
 
-      <form onSubmit={handleSaveText} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Sitenaam & beschrijving</p>
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Sitenaam</p>
+      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Social Bar</p>
+        <p style={{ fontSize: 12, color: "var(--danger-text)", marginBottom: 10, lineHeight: 1.5 }}>
+          ⚠ Dit is doorgaans het meest opdringerige advertentieformaat (zwevende
+          meldingen/pop-up-achtige balken, site-breed). Overweeg dit uit te laten als je
+          bezoekerservaring belangrijker vindt dan maximale inkomsten.
+        </p>
         <input
           type="text"
-          value={nameDraft}
-          onChange={(e) => setNameDraft(e.target.value)}
-          style={{ marginBottom: 10 }}
+          placeholder="Volledige script-URL (bijv. https://.../invoke.js)"
+          defaultValue={slots.social_bar_url || ""}
+          onBlur={(e) => saveSlots({ ...slots, social_bar_url: e.target.value.trim() || null })}
+          disabled={slotBusy}
         />
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
-          Beschrijving (voor zoekmachines, max. ~160 tekens werkt het best)
-        </p>
-        <textarea
-          rows={3}
-          value={descDraft}
-          onChange={(e) => setDescDraft(e.target.value)}
-          style={{ marginBottom: 10 }}
-        />
-        {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 8 }}>{error}</p>}
-        {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Opgeslagen.</p>}
-        <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px" }}>
-          Opslaan
-        </button>
-      </form>
-
-      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16 }}>
-        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Favicon</p>
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
-          Het icoontje in het browsertabblad. Vierkante afbeelding werkt het best (bijv. 512×512px).
-          Geen eigen favicon geüpload? Dan gebruikt de site een eigen standaardicoon.
-        </p>
-        {settings.favicon_url && (
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-            <img src={settings.favicon_url} alt="Huidige favicon" style={{ width: 32, height: 32, borderRadius: 6, border: "1px solid var(--border)" }} />
-            <button onClick={removeFavicon} disabled={busy} style={{ width: "auto", padding: "5px 10px", fontSize: 12 }}>
-              Terugzetten naar standaard
-            </button>
-          </div>
-        )}
-        <input type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={handleFaviconUpload} disabled={uploadingFavicon} />
-        {uploadingFavicon && <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 8 }}>Bezig met uploaden...</p>}
       </div>
 
-      {newsletter && (
-        <form onSubmit={handleSaveNewsletter} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
-          <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Nieuwsbrief</p>
-          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
-            Zonder afzender-e-mailadres blijft het aanmeldformulier voor bezoekers verborgen — pas
-            als je hier iets invult, verschijnt het op de site. Aanmeldingen worden opgeslagen in
-            een lijst die je hier kunt zien; er wordt nog geen nieuwsbrief automatisch verstuurd.
-          </p>
-          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Afzender-e-mailadres</p>
-          <input
-            type="text"
-            placeholder="redactie@novapers.nl"
-            value={newsletterDraft}
-            onChange={(e) => setNewsletterDraft(e.target.value)}
-            style={{ marginBottom: 10 }}
-          />
-          {newsletterError && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 8 }}>{newsletterError}</p>}
-          {newsletterSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Opgeslagen.</p>}
-          {newsletter.subscriber_count !== undefined && (
-            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>
-              {newsletter.subscriber_count} aanmelding(en) tot nu toe.
-            </p>
-          )}
-          <button type="submit" className="primary" disabled={newsletterBusy} style={{ width: "auto", padding: "8px 16px" }}>
-            Opslaan
-          </button>
-        </form>
-      )}
+      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Native banner (blendt met content)</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Script-URL</p>
+        <input
+          type="text"
+          placeholder="https://.../invoke.js"
+          defaultValue={slots.native_banner?.script_url || ""}
+          onBlur={(e) => saveSlots({ ...slots, native_banner: { ...slots.native_banner, script_url: e.target.value.trim() || null } })}
+          disabled={slotBusy}
+          style={{ marginBottom: 8 }}
+        />
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Container-ID</p>
+        <input
+          type="text"
+          placeholder="container-xxxxxxxx"
+          defaultValue={slots.native_banner?.container_id || ""}
+          onBlur={(e) => saveSlots({ ...slots, native_banner: { ...slots.native_banner, container_id: e.target.value.trim() || null } })}
+          disabled={slotBusy}
+        />
+      </div>
 
-      {social && (
-        <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
-          <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Social media</p>
-          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
-            Alleen ingevulde profielen krijgen een icoontje in de footer — laat een veld leeg om
-            dat icoon te verbergen.
-          </p>
-          {["twitter", "facebook", "instagram", "youtube"].map((key) => (
-            <div key={key} style={{ marginBottom: 8 }}>
-              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4, textTransform: "capitalize" }}>{key}</p>
+      {BANNER_SLOTS.map((slot) => {
+        const current = slots.banners[slot.id] || {};
+        return (
+          <div key={slot.id} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 2px" }}>{slot.label}</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>{slot.hint}</p>
+            <div style={{ display: "flex", gap: 8 }}>
               <input
                 type="text"
-                placeholder={`https://${key}.com/...`}
-                defaultValue={social[key] || ""}
-                onBlur={(e) => saveSocial({ ...social, [key]: e.target.value.trim() || null })}
-                disabled={socialBusy}
+                placeholder="Ad key"
+                defaultValue={current.key || ""}
+                onBlur={(e) => saveSlots({ ...slots, banners: { ...slots.banners, [slot.id]: { ...current, key: e.target.value.trim() || null } } })}
+                disabled={slotBusy}
+                style={{ flex: 2 }}
+              />
+              <input
+                type="number"
+                placeholder="Breedte"
+                defaultValue={current.width || ""}
+                onBlur={(e) => saveSlots({ ...slots, banners: { ...slots.banners, [slot.id]: { ...current, width: parseInt(e.target.value, 10) || null } } })}
+                disabled={slotBusy}
+                style={{ flex: 1 }}
+              />
+              <input
+                type="number"
+                placeholder="Hoogte"
+                defaultValue={current.height || ""}
+                onBlur={(e) => saveSlots({ ...slots, banners: { ...slots.banners, [slot.id]: { ...current, height: parseInt(e.target.value, 10) || null } } })}
+                disabled={slotBusy}
+                style={{ flex: 1 }}
               />
             </div>
-          ))}
-          {socialSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginTop: 8 }}>Opgeslagen.</p>}
-        </div>
-      )}
-
-      {infoPages && (
-        <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
-          <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Informatiepagina's</p>
-          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 14 }}>
-            Zet je een pagina uit, dan verdwijnt de link uit de footer én geeft de pagina zelf een
-            "niet gevonden" i.p.v. de inhoud.
-          </p>
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-            <span style={{ fontSize: 13 }}>Over ons</span>
-            <div style={{ display: "flex", gap: 8 }}>
-              <a href="/review/settings/info-pages/about" style={{ fontSize: 13, color: "var(--accent-text)", alignSelf: "center" }}>Bewerken</a>
-              <button onClick={() => toggleInfoPage("about_enabled")} disabled={infoPagesBusy} className={infoPages.about_enabled ? "danger" : "primary"} style={{ width: "auto", padding: "6px 14px", fontSize: 13 }}>
-                {infoPages.about_enabled ? "Uitzetten" : "Aanzetten"}
-              </button>
-            </div>
           </div>
+        );
+      })}
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ fontSize: 13 }}>Privacy</span>
-            <div style={{ display: "flex", gap: 8 }}>
-              <a href="/review/settings/info-pages/privacy" style={{ fontSize: 13, color: "var(--accent-text)", alignSelf: "center" }}>Bewerken</a>
-              <button onClick={() => toggleInfoPage("privacy_enabled")} disabled={infoPagesBusy} className={infoPages.privacy_enabled ? "danger" : "primary"} style={{ width: "auto", padding: "6px 14px", fontSize: 13 }}>
-                {infoPages.privacy_enabled ? "Uitzetten" : "Aanzetten"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {slotSaved && <p style={{ color: "var(--success-text)", fontSize: 13 }}>Opgeslagen.</p>}
     </>
   );
 }
