@@ -5,6 +5,7 @@ import { verifySessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
 const ADMIN_PATH_PREFIXES = [
   "/review",
   "/login",
+  "/uitnodiging",
   "/api/generate",
   "/api/articles",
   "/api/sources",
@@ -17,12 +18,14 @@ const ADMIN_PATH_PREFIXES = [
   "/api/webhooks",
   "/api/keys",
   "/api/categories",
+  "/api/invite",
+  "/api/account",
 ];
 
 // Subset die WEL alleen op het admin-subdomein mag bestaan, maar NIET zelf
 // een geldige sessie mag vereisen — anders kun je nooit meer inloggen
 // (de loginpagina zelf, en de login/logout-endpoints).
-const AUTH_EXEMPT_PREFIXES = ["/login", "/api/auth"];
+const AUTH_EXEMPT_PREFIXES = ["/login", "/api/auth", "/uitnodiging", "/api/invite"];
 
 // Alleen voor de rol "admin" — redacteuren (rol "editor") mogen artikelen
 // genereren/bewerken, maar geen bronnen/instellingen/gebruikers beheren.
