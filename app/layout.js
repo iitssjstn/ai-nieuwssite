@@ -1,6 +1,7 @@
-import Script from "next/script";
 import "./globals.css";
 import { getAdsenseClientId, getSiteSettings, getAdSlots } from "@/lib/db";
+import ConsentGatedScripts from "./components/ConsentGatedScripts";
+import CookieConsentBanner from "./components/CookieConsentBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -39,17 +40,8 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         {children}
-        {adsenseClientId && (
-          <Script
-            async
-            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClientId}`}
-            crossOrigin="anonymous"
-            strategy="afterInteractive"
-          />
-        )}
-        {social_bar_url && (
-          <Script src={social_bar_url} strategy="afterInteractive" />
-        )}
+        <CookieConsentBanner />
+        <ConsentGatedScripts adsenseClientId={adsenseClientId} socialBarUrl={social_bar_url} />
       </body>
     </html>
   );
