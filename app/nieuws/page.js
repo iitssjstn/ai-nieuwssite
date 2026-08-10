@@ -3,10 +3,22 @@ import Footer from "../components/Footer";
 import LiveTimeLabel from "../components/LiveTimeLabel";
 import Link from "next/link";
 import { getArticles, getSiteSettings } from "@/lib/db";
+import { headers } from "next/headers";
+
+function getBaseUrl() {
+  const h = headers();
+  const host = h.get("host");
+  const proto = h.get("x-forwarded-proto") || "https";
+  return `${proto}://${host}`;
+}
 
 export function generateMetadata() {
   const { site_name } = getSiteSettings();
-  return { title: `Al het nieuws — ${site_name}`, description: `Alle artikelen van ${site_name}, chronologisch.` };
+  return {
+    title: `Al het nieuws — ${site_name}`,
+    description: `Alle artikelen van ${site_name}, chronologisch.`,
+    alternates: { canonical: `${getBaseUrl()}/nieuws` },
+  };
 }
 
 export default function AllNewsPage() {
