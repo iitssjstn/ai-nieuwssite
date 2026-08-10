@@ -3,10 +3,21 @@ import Footer from "../components/Footer";
 import ArticleBody from "../components/ArticleBody";
 import { getSiteSettings, getInfoPagesSettings, getInfoPageContent, getNewsletterSettings } from "@/lib/db";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+
+function getBaseUrl() {
+  const h = headers();
+  const host = h.get("host");
+  const proto = h.get("x-forwarded-proto") || "https";
+  return `${proto}://${host}`;
+}
 
 export function generateMetadata() {
   const { site_name } = getSiteSettings();
-  return { title: `Privacyverklaring — ${site_name}` };
+  return {
+    title: `Privacyverklaring — ${site_name}`,
+    alternates: { canonical: `${getBaseUrl()}/privacy` },
+  };
 }
 
 export default function PrivacyPage() {
