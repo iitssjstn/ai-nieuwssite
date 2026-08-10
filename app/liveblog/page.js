@@ -2,10 +2,22 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Link from "next/link";
 import { getArticles, getSiteSettings } from "@/lib/db";
+import { headers } from "next/headers";
+
+function getBaseUrl() {
+  const h = headers();
+  const host = h.get("host");
+  const proto = h.get("x-forwarded-proto") || "https";
+  return `${proto}://${host}`;
+}
 
 export function generateMetadata() {
   const { site_name } = getSiteSettings();
-  return { title: `Liveblogs — ${site_name}`, description: `Alle doorlopende liveblogs van ${site_name}.` };
+  return {
+    title: `Liveblogs — ${site_name}`,
+    description: `Alle doorlopende liveblogs van ${site_name}.`,
+    alternates: { canonical: `${getBaseUrl()}/liveblog` },
+  };
 }
 
 export default function LiveblogHubPage() {
