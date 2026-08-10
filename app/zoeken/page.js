@@ -7,7 +7,16 @@ import { getExcerpt, getReadingTime } from "@/lib/content";
 export function generateMetadata({ searchParams }) {
   const { site_name } = getSiteSettings();
   const q = searchParams?.q || "";
-  return { title: q ? `Zoeken: ${q} — ${site_name}` : `Zoeken — ${site_name}` };
+  return {
+    title: q ? `Zoeken: ${q} — ${site_name}` : `Zoeken — ${site_name}`,
+    // Zoekresultaten horen niet geïndexeerd te worden — elke zoekopdracht is
+    // technisch een aparte URL (?q=...) met grotendeels dezelfde opmaak
+    // eromheen, wat Google als dubbele content zonder canonical ziet. Google
+    // adviseert zelf ook expliciet om dit soort pagina's op noindex te
+    // zetten i.p.v. een canonical te kiezen (er ís geen "hoofdversie" van
+    // een zoekresultaat).
+    robots: { index: false, follow: true },
+  };
 }
 
 export default function SearchPage({ searchParams }) {
