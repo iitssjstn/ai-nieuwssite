@@ -2,10 +2,22 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import Link from "next/link";
 import { getPolls, getArticles, getSiteSettings } from "@/lib/db";
+import { headers } from "next/headers";
+
+function getBaseUrl() {
+  const h = headers();
+  const host = h.get("host");
+  const proto = h.get("x-forwarded-proto") || "https";
+  return `${proto}://${host}`;
+}
 
 export function generateMetadata() {
   const { site_name } = getSiteSettings();
-  return { title: `Polls — ${site_name}`, description: `Alle polls van ${site_name}.` };
+  return {
+    title: `Polls — ${site_name}`,
+    description: `Alle polls van ${site_name}.`,
+    alternates: { canonical: `${getBaseUrl()}/polls` },
+  };
 }
 
 export default function PollsHubPage() {
