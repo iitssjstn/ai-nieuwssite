@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getArticles, getSiteSettings, getCategories } from "@/lib/db";
 import PageviewTracker from "./PageviewTracker";
+import VisitorHeartbeat from "./VisitorHeartbeat";
 import SettingsPanel from "./SettingsPanel";
 
 export default function Header({ activeCategory }) {
@@ -13,6 +14,7 @@ export default function Header({ activeCategory }) {
   return (
     <>
       <PageviewTracker />
+      <VisitorHeartbeat />
       {breaking && (
         <Link href={`/artikel/${breaking.slug}`} className="breaking-bar">
           <span className="breaking-label">Breaking</span>
