@@ -11,6 +11,7 @@ export default function ReviewOverview() {
   const [analyticsPeriod, setAnalyticsPeriod] = useState("today");
   const [analytics, setAnalytics] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
+  const [activeVisitors, setActiveVisitors] = useState(null);
   const [categories, setCategories] = useState([]);
   const [recentArticles, setRecentArticles] = useState([]);
   const [me, setMe] = useState(null);
@@ -18,6 +19,11 @@ export default function ReviewOverview() {
   async function loadOnlineUsers() {
     const res = await fetch("/api/users/online");
     if (res.ok) setOnlineUsers((await res.json()).users || []);
+  }
+
+  async function loadActiveVisitors() {
+    const res = await fetch("/api/stats/active-visitors");
+    if (res.ok) setActiveVisitors((await res.json()).count);
   }
 
   async function loadAll() {
@@ -56,6 +62,12 @@ export default function ReviewOverview() {
   useEffect(() => {
     loadOnlineUsers();
     const interval = setInterval(loadOnlineUsers, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    loadActiveVisitors();
+    const interval = setInterval(loadActiveVisitors, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -113,6 +125,9 @@ export default function ReviewOverview() {
           <CircularStat label="Gepland" value={stats.scheduled} color="#6fa8e8" href="/review/published?tab=scheduled" />
           <CircularStat label="Afgekeurd" value={stats.rejected} color="#f09595" href="/review/published?tab=rejected" />
           <CircularStat label="Bronnen" value={stats.sources} color="#c79ef0" href="/review/sources" />
+          {activeVisitors !== null && (
+            <CircularStat label="Nu op de site" value={activeVisitors} color="#22C55E" />
+          )}
         </div>
       )}
 
@@ -252,9 +267,10 @@ export default function ReviewOverview() {
 }
 
 function CircularStat({ label, value, color, href }) {
+  const Wrapper = href ? Link : "div";
   return (
-    <Link
-      href={href}
+    <Wrapper
+      {...(href ? { href } : {})}
       className="admin-glass-card"
       style={{
         display: "flex", flexDirection: "column", alignItems: "center",
@@ -272,7 +288,7 @@ function CircularStat({ label, value, color, href }) {
         {value}
       </div>
       <p style={{ margin: 0, fontSize: 12, color: "var(--text-secondary)", textAlign: "center" }}>{label}</p>
-    </Link>
+    </Wrapper>
   );
 }
 
