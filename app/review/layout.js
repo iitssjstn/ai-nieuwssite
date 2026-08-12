@@ -222,10 +222,13 @@ export default function ReviewLayout({ children }) {
           return (
             <div key={item.href}>
               {showGroupHeader && (
-                <p style={{
-                  fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em",
-                  color: "var(--text-muted)", margin: "16px 12px 6px", fontWeight: 600,
-                }}>
+                <p
+                  className="admin-nav-group-header"
+                  style={{
+                    fontSize: 10, textTransform: "uppercase", letterSpacing: "0.06em",
+                    color: "var(--text-muted)", margin: "16px 12px 6px", fontWeight: 600,
+                  }}
+                >
                   {item.group}
                 </p>
               )}
