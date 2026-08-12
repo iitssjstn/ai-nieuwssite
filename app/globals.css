@@ -692,6 +692,18 @@ article img { max-width: 100%; border-radius: 8px; margin: 12px 0; display: bloc
 .admin-shell .pending-item:hover { border-color: #444759; }
 .stat-card-link:hover { border-color: var(--border) !important; background: var(--surface-2) !important; }
 
+.dashboard-chart-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+.dashboard-chart-row > * { min-width: 0; }
+.dashboard-secondary-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.dashboard-secondary-row > * { min-width: 0; }
+
+@media (max-width: 860px) {
+  .dashboard-chart-row,
+  .dashboard-secondary-row {
+    grid-template-columns: 1fr;
+  }
+}
+
 .settings-layout {
   display: grid;
   grid-template-columns: 220px 1fr;
