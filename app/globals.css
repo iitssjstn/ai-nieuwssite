@@ -326,7 +326,7 @@ article p { font-size: 16px; line-height: 1.7; margin: 0 0 20px; }
 .flag-ok { background: #eaf3de; color: #27500a; }
 .flag-warn { background: #faeeda; color: #633806; }
 
-.actions { display: flex; gap: 8px; }
+.actions { display: flex; gap: 8px; flex-wrap: wrap; }
 button {
   flex: 1;
   padding: 10px 14px;
@@ -678,8 +678,10 @@ article img { max-width: 100%; border-radius: 8px; margin: 12px 0; display: bloc
   .admin-sidebar-spacer { display: none; }
   .admin-user-chip { border-top: none; margin-top: 0; margin-left: auto; padding: 0; }
   .admin-nav-item { white-space: nowrap; }
+  .admin-nav-group-header { display: none; }
   .admin-content { padding: 20px; }
   .admin-topbar { padding: 14px 20px; }
+  .review-columns { grid-template-columns: 1fr; }
 }
 
 /* Statuskleuren blijven leesbaar op het donkere oppervlak */
