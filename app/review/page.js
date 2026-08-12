@@ -132,7 +132,7 @@ export default function ReviewOverview() {
       )}
 
       {/* Grafiek + donut naast elkaar */}
-      <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16, marginBottom: 16 }}>
+      <div className="dashboard-chart-row" style={{ marginBottom: 16 }}>
         {pageviews.length > 0 && (
           <div className="admin-glass-card" style={{ padding: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
@@ -205,7 +205,7 @@ export default function ReviewOverview() {
       </div>
 
       {/* Waarschuwingen + meest gelezen naast elkaar */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+      <div className="dashboard-secondary-row" style={{ marginBottom: 16 }}>
         <div className="admin-glass-card" style={{ padding: 20 }}>
           <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 12px" }}>Meldingen</p>
           {alerts.map((a, i) => {
