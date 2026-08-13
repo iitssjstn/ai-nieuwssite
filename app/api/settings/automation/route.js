@@ -11,7 +11,8 @@ export async function PATCH(request) {
   const {
     enabled, max_per_source, auto_publish, auto_publish_min_confidence,
     auto_gather_sources, auto_update_published, auto_update_min_confidence,
-    use_source_image,
+    use_source_image, poll_interval_minutes, active_hours_enabled,
+    active_hours_start, active_hours_end,
   } = await request.json();
   if (max_per_source !== undefined && (max_per_source < 1 || max_per_source > 20)) {
     return NextResponse.json({ error: "max_per_source moet tussen 1 en 20 liggen" }, { status: 400 });
@@ -22,10 +23,21 @@ export async function PATCH(request) {
   if (auto_update_min_confidence !== undefined && (auto_update_min_confidence < 0 || auto_update_min_confidence > 1)) {
     return NextResponse.json({ error: "auto_update_min_confidence moet tussen 0 en 1 liggen" }, { status: 400 });
   }
+  if (poll_interval_minutes !== undefined && (poll_interval_minutes < 1 || poll_interval_minutes > 1440)) {
+    return NextResponse.json({ error: "poll_interval_minutes moet tussen 1 en 1440 liggen" }, { status: 400 });
+  }
+  const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
+  if (active_hours_start !== undefined && !timeRegex.test(active_hours_start)) {
+    return NextResponse.json({ error: "active_hours_start moet een geldige tijd zijn (HH:MM)" }, { status: 400 });
+  }
+  if (active_hours_end !== undefined && !timeRegex.test(active_hours_end)) {
+    return NextResponse.json({ error: "active_hours_end moet een geldige tijd zijn (HH:MM)" }, { status: 400 });
+  }
   setAutomationSettings({
     enabled, max_per_source, auto_publish, auto_publish_min_confidence,
     auto_gather_sources, auto_update_published, auto_update_min_confidence,
-    use_source_image,
+    use_source_image, poll_interval_minutes, active_hours_enabled,
+    active_hours_start, active_hours_end,
   });
   return NextResponse.json(getAutomationSettings());
 }
