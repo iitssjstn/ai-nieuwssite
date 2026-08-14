@@ -64,7 +64,10 @@ export default function BackupsPage() {
       const data = await res.json();
       setRemote(data);
       setRemoteUrlDraft(data.url || "");
-      setRemoteKeyDraft(data.key || "");
+      // Bewust NIET vooraf invullen — de sleutel komt nu ook al niet meer
+      // van de server terug (zie API-route), maar ook als dat wel zo was:
+      // een wachtwoordveld met de echte waarde erin blijft via
+      // "Inspecteren" af te lezen, ook met type="password".
     }
   }
 
@@ -86,6 +89,7 @@ export default function BackupsPage() {
     setRemoteBusy(false);
     if (res.ok) {
       setRemote(await res.json());
+      setRemoteKeyDraft(""); // zojuist getypte waarde niet in de DOM laten hangen na opslaan
       setRemoteSaved(true);
     } else {
       const data = await res.json();
@@ -169,10 +173,12 @@ export default function BackupsPage() {
           onChange={(e) => setRemoteUrlDraft(e.target.value)}
           style={{ marginBottom: 8 }}
         />
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Wachtwoord</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
+          Wachtwoord {remote?.hasKey && <span style={{ color: "var(--success-text)" }}>— al ingesteld</span>}
+        </p>
         <input
           type="password"
-          placeholder="Het wachtwoord dat je op de ontvanger zelf hebt ingesteld"
+          placeholder={remote?.hasKey ? "Laat leeg om te behouden, of typ een nieuw wachtwoord" : "Het wachtwoord dat je op de ontvanger zelf hebt ingesteld"}
           value={remoteKeyDraft}
           onChange={(e) => setRemoteKeyDraft(e.target.value)}
           style={{ marginBottom: 10 }}
