@@ -12,7 +12,7 @@ export async function PATCH(request) {
     enabled, max_per_source, auto_publish, auto_publish_min_confidence,
     auto_gather_sources, auto_update_published, auto_update_min_confidence,
     use_source_image, poll_interval_minutes, active_hours_enabled,
-    active_hours_start, active_hours_end,
+    active_hours_start, active_hours_end, backup_frequency_hours,
   } = await request.json();
   if (max_per_source !== undefined && (max_per_source < 1 || max_per_source > 20)) {
     return NextResponse.json({ error: "max_per_source moet tussen 1 en 20 liggen" }, { status: 400 });
@@ -33,11 +33,14 @@ export async function PATCH(request) {
   if (active_hours_end !== undefined && !timeRegex.test(active_hours_end)) {
     return NextResponse.json({ error: "active_hours_end moet een geldige tijd zijn (HH:MM)" }, { status: 400 });
   }
+  if (backup_frequency_hours !== undefined && (backup_frequency_hours < 1 || backup_frequency_hours > 168)) {
+    return NextResponse.json({ error: "backup_frequency_hours moet tussen 1 en 168 liggen" }, { status: 400 });
+  }
   setAutomationSettings({
     enabled, max_per_source, auto_publish, auto_publish_min_confidence,
     auto_gather_sources, auto_update_published, auto_update_min_confidence,
     use_source_image, poll_interval_minutes, active_hours_enabled,
-    active_hours_start, active_hours_end,
+    active_hours_start, active_hours_end, backup_frequency_hours,
   });
   return NextResponse.json(getAutomationSettings());
 }
