@@ -328,7 +328,7 @@ article p { font-size: 16px; line-height: 1.7; margin: 0 0 20px; }
 
 .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 button {
-  flex: 1;
+  flex: 0 1 auto;
   padding: 10px 14px;
   border-radius: 8px;
   border: 1px solid var(--border);
