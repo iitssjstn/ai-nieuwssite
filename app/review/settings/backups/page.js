@@ -60,14 +60,18 @@ export default function BackupsPage() {
   async function handleBackupNow() {
     setError(null);
     setBusy(true);
-    const res = await fetch("/api/backups", { method: "POST" });
-    setBusy(false);
-    if (res.ok) {
+    try {
+      const res = await fetch("/api/backups", { method: "POST" });
       const data = await res.json();
-      setBackups(data.backups || []);
-    } else {
-      const data = await res.json();
-      setError(data.error || "Back-uppen mislukt");
+      if (res.ok) {
+        setBackups(data.backups || []);
+      } else {
+        setError(data.error || "Back-uppen mislukt");
+      }
+    } catch {
+      setError("Kon geen verbinding maken met de server om te back-uppen. Probeer het opnieuw, en check zo nodig de serverlogs.");
+    } finally {
+      setBusy(false);
     }
   }
 
