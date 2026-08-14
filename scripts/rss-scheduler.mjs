@@ -4,9 +4,9 @@
 // als fs/crypto importeren zonder de standalone-build kapot te maken,
 // vercel/next.js#49565) door de scheduler volledig los van Next.js' eigen
 // bundelproces te draaien — gewoon een normaal Node-script.
-import { getSources, getAutomationSettings, isWithinActiveHours } from "../lib/db.js";
+import { getSources, getAutomationSettings, isWithinActiveHours, getRemoteBackupSettings } from "../lib/db.js";
 import { fetchAndImportFromSource } from "../lib/rss.js";
-import { runScheduledBackupIfNeeded } from "../lib/backup.js";
+import { runScheduledBackupIfNeeded, pushBackupToRemote } from "../lib/backup.js";
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -53,11 +53,22 @@ async function pollAllSources() {
   }
 }
 
-function checkScheduledBackup() {
+async function checkScheduledBackup() {
   try {
     const { backup_frequency_hours } = getAutomationSettings();
     const created = runScheduledBackupIfNeeded(backup_frequency_hours);
-    if (created) console.log(`[Backup] back-up aangemaakt: ${created}`);
+    if (created) {
+      console.log(`[Backup] back-up aangemaakt: ${created}`);
+      const remoteSettings = getRemoteBackupSettings();
+      if (remoteSettings.url && remoteSettings.key) {
+        const result = await pushBackupToRemote(created, remoteSettings);
+        if (result.success) {
+          console.log(`[Backup] ook verstuurd naar externe ontvanger: ${created}`);
+        } else if (!result.skipped) {
+          console.error(`[Backup] versturen naar externe ontvanger mislukt: ${result.error}`);
+        }
+      }
+    }
   } catch (err) {
     console.error("[Backup] fout bij aanmaken back-up:", err.message);
   }
