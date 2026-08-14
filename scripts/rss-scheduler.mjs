@@ -6,7 +6,7 @@
 // bundelproces te draaien — gewoon een normaal Node-script.
 import { getSources, getAutomationSettings, isWithinActiveHours } from "../lib/db.js";
 import { fetchAndImportFromSource } from "../lib/rss.js";
-import { runDailyBackupIfNeeded } from "../lib/backup.js";
+import { runScheduledBackupIfNeeded } from "../lib/backup.js";
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -53,10 +53,11 @@ async function pollAllSources() {
   }
 }
 
-function checkDailyBackup() {
+function checkScheduledBackup() {
   try {
-    const created = runDailyBackupIfNeeded();
-    if (created) console.log(`[Backup] dagelijkse back-up aangemaakt: ${created}`);
+    const { backup_frequency_hours } = getAutomationSettings();
+    const created = runScheduledBackupIfNeeded(backup_frequency_hours);
+    if (created) console.log(`[Backup] back-up aangemaakt: ${created}`);
   } catch (err) {
     console.error("[Backup] fout bij aanmaken back-up:", err.message);
   }
@@ -64,9 +65,11 @@ function checkDailyBackup() {
 
 // De back-up-taak staat los van de RSS-planning hieronder — ook als
 // automatisch RSS-ophalen (tijdelijk) uitstaat, moet het databestand toch
-// elke dag geback-upt blijven worden.
-checkDailyBackup();
-setInterval(checkDailyBackup, 60 * 60 * 1000);
+// volgens de ingestelde frequentie geback-upt blijven worden. Elke 15
+// minuten checken (goedkoop) zodat ook kortere frequenties (bijv. elke 6
+// uur) zonder te veel vertraging worden opgepikt.
+checkScheduledBackup();
+setInterval(checkScheduledBackup, 15 * 60 * 1000);
 
 // RSS-polling gebruikt bewust een zichzelf-herplannende setTimeout i.p.v.
 // een vaste setInterval — zo werkt een wijziging van de interval- of
