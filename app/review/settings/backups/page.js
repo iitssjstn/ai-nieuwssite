@@ -27,6 +27,12 @@ function formatFrequencyLabel(hours) {
 export default function BackupsPage() {
   const [backups, setBackups] = useState(null);
   const [settings, setSettings] = useState(null);
+  const [remote, setRemote] = useState(null);
+  const [remoteUrlDraft, setRemoteUrlDraft] = useState("");
+  const [remoteKeyDraft, setRemoteKeyDraft] = useState("");
+  const [remoteBusy, setRemoteBusy] = useState(false);
+  const [remoteSaved, setRemoteSaved] = useState(false);
+  const [remotePushStatus, setRemotePushStatus] = useState(null);
   const [busy, setBusy] = useState(false);
   const [freqBusy, setFreqBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -52,19 +58,51 @@ export default function BackupsPage() {
     if (res.ok) setSettings(await res.json());
   }
 
+  async function loadRemote() {
+    const res = await fetch("/api/settings/remote-backup");
+    if (res.ok) {
+      const data = await res.json();
+      setRemote(data);
+      setRemoteUrlDraft(data.url || "");
+      setRemoteKeyDraft(data.key || "");
+    }
+  }
+
   useEffect(() => {
     load();
     loadSettings();
+    loadRemote();
   }, []);
+
+  async function handleSaveRemote(e) {
+    e.preventDefault();
+    setRemoteBusy(true);
+    setRemoteSaved(false);
+    const res = await fetch("/api/settings/remote-backup", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: remoteUrlDraft, key: remoteKeyDraft }),
+    });
+    setRemoteBusy(false);
+    if (res.ok) {
+      setRemote(await res.json());
+      setRemoteSaved(true);
+    } else {
+      const data = await res.json();
+      setError(data.error || "Opslaan van externe back-up-instellingen mislukt");
+    }
+  }
 
   async function handleBackupNow() {
     setError(null);
+    setRemotePushStatus(null);
     setBusy(true);
     try {
       const res = await fetch("/api/backups", { method: "POST" });
       const data = await res.json();
       if (res.ok) {
         setBackups(data.backups || []);
+        if (data.remote && !data.remote.skipped) setRemotePushStatus(data.remote);
       } else {
         setError(data.error || "Back-uppen mislukt");
       }
@@ -86,7 +124,7 @@ export default function BackupsPage() {
     if (res.ok) setSettings(await res.json());
   }
 
-  if (!backups || !settings) return null;
+  if (!backups || !settings || !remote) return null;
 
   const newest = backups[0];
 
@@ -98,7 +136,8 @@ export default function BackupsPage() {
         gebruikers — alles), op de frequentie die je hieronder instelt. Er blijft altijd ongeveer
         14 dagen aan geschiedenis bewaard, ongeacht hoe vaak je back-upt; oudere back-ups worden
         automatisch opgeruimd. Download regelmatig een kopie naar je eigen computer voor extra
-        zekerheid — deze back-ups staan namelijk op dezelfde server als de site zelf.
+        zekerheid — deze back-ups staan namelijk op dezelfde server als de site zelf, tenzij je
+        hieronder een externe ontvanger instelt.
       </p>
 
       <div className="admin-glass-card" style={{ padding: 16, marginBottom: 16 }}>
@@ -115,6 +154,35 @@ export default function BackupsPage() {
         </select>
       </div>
 
+      <form onSubmit={handleSaveRemote} className="admin-glass-card" style={{ padding: 16, marginBottom: 16 }}>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Externe back-up-ontvanger (optioneel)</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>
+          Elke nieuwe back-up wordt hier automatisch ook naartoe gestuurd — bedoeld voor een
+          losse "backup-receiver"-applicatie op een tweede server, zodat je back-ups niet alleen
+          hier staan.
+        </p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>URL van de ontvanger</p>
+        <input
+          type="text"
+          placeholder="https://back-up.jouwdomein.nl"
+          value={remoteUrlDraft}
+          onChange={(e) => setRemoteUrlDraft(e.target.value)}
+          style={{ marginBottom: 8 }}
+        />
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Gedeeld wachtwoord</p>
+        <input
+          type="text"
+          placeholder="Hetzelfde wachtwoord als BACKUP_SHARED_SECRET op de ontvanger"
+          value={remoteKeyDraft}
+          onChange={(e) => setRemoteKeyDraft(e.target.value)}
+          style={{ marginBottom: 10 }}
+        />
+        {remoteSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Opgeslagen.</p>}
+        <button type="submit" className="primary" disabled={remoteBusy} style={{ width: "auto", padding: "8px 16px" }}>
+          Opslaan
+        </button>
+      </form>
+
       <div className="admin-glass-card" style={{ padding: 16, marginBottom: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
@@ -130,6 +198,13 @@ export default function BackupsPage() {
           </button>
         </div>
         {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginTop: 10 }}>{error}</p>}
+        {remotePushStatus && (
+          <p style={{ color: remotePushStatus.success ? "var(--success-text)" : "var(--danger-text)", fontSize: 13, marginTop: 10 }}>
+            {remotePushStatus.success
+              ? "✓ Ook verstuurd naar de externe ontvanger."
+              : `⚠ Versturen naar de externe ontvanger mislukt: ${remotePushStatus.error}`}
+          </p>
+        )}
       </div>
 
       {backups.length === 0 ? (
