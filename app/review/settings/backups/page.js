@@ -169,10 +169,10 @@ export default function BackupsPage() {
           onChange={(e) => setRemoteUrlDraft(e.target.value)}
           style={{ marginBottom: 8 }}
         />
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Gedeeld wachtwoord</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Wachtwoord</p>
         <input
-          type="text"
-          placeholder="Hetzelfde wachtwoord als BACKUP_SHARED_SECRET op de ontvanger"
+          type="password"
+          placeholder="Het wachtwoord dat je op de ontvanger zelf hebt ingesteld"
           value={remoteKeyDraft}
           onChange={(e) => setRemoteKeyDraft(e.target.value)}
           style={{ marginBottom: 10 }}
