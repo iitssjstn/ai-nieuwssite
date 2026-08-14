@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { listBackups, createBackupNow } from "@/lib/backup";
-import { getAutomationSettings } from "@/lib/db";
+import { listBackups, createBackupNow, pushBackupToRemote } from "@/lib/backup";
+import { getAutomationSettings, getRemoteBackupSettings } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +16,11 @@ export async function POST() {
   try {
     const { backup_frequency_hours } = getAutomationSettings();
     const filename = createBackupNow(backup_frequency_hours);
-    return NextResponse.json({ filename, backups: listBackups() });
+
+    const remoteSettings = getRemoteBackupSettings();
+    const remoteResult = await pushBackupToRemote(filename, remoteSettings);
+
+    return NextResponse.json({ filename, backups: listBackups(), remote: remoteResult });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 400 });
   }
