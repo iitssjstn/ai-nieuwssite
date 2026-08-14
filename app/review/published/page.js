@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useConfirmDialog } from "../../components/ConfirmDialog";
 import ShareButtons from "../../components/ShareButtons";
@@ -150,7 +151,28 @@ export default function PublishedArticles() {
 
       {filtered.map((a) => (
         <div key={a.id} className="pending-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-          <div style={{ minWidth: 0 }}>
+          <div style={{ display: "flex", gap: 12, alignItems: "center", minWidth: 0 }}>
+            {a.featured_image ? (
+              <Image
+                src={a.featured_image}
+                alt=""
+                width={52}
+                height={52}
+                style={{ width: 52, height: 52, borderRadius: 8, objectFit: "cover", flexShrink: 0, border: "1px solid var(--border)" }}
+              />
+            ) : (
+              <div style={{
+                width: 52, height: 52, borderRadius: 8, flexShrink: 0, border: "1px solid var(--border)",
+                background: "var(--surface-2)", display: "flex", alignItems: "center", justifyContent: "center",
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.8">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="9" cy="9" r="2" />
+                  <path d="M21 15l-5-5L5 21" />
+                </svg>
+              </div>
+            )}
+            <div style={{ minWidth: 0 }}>
             <span className="badge badge-muted" style={{ marginBottom: 8, display: "inline-block", ...categoryStyle(a.category) }}>{a.category}</span>
             {a.reviewer_id === "auto" && (
               <span className="badge" style={{ marginBottom: 8, marginLeft: 6, display: "inline-block", background: "var(--accent-bg)", color: "var(--accent-text)" }}>
@@ -166,6 +188,7 @@ export default function PublishedArticles() {
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
               {dateLine(a)}
             </p>
+            </div>
           </div>
           <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
             <Link href={`/review/${a.id}`}>
