@@ -20,6 +20,7 @@ const ADMIN_PATH_PREFIXES = [
   "/api/categories",
   "/api/invite",
   "/api/account",
+  "/api/backups",
 ];
 
 // Subset die WEL alleen op het admin-subdomein mag bestaan, maar NIET zelf
@@ -38,6 +39,7 @@ const ADMIN_ONLY_PREFIXES = [
   "/api/users",
   "/api/webhooks",
   "/api/keys",
+  "/api/backups",
 ];
 
 // Uitzondering binnen een admin-only prefix — wél inloggen vereist, maar
