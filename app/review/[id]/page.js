@@ -27,6 +27,8 @@ export default function ReviewDetail() {
   const [tagsInput, setTagsInput] = useState("");
   const [scheduledAt, setScheduledAt] = useState("");
   const [busy, setBusy] = useState(false);
+  const [editingClaimIndex, setEditingClaimIndex] = useState(null);
+  const [claimTextDraft, setClaimTextDraft] = useState("");
   const [uploadingFeatured, setUploadingFeatured] = useState(false);
   const [autosaveStatus, setAutosaveStatus] = useState(null);
   const [showRevisions, setShowRevisions] = useState(false);
@@ -355,17 +357,62 @@ export default function ReviewDetail() {
 
       {article.claims?.length > 0 && (
         <div style={{ background: "var(--surface-1)", borderRadius: 8, padding: "10px 14px", margin: "16px 0", fontSize: 13 }}>
-          <p style={{ margin: "0 0 8px", fontWeight: 500 }}>🔍 Claim-verificatie (door AI, controleer zelf ook)</p>
+          <p style={{ margin: "0 0 8px", fontWeight: 500 }}>🔍 Claim-verificatie</p>
+          <p style={{ margin: "0 0 10px", color: "var(--text-muted)", fontSize: 12 }}>
+            Klik op het icoon om de status handmatig om te zetten, of op de tekst om die te corrigeren.
+          </p>
           {article.claims.map((c, i) => (
-            <p key={i} style={{ margin: "4px 0", display: "flex", alignItems: "flex-start", gap: 6 }}>
-              <span style={{ flexShrink: 0 }}>{c.verified ? "✅" : "⚠️"}</span>
-              <span>
-                {c.text}
-                {c.confirmed_by_sources > 1 && (
-                  <span style={{ color: "var(--text-muted)" }}> — bevestigd door {c.confirmed_by_sources} bronnen</span>
-                )}
-              </span>
-            </p>
+            <div key={i} style={{ margin: "6px 0", display: "flex", alignItems: "flex-start", gap: 6 }}>
+              <button
+                onClick={() => act("update_claim", { claimIndex: i, claim: { verified: !c.verified } })}
+                disabled={busy}
+                title={c.verified ? "Markeer als niet geverifieerd" : "Markeer als geverifieerd"}
+                style={{ width: "auto", padding: "2px 6px", fontSize: 14, flexShrink: 0, background: "transparent", border: "none", cursor: "pointer" }}
+              >
+                {c.verified ? "✅" : "⚠️"}
+              </button>
+              {editingClaimIndex === i ? (
+                <span style={{ flex: 1, display: "flex", gap: 6 }}>
+                  <input
+                    type="text"
+                    value={claimTextDraft}
+                    onChange={(e) => setClaimTextDraft(e.target.value)}
+                    style={{ flex: 1, fontSize: 13, padding: "4px 8px" }}
+                    autoFocus
+                  />
+                  <button
+                    onClick={async () => {
+                      await act("update_claim", { claimIndex: i, claim: { text: claimTextDraft } });
+                      setEditingClaimIndex(null);
+                    }}
+                    disabled={busy}
+                    style={{ width: "auto", padding: "4px 10px", fontSize: 12 }}
+                  >
+                    Opslaan
+                  </button>
+                  <button
+                    onClick={() => setEditingClaimIndex(null)}
+                    style={{ width: "auto", padding: "4px 10px", fontSize: 12 }}
+                  >
+                    Annuleren
+                  </button>
+                </span>
+              ) : (
+                <span
+                  onClick={() => { setEditingClaimIndex(i); setClaimTextDraft(c.text); }}
+                  style={{ cursor: "pointer" }}
+                  title="Klik om te bewerken"
+                >
+                  {c.text}
+                  {c.confirmed_by_sources > 1 && (
+                    <span style={{ color: "var(--text-muted)" }}> — bevestigd door {c.confirmed_by_sources} bronnen</span>
+                  )}
+                  {c.manually_reviewed && (
+                    <span style={{ color: "var(--success-text)", fontSize: 11 }}> · handmatig gecontroleerd</span>
+                  )}
+                </span>
+              )}
+            </div>
           ))}
         </div>
       )}
