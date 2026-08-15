@@ -15,6 +15,10 @@ function timeAgo(dateStr) {
   return `${Math.floor(hours / 24)} dag(en) geleden`;
 }
 
+function sourceName(sourceId, sources) {
+  return sources.find((s) => s.id === sourceId)?.name || null;
+}
+
 export default function QueuePage() {
   const { confirm, ConfirmDialog } = useConfirmDialog();
   const [pending, setPending] = useState([]);
@@ -30,6 +34,8 @@ export default function QueuePage() {
   const [extraSources, setExtraSources] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
 
   async function loadAll() {
     const [pendingRes, sourcesRes, statsRes, categoriesRes] = await Promise.all([
@@ -77,6 +83,47 @@ export default function QueuePage() {
     await fetch(`/api/articles/${id}`, { method: "DELETE" });
     await loadAll();
     setBusyId(null);
+  }
+
+  function toggleSelect(id) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function toggleSelectAll() {
+    setSelectedIds((prev) => (prev.size === pending.length ? new Set() : new Set(pending.map((a) => a.id))));
+  }
+
+  async function bulkReject() {
+    if (selectedIds.size === 0) return;
+    if (!(await confirm(`${selectedIds.size} concept(en) afkeuren?`))) return;
+    setBulkBusy(true);
+    await Promise.all(
+      [...selectedIds].map((id) =>
+        fetch(`/api/articles/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "reject" }),
+        })
+      )
+    );
+    setSelectedIds(new Set());
+    await loadAll();
+    setBulkBusy(false);
+  }
+
+  async function bulkDelete() {
+    if (selectedIds.size === 0) return;
+    if (!(await confirm(`${selectedIds.size} concept(en) definitief verwijderen? Dit kan niet ongedaan worden gemaakt.`))) return;
+    setBulkBusy(true);
+    await Promise.all([...selectedIds].map((id) => fetch(`/api/articles/${id}`, { method: "DELETE" })));
+    setSelectedIds(new Set());
+    await loadAll();
+    setBulkBusy(false);
   }
 
   async function handleGenerate(e) {
@@ -218,12 +265,47 @@ export default function QueuePage() {
         </button>
       </form>
 
-      <h2 style={{ fontSize: 16, fontWeight: 500 }}>Wachtrij ({pending.length})</h2>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+        <h2 style={{ fontSize: 16, fontWeight: 500, margin: 0 }}>Wachtrij ({pending.length})</h2>
+        {me?.role === "admin" && pending.length > 0 && (
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                style={{ width: "auto" }}
+                checked={selectedIds.size === pending.length}
+                onChange={toggleSelectAll}
+              />
+              Alles selecteren
+            </label>
+            {selectedIds.size > 0 && (
+              <>
+                <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{selectedIds.size} geselecteerd</span>
+                <button disabled={bulkBusy} onClick={bulkReject} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+                  Afkeuren
+                </button>
+                <button disabled={bulkBusy} onClick={bulkDelete} className="danger" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+                  Verwijderen
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
       {pending.length === 0 && (
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Niets te reviewen.</p>
       )}
       {pending.map((a) => (
         <div key={a.id} className="pending-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+          {me?.role === "admin" && (
+            <input
+              type="checkbox"
+              style={{ width: "auto", flexShrink: 0 }}
+              checked={selectedIds.has(a.id)}
+              onChange={() => toggleSelect(a.id)}
+              onClick={(e) => e.stopPropagation()}
+            />
+          )}
           <Link href={`/review/${a.id}`} style={{ minWidth: 0, flex: 1, color: "inherit", textDecoration: "none" }}>
             <span className="badge badge-muted" style={{ marginBottom: 8, display: "inline-block" }}>{a.category}</span>
             {a.possible_duplicate && (
@@ -232,6 +314,7 @@ export default function QueuePage() {
             <p style={{ fontWeight: 500, margin: 0 }}>{a.title}</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
               {timeAgo(a.created_at)} · Confidence: {a.confidence_score != null ? Math.round(a.confidence_score * 100) + "%" : "-"}
+              {sourceName(a.source_id, sources) && ` · Bron: ${sourceName(a.source_id, sources)}`}
               {a.source_url && " · 🔗 bron-link beschikbaar"}
             </p>
           </Link>
