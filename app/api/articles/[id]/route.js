@@ -23,7 +23,7 @@ export async function GET(request, { params }) {
 export async function PATCH(request, { params }) {
   const session = await getSessionFromRequest(request);
   const body = await request.json();
-  const { action, title, articleBody, featuredImage, featuredImageCredit, tags, scheduledAt, liveblogText, updateId, location, pollId, category } = body;
+  const { action, title, articleBody, featuredImage, featuredImageCredit, tags, scheduledAt, liveblogText, updateId, location, pollId, category, claimIndex, claim } = body;
 
   if (ADMIN_ONLY_ACTIONS.includes(action) && session?.role !== "admin") {
     return NextResponse.json({ error: "Alleen voor admins" }, { status: 403 });
@@ -125,6 +125,19 @@ export async function PATCH(request, { params }) {
       pending_update: null,
     });
     triggerWebhooks("article.updated", updated).catch(() => {});
+  } else if (action === "update_claim") {
+    if (!Number.isInteger(claimIndex) || claimIndex < 0) {
+      return NextResponse.json({ error: "claimIndex is verplicht" }, { status: 400 });
+    }
+    const currentClaims = existing.claims || [];
+    if (claimIndex >= currentClaims.length) {
+      return NextResponse.json({ error: "Claim niet gevonden" }, { status: 400 });
+    }
+    const newClaims = currentClaims.map((c, i) =>
+      i === claimIndex ? { ...c, ...claim, manually_reviewed: true } : c
+    );
+    updated = updateArticle(params.id, { claims: newClaims });
+    diff = `claim ${claimIndex + 1} handmatig aangepast`;
   } else if (action === "dismiss_pending_update") {
     updated = updateArticle(params.id, { pending_update: null });
   } else {
