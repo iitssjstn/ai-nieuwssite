@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
+import { createSessionToken, SESSION_COOKIE_NAME, getCookieDomain } from "@/lib/auth";
 import { verifyCredentials } from "@/lib/auth-node";
 
 export async function POST(request) {
@@ -29,6 +29,7 @@ export async function POST(request) {
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 30, // 30 dagen
+    domain: getCookieDomain(request),
   });
   return res;
 }
