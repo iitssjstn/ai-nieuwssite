@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createSessionToken, SESSION_COOKIE_NAME } from "@/lib/auth";
+import { createSessionToken, SESSION_COOKIE_NAME, getCookieDomain } from "@/lib/auth";
 import { hasAdminAccount, createAdminAccount } from "@/lib/auth-node";
 import { setGoogleApiKey } from "@/lib/db";
 
@@ -46,6 +46,7 @@ export async function POST(request) {
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 24 * 30,
+    domain: getCookieDomain(request),
   });
   return res;
 }
