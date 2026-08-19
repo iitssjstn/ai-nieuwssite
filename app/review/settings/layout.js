@@ -12,6 +12,7 @@ const SECTIONS = [
   { href: "/review/settings/images", label: "Afbeeldingen", desc: "Gratis stockfoto-providers voor artikelen" },
   { href: "/review/settings/adsense", label: "Google AdSense", desc: "Publisher-ID en de grote advertentie-eenheid" },
   { href: "/review/settings/adsterra", label: "Adsterra", desc: "Social Bar, native banner en bannerslots" },
+  { href: "/review/settings/ezoic", label: "Ezoic", desc: "Ezoic-integratie aan/uit" },
   { href: "/review/settings/newsletter", label: "Nieuwsbrief", desc: "Afzender-e-mailadres en aanmeldingen" },
   { href: "/review/settings/social", label: "Social media", desc: "Links naar je profielen voor de footer" },
   { href: "/review/settings/info-pages", label: "Informatiepagina's", desc: "Over ons & Privacy aan/uit en bewerken" },
