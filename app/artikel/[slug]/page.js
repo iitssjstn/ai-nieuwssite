@@ -10,8 +10,18 @@ import NativeAd from "../../components/NativeAd";
 import KeyClaims from "../../components/KeyClaims";
 import { getArticle, getArticleBySlug, getArticles, getSiteSettings, getCategories, getAdSlots, incrementViews } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
-import { headers } from "next/headers";
+import { headers, cookies } from "next/headers";
+import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { isHtmlBody, getExcerpt, resolveImageUrl, getCategoryStyle } from "@/lib/content";
+
+// Voorkomt dat het bezoek van de ingelogde admin/redacteur zelf (bijv. even
+// een net gepubliceerd artikel controleren) meetelt als een gewone
+// paginaweergave in de statistieken.
+async function isAdminSession() {
+  const token = cookies().get(SESSION_COOKIE_NAME)?.value;
+  if (!token) return false;
+  return Boolean(await verifySessionToken(token));
+}
 
 function timeAgo(dateStr) {
   if (!dateStr) return "";
@@ -74,11 +84,13 @@ export function generateMetadata({ params }) {
   };
 }
 
-export default function ArticlePage({ params }) {
+export default async function ArticlePage({ params }) {
   const article = resolveArticle(params.slug);
   if (!article || article.status !== "published") notFound();
 
-  incrementViews(article.id);
+  if (!(await isAdminSession())) {
+    incrementViews(article.id);
+  }
 
   const { site_name } = getSiteSettings();
   const categories = getCategories();
