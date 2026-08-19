@@ -311,6 +311,11 @@ export default function QueuePage() {
             {a.possible_duplicate && (
               <span className="flag flag-warn" style={{ marginLeft: 8 }}>⚠ mogelijk duplicaat</span>
             )}
+            {a.flags?.content_thin && (
+              <span className="flag flag-warn" style={{ marginLeft: 8 }} title="Ruim onder de beoogde 350-500 woorden — overweeg aan te vullen vóór publicatie">
+                ⚠ dunne content ({a.flags.word_count} woorden)
+              </span>
+            )}
             <p style={{ fontWeight: 500, margin: 0 }}>{a.title}</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
               {timeAgo(a.created_at)} · Confidence: {a.confidence_score != null ? Math.round(a.confidence_score * 100) + "%" : "-"}
