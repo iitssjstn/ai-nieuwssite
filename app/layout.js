@@ -1,5 +1,5 @@
 import "./globals.css";
-import { getAdsenseClientId, getSiteSettings, getAdSlots } from "@/lib/db";
+import { getAdsenseClientId, getSiteSettings, getAdSlots, getEzoicEnabled } from "@/lib/db";
 import ConsentGatedScripts from "./components/ConsentGatedScripts";
 import CookieConsentBanner from "./components/CookieConsentBanner";
 
@@ -19,6 +19,7 @@ export function generateMetadata() {
 
 export default function RootLayout({ children }) {
   const adsenseClientId = getAdsenseClientId();
+  const ezoicEnabled = getEzoicEnabled();
   const { social_bar_url } = getAdSlots();
 
   return (
@@ -41,7 +42,7 @@ export default function RootLayout({ children }) {
       <body>
         {children}
         <CookieConsentBanner />
-        <ConsentGatedScripts adsenseClientId={adsenseClientId} socialBarUrl={social_bar_url} />
+        <ConsentGatedScripts adsenseClientId={adsenseClientId} socialBarUrl={social_bar_url} ezoicEnabled={ezoicEnabled} />
       </body>
     </html>
   );
