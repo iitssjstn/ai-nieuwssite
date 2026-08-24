@@ -25,8 +25,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="nl">
       <head>
-        {/* Vóór React laadt al de juiste modus instellen — anders zie je
-            eerst kort de lichte site en dan een flits naar donker. */}
+        {/* Set the correct mode before React loads — otherwise you'd
+            briefly see the light site and then a flash to dark. */}
         <script
           dangerouslySetInnerHTML={{
             __html: `

@@ -73,9 +73,9 @@ export default function ReviewOverview() {
 
   const maxViews = Math.max(1, ...pageviews.map((d) => d.views));
 
-  // Echte trend: laatste 7 dagen vs. de 7 dagen daarvoor (geen verzonnen
-  // percentage — als er niet genoeg data is voor een zinnige vergelijking,
-  // laten we het gewoon weg i.p.v. iets te verzinnen).
+  // Real trend: last 7 days vs. the 7 days before that (no invented
+  // percentage — if there isn't enough data for a meaningful comparison,
+  // we simply leave it out instead of making something up).
   let viewsTrend = null;
   if (pageviews.length >= 14) {
     const last7 = pageviews.slice(-7).reduce((s, d) => s + d.views, 0);
@@ -93,10 +93,10 @@ export default function ReviewOverview() {
 
   const alerts = [];
   if (stats?.pending_review > 0) {
-    alerts.push({ type: "warn", text: `${stats.pending_review} artikel(en) wachten op review`, href: "/review/queue" });
+    alerts.push({ type: "warn", text: `${stats.pending_review} article(s) awaiting review`, href: "/review/queue" });
   }
   if (stats?.pending_updates > 0) {
-    alerts.push({ type: "info", text: `${stats.pending_updates} artikel(en) hebben een update-melding`, href: "/review/published" });
+    alerts.push({ type: "info", text: `${stats.pending_updates} article(s) have an update notification`, href: "/review/published" });
   }
   if (alerts.length === 0 && stats) {
     alerts.push({ type: "ok", text: "Alles is bijgewerkt — niets wacht op actie", href: null });
@@ -109,24 +109,24 @@ export default function ReviewOverview() {
       {/* Begroeting */}
       <div style={{ marginBottom: 24 }}>
         <h1 style={{ fontSize: 26, fontWeight: 600, margin: 0 }}>
-          {firstName ? `Welkom terug, ${firstName}` : "Welkom terug"}
+          {firstName ? `Welcome back, ${firstName}` : "Welcome back"}
         </h1>
         <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: "6px 0 0" }}>
-          {stats ? `${stats.published} artikelen live, ${stats.pending_review} wachten op jouw review.` : "Even laden..."}
+          {stats ? `${stats.published} articles live, ${stats.pending_review} awaiting your review.` : "Loading..."}
         </p>
       </div>
 
       {/* Cirkelvormige kernstatistieken */}
       {stats && (
         <div style={{ display: "flex", gap: 14, marginBottom: 24, flexWrap: "wrap" }}>
-          <CircularStat label="Gepubliceerd" value={stats.published} color="#9fd15d" href="/review/published?tab=published" />
-          <CircularStat label="Te reviewen" value={stats.pending_review} color="#f0b154" href="/review/queue" />
-          <CircularStat label="Goedgekeurd" value={stats.approved} color="#6fa8e8" href="/review/published?tab=approved" />
-          <CircularStat label="Gepland" value={stats.scheduled} color="#6fa8e8" href="/review/published?tab=scheduled" />
-          <CircularStat label="Afgekeurd" value={stats.rejected} color="#f09595" href="/review/published?tab=rejected" />
-          <CircularStat label="Bronnen" value={stats.sources} color="#c79ef0" href="/review/sources" />
+          <CircularStat label="Published" value={stats.published} color="#9fd15d" href="/review/published?tab=published" />
+          <CircularStat label="To Review" value={stats.pending_review} color="#f0b154" href="/review/queue" />
+          <CircularStat label="Approved" value={stats.approved} color="#6fa8e8" href="/review/published?tab=approved" />
+          <CircularStat label="Scheduled" value={stats.scheduled} color="#6fa8e8" href="/review/published?tab=scheduled" />
+          <CircularStat label="Rejected" value={stats.rejected} color="#f09595" href="/review/published?tab=rejected" />
+          <CircularStat label="Sources" value={stats.sources} color="#c79ef0" href="/review/sources" />
           {activeVisitors !== null && (
-            <CircularStat label="Nu op de site" value={activeVisitors} color="#22C55E" />
+            <CircularStat label="On site now" value={activeVisitors} color="#22C55E" />
           )}
         </div>
       )}
@@ -136,7 +136,7 @@ export default function ReviewOverview() {
         {pageviews.length > 0 && (
           <div className="admin-glass-card" style={{ padding: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 4 }}>
-              <p style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>Paginaweergaven — laatste 14 dagen</p>
+              <p style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>Page views — last 14 days</p>
               {viewsTrend !== null && (
                 <span style={{ fontSize: 12, color: viewsTrend >= 0 ? "var(--success-text)" : "var(--danger-text)" }}>
                   {viewsTrend >= 0 ? "+" : ""}{viewsTrend}% t.o.v. vorige week
@@ -144,7 +144,7 @@ export default function ReviewOverview() {
               )}
             </div>
             <p style={{ fontSize: 22, fontWeight: 700, margin: "2px 0 14px" }}>
-              {pageviews.reduce((sum, d) => sum + d.views, 0)} <span style={{ fontSize: 13, fontWeight: 400, color: "var(--text-muted)" }}>weergaven totaal</span>
+              {pageviews.reduce((sum, d) => sum + d.views, 0)} <span style={{ fontSize: 13, fontWeight: 400, color: "var(--text-muted)" }}>total views</span>
             </p>
             <PageviewsChart data={pageviews} maxViews={maxViews} hoveredDay={hoveredDay} setHoveredDay={setHoveredDay} />
           </div>
@@ -154,7 +154,7 @@ export default function ReviewOverview() {
           {onlineUsers.length > 0 && (
             <div className="admin-glass-card" style={{ padding: "12px 16px" }}>
               <p style={{ fontSize: 10, color: "var(--text-muted)", margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "0.03em" }}>
-                Nu online
+                Online now
               </p>
               <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                 {onlineUsers.map((u) => (
@@ -168,9 +168,9 @@ export default function ReviewOverview() {
           )}
 
           <div className="admin-glass-card" style={{ padding: 20, display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 14px", alignSelf: "flex-start" }}>Categorieën</p>
+            <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 14px", alignSelf: "flex-start" }}>Categories</p>
             {categoryData.length === 0 ? (
-              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven.</p>
+              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No views yet.</p>
             ) : (
               <>
                 <DonutChart data={categoryData} hoveredLabel={hoveredCategory} onHover={setHoveredCategory} />
@@ -222,7 +222,7 @@ export default function ReviewOverview() {
         {analytics && (
           <div className="admin-glass-card" style={{ padding: 20 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <p style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>Meest gelezen</p>
+              <p style={{ fontSize: 14, fontWeight: 600, margin: 0 }}>Most Read</p>
               <select value={analyticsPeriod} onChange={(e) => setAnalyticsPeriod(e.target.value)} style={{ width: "auto", padding: "3px 6px", fontSize: 12 }}>
                 <option value="today">Vandaag</option>
                 <option value="week">Deze week</option>
@@ -230,7 +230,7 @@ export default function ReviewOverview() {
               </select>
             </div>
             {analytics.top_articles.length === 0 && (
-              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven in deze periode.</p>
+              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No views in this period yet.</p>
             )}
             {analytics.top_articles.map((a, i) => (
               <Link key={a.id} href={`/review/${a.id}`} style={{ display: "flex", justifyContent: "space-between", fontSize: 13, padding: "6px 0", color: "inherit", textDecoration: "none" }}>
@@ -242,7 +242,7 @@ export default function ReviewOverview() {
         )}
       </div>
 
-      {/* Recente artikelen — tabel */}
+      {/* Recent articles — table */}
       {recentArticles.length > 0 && (
         <div className="admin-glass-card" style={{ padding: 20, marginBottom: 16 }}>
           <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 14px" }}>Recent gepubliceerd</p>
@@ -400,7 +400,7 @@ function DonutChart({ data, hoveredLabel, onHover }) {
       ) : (
         <>
           <text x={80} y={76} textAnchor="middle" fontSize={22} fontWeight={700} fill="var(--text-primary)">{total}</text>
-          <text x={80} y={95} textAnchor="middle" fontSize={11} fill="var(--text-muted)">weergaven</text>
+          <text x={80} y={95} textAnchor="middle" fontSize={11} fill="var(--text-muted)">views</text>
         </>
       )}
     </svg>

@@ -16,14 +16,14 @@ export default function AdminKaartPage() {
 
   return (
     <div className="container">
-      <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Kaart-overzicht</h1>
+      <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Map Overview</h1>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Alle artikelen met een gekoppelde locatie, ongeacht status. De publieke kaart op{" "}
-        <code>/kaart</code> toont alleen gepubliceerde artikelen. Voeg een locatie toe bij het
-        bewerken van een artikel.
+        All articles with a linked location, regardless of status. The public map at{" "}
+        <code>/kaart</code> only shows published articles. Add a location when
+        editing an article.
       </p>
       {articles.length === 0 ? (
-        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Nog geen artikelen met een locatie.</p>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>No articles with a location yet.</p>
       ) : (
         <NewsMap articles={articles} />
       )}

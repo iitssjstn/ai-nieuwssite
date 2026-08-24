@@ -16,11 +16,11 @@ export default function KeyClaims({ claims }) {
             </span>
           ) : c.verified ? (
             <span style={{ fontSize: 11, color: "var(--success-text)", whiteSpace: "nowrap", flexShrink: 0 }}>
-              ✓ Bevestigd door de bron
+              ✓ Confirmed by the source
             </span>
           ) : (
             <span style={{ fontSize: 11, color: "var(--danger-text)", whiteSpace: "nowrap", flexShrink: 0 }}>
-              ⚠ Niet letterlijk in de bron
+              ⚠ Not verbatim in the source
             </span>
           )}
         </div>

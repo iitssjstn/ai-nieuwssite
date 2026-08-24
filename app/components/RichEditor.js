@@ -38,10 +38,10 @@ export default function RichEditor({ value, onChange }) {
     try {
       const res = await fetch("/api/uploads", { method: "POST", body: formData });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Upload mislukt");
+      if (!res.ok) throw new Error(data.error || "Upload failed");
       exec("insertImage", data.url);
     } catch (err) {
-      alert("Afbeelding uploaden mislukt: " + err.message);
+      alert("Image upload failed: " + err.message);
     }
   }
 

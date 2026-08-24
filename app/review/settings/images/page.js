@@ -46,12 +46,12 @@ export default function ImagesPage() {
       await load();
     } else {
       const data = await res.json();
-      setError(data.error || "Opslaan mislukt");
+      setError(data.error || "Save failed");
     }
   }
 
   async function removeCustomProvider(id, label) {
-    if (!(await confirm(`Provider "${label}" verwijderen? Dit verwijdert ook de opgeslagen API-key.`))) return;
+    if (!(await confirm(`Delete provider "${label}"? This also removes the saved API key.`))) return;
     await fetch(`/api/settings/custom-image-providers/${id}`, { method: "DELETE" });
     await load();
   }
@@ -76,41 +76,41 @@ export default function ImagesPage() {
       await load();
     } else {
       const data = await res.json();
-      setAddError(data.error || "Toevoegen mislukt");
+      setAddError(data.error || "Add failed");
     }
   }
 
   return (
     <>
       {ConfirmDialog}
-      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Afbeeldingen</h2>
+      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Images</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Zodra je hier minstens één key instelt, zoekt de AI automatisch een passende gratis
-        stockfoto bij elk nieuw concept — op basis van trefwoorden die de AI zelf bedenkt.
-        Werkt de eerste provider niet, dan valt het systeem terug op de volgende.
+        Once you set at least one key here, the AI automatically searches for a matching free
+        stock photo for each new draft — based on keywords the AI comes up with itself.
+        If the first provider doesn't work, the system falls back to the next one.
       </p>
 
       {providers.map((p) => (
         <div key={p.id} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
             <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>
-              {p.label} {p.custom && <span className="badge badge-muted" style={{ fontSize: 10, marginLeft: 6 }}>eigen provider</span>}
+              {p.label} {p.custom && <span className="badge badge-muted" style={{ fontSize: 10, marginLeft: 6 }}>custom provider</span>}
             </p>
             <span className={`badge ${p.hasKey ? "badge-muted" : ""}`} style={{ fontSize: 11 }}>
-              {p.hasKey ? `Actief · ${p.masked}` : "Niet ingesteld"}
+              {p.hasKey ? `Active · ${p.masked}` : "Not configured"}
             </span>
           </div>
 
           <input
             type="text"
-            placeholder={p.hasKey ? "Nieuwe API-key (laat leeg om te behouden)" : "API-key"}
+            placeholder={p.hasKey ? "New API key (leave blank to keep)" : "API key"}
             value={drafts[p.id] ?? ""}
             onChange={(e) => setDrafts((d) => ({ ...d, [p.id]: e.target.value }))}
             style={{ marginBottom: 10 }}
           />
 
           {error && busyId === null && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 8 }}>{error}</p>}
-          {savedId === p.id && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Opgeslagen.</p>}
+          {savedId === p.id && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Saved.</p>}
 
           <div style={{ display: "flex", gap: 8 }}>
             <button
@@ -119,7 +119,7 @@ export default function ImagesPage() {
               disabled={busyId === p.id}
               style={{ width: "auto", padding: "8px 16px" }}
             >
-              {busyId === p.id ? "Bezig..." : "Opslaan"}
+              {busyId === p.id ? "Working..." : "Save"}
             </button>
             {p.custom && (
               <button
@@ -127,7 +127,7 @@ export default function ImagesPage() {
                 className="danger"
                 style={{ width: "auto", padding: "8px 16px" }}
               >
-                Provider verwijderen
+                Delete provider
               </button>
             )}
           </div>
@@ -135,7 +135,7 @@ export default function ImagesPage() {
       ))}
 
       <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>
-        Gratis keys: <a href="https://www.pexels.com/api/" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-text)" }}>pexels.com/api</a>
+        Free keys: <a href="https://www.pexels.com/api/" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-text)" }}>pexels.com/api</a>
         {" · "}
         <a href="https://unsplash.com/developers" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-text)" }}>unsplash.com/developers</a>
         {" · "}
@@ -144,51 +144,51 @@ export default function ImagesPage() {
 
       {!showAddForm ? (
         <button onClick={() => setShowAddForm(true)} style={{ width: "auto", padding: "8px 16px" }}>
-          + Eigen fotoprovider toevoegen
+          + Add custom photo provider
         </button>
       ) : (
         <form onSubmit={handleAddProvider} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16 }}>
-          <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Eigen fotoprovider toevoegen</p>
+          <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Add custom photo provider</p>
           <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 14, lineHeight: 1.5 }}>
-            Voor elke API die zoekresultaten als JSON teruggeeft. Gebruik <code>{"{q}"}</code> in de
-            URL als plek voor de zoekterm. De veldnamen hieronder verwijzen naar de structuur van
-            het JSON-antwoord van die API (bijv. bij Pixabay: resultatenpad "hits", afbeeldingsveld
+            For any API that returns search results as JSON. Use <code>{"{q}"}</code> in the
+            URL as the placeholder for the search term. The field names below refer to the structure of
+            that API's JSON response (e.g. for Pixabay: results path "hits", image field
             "largeImageURL").
           </p>
 
-          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Naam</p>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Name</p>
           <input
             type="text"
-            placeholder="Bijv. MijnFotoAPI"
+            placeholder="e.g. MyPhotoAPI"
             value={newProvider.label}
             onChange={(e) => setNewProvider((p) => ({ ...p, label: e.target.value }))}
             style={{ marginBottom: 10 }}
           />
 
           <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
-            Zoek-URL (met <code>{"{q}"}</code> als placeholder voor de zoekterm)
+            Search URL (with <code>{"{q}"}</code> as the placeholder for the search term)
           </p>
           <input
             type="text"
-            placeholder="https://api.voorbeeld.com/search?query={q}&per_page=6"
+            placeholder="https://api.example.com/search?query={q}&per_page=6"
             value={newProvider.url_template}
             onChange={(e) => setNewProvider((p) => ({ ...p, url_template: e.target.value }))}
             style={{ marginBottom: 10 }}
           />
 
-          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Hoe wordt de API-key meegestuurd?</p>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>How is the API key sent?</p>
           <select
             value={newProvider.auth_type}
             onChange={(e) => setNewProvider((p) => ({ ...p, auth_type: e.target.value }))}
             style={{ marginBottom: 10, padding: 8, borderRadius: 8, border: "1px solid var(--border)" }}
           >
-            <option value="query">Als queryparameter in de URL (bijv. Pixabay: ?key=...)</option>
-            <option value="header">Als header (bijv. Pexels/Unsplash: Authorization-header)</option>
+            <option value="query">As a query parameter in the URL (e.g. Pixabay: ?key=...)</option>
+            <option value="header">As a header (e.g. Pexels/Unsplash: Authorization header)</option>
           </select>
 
           {newProvider.auth_type === "query" ? (
             <>
-              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Naam van de queryparameter</p>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Name of the query parameter</p>
               <input
                 type="text"
                 placeholder="key"
@@ -199,7 +199,7 @@ export default function ImagesPage() {
             </>
           ) : (
             <>
-              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Headernaam</p>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Header name</p>
               <input
                 type="text"
                 placeholder="Authorization"
@@ -208,7 +208,7 @@ export default function ImagesPage() {
                 style={{ marginBottom: 10 }}
               />
               <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
-                Voorvoegsel vóór de key (optioneel, bijv. "Bearer " of "Client-ID ")
+                Prefix before the key (optional, e.g. "Bearer " or "Client-ID ")
               </p>
               <input
                 type="text"
@@ -221,49 +221,49 @@ export default function ImagesPage() {
           )}
 
           <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
-            Pad naar de resultatenlijst in de JSON-respons
+            Path to the results list in the JSON response
           </p>
           <input
             type="text"
-            placeholder="Bijv. photos of data.items"
+            placeholder="e.g. photos or data.items"
             value={newProvider.results_path}
             onChange={(e) => setNewProvider((p) => ({ ...p, results_path: e.target.value }))}
             style={{ marginBottom: 10 }}
           />
 
           <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
-            Veld met de afbeeldings-URL (binnen elk item)
+            Field with the image URL (within each item)
           </p>
           <input
             type="text"
-            placeholder="Bijv. src.large of imageURL"
+            placeholder="e.g. src.large or imageURL"
             value={newProvider.image_field}
             onChange={(e) => setNewProvider((p) => ({ ...p, image_field: e.target.value }))}
             style={{ marginBottom: 10 }}
           />
 
-          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Veld met een kleinere thumbnail (optioneel)</p>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Field with a smaller thumbnail (optional)</p>
           <input
             type="text"
-            placeholder="Bijv. src.medium"
+            placeholder="e.g. src.medium"
             value={newProvider.thumb_field}
             onChange={(e) => setNewProvider((p) => ({ ...p, thumb_field: e.target.value }))}
             style={{ marginBottom: 10 }}
           />
 
-          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Veld met de naam van de maker (optioneel)</p>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Field with the creator's name (optional)</p>
           <input
             type="text"
-            placeholder="Bijv. photographer of user.name"
+            placeholder="e.g. photographer or user.name"
             value={newProvider.credit_name_field}
             onChange={(e) => setNewProvider((p) => ({ ...p, credit_name_field: e.target.value }))}
             style={{ marginBottom: 10 }}
           />
 
-          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Veld met een link naar de foto/maker (optioneel)</p>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Field with a link to the photo/creator (optional)</p>
           <input
             type="text"
-            placeholder="Bijv. url of pageURL"
+            placeholder="e.g. url or pageURL"
             value={newProvider.credit_url_field}
             onChange={(e) => setNewProvider((p) => ({ ...p, credit_url_field: e.target.value }))}
             style={{ marginBottom: 10 }}
@@ -273,10 +273,10 @@ export default function ImagesPage() {
 
           <div style={{ display: "flex", gap: 8 }}>
             <button type="submit" className="primary" disabled={addBusy} style={{ width: "auto", padding: "8px 16px" }}>
-              {addBusy ? "Bezig..." : "Toevoegen"}
+              {addBusy ? "Working..." : "Add"}
             </button>
             <button type="button" onClick={() => setShowAddForm(false)} style={{ width: "auto", padding: "8px 16px" }}>
-              Annuleren
+              Cancel
             </button>
           </div>
         </form>

@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 
 const BANNER_SLOTS = [
-  { id: "top_banner", label: "Bovenaan de homepage", hint: "Brede banner, bijv. 728×90" },
-  { id: "homepage_sidebar", label: "Zijbalk homepage", hint: "Kleine banner, bijv. 320×50" },
-  { id: "article_sidebar", label: "Zijbalk artikelpagina", hint: "Staande banner, bijv. 160×300" },
-  { id: "article_incontent", label: "Onder het artikel", hint: "Brede banner, bijv. 468×60" },
+  { id: "top_banner", label: "Top of homepage", hint: "Wide banner, e.g. 728×90" },
+  { id: "homepage_sidebar", label: "Homepage sidebar", hint: "Small banner, e.g. 320×50" },
+  { id: "article_sidebar", label: "Article page sidebar", hint: "Vertical banner, e.g. 160×300" },
+  { id: "article_incontent", label: "Below the article", hint: "Wide banner, e.g. 468×60" },
 ];
 
 export default function AdsterraPage() {
@@ -44,20 +44,20 @@ export default function AdsterraPage() {
     <>
       <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Adsterra</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Voor netwerken als Adsterra, die met losse code-snippets werken i.p.v. één publisher-ID.
-        Elk veld is optioneel — laat leeg om die advertentie niet te tonen.
+        For networks like Adsterra, which work with separate code snippets instead of a single
+        publisher ID. Each field is optional — leave blank to not show that ad.
       </p>
 
       <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
         <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Social Bar</p>
         <p style={{ fontSize: 12, color: "var(--danger-text)", marginBottom: 10, lineHeight: 1.5 }}>
-          ⚠ Dit is doorgaans het meest opdringerige advertentieformaat (zwevende
-          meldingen/pop-up-achtige balken, site-breed). Overweeg dit uit te laten als je
-          bezoekerservaring belangrijker vindt dan maximale inkomsten.
+          ⚠ This is typically the most intrusive ad format (floating
+          notifications/pop-up-like bars, site-wide). Consider leaving this off if
+          you value visitor experience over maximum revenue.
         </p>
         <input
           type="text"
-          placeholder="Volledige script-URL (bijv. https://.../invoke.js)"
+          placeholder="Full script URL (e.g. https://.../invoke.js)"
           defaultValue={slots.social_bar_url || ""}
           onBlur={(e) => saveSlots({ ...slots, social_bar_url: e.target.value.trim() || null })}
           disabled={slotBusy}
@@ -65,8 +65,8 @@ export default function AdsterraPage() {
       </div>
 
       <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
-        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Native banner (blendt met content)</p>
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Script-URL</p>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Native banner (blends with content)</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Script URL</p>
         <input
           type="text"
           placeholder="https://.../invoke.js"
@@ -75,7 +75,7 @@ export default function AdsterraPage() {
           disabled={slotBusy}
           style={{ marginBottom: 8 }}
         />
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Container-ID</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Container ID</p>
         <input
           type="text"
           placeholder="container-xxxxxxxx"
@@ -102,7 +102,7 @@ export default function AdsterraPage() {
               />
               <input
                 type="number"
-                placeholder="Breedte"
+                placeholder="Width"
                 defaultValue={current.width || ""}
                 onBlur={(e) => saveSlots({ ...slots, banners: { ...slots.banners, [slot.id]: { ...current, width: parseInt(e.target.value, 10) || null } } })}
                 disabled={slotBusy}
@@ -110,7 +110,7 @@ export default function AdsterraPage() {
               />
               <input
                 type="number"
-                placeholder="Hoogte"
+                placeholder="Height"
                 defaultValue={current.height || ""}
                 onBlur={(e) => saveSlots({ ...slots, banners: { ...slots.banners, [slot.id]: { ...current, height: parseInt(e.target.value, 10) || null } } })}
                 disabled={slotBusy}
@@ -121,7 +121,7 @@ export default function AdsterraPage() {
         );
       })}
 
-      {slotSaved && <p style={{ color: "var(--success-text)", fontSize: 13 }}>Opgeslagen.</p>}
+      {slotSaved && <p style={{ color: "var(--success-text)", fontSize: 13 }}>Saved.</p>}
     </>
   );
 }

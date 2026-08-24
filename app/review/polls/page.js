@@ -37,12 +37,12 @@ export default function PollsPage() {
       await load();
     } else {
       const data = await res.json();
-      setError(data.error || "Aanmaken mislukt");
+      setError(data.error || "Creation failed");
     }
   }
 
   async function remove(id) {
-    if (!(await confirm("Deze poll verwijderen?"))) return;
+    if (!(await confirm("Delete this poll?"))) return;
     await fetch(`/api/polls/${id}`, { method: "DELETE" });
     await load();
   }
@@ -63,14 +63,14 @@ export default function PollsPage() {
       {ConfirmDialog}
       <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Polls</h1>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Maak een poll aan en koppel het poll-ID bij het bewerken van een artikel om 'm daaronder te tonen.
+        Create a poll and link the poll ID when editing an article to display it below.
       </p>
 
       <form onSubmit={handleCreate} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 20 }}>
-        <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>Nieuwe poll</p>
+        <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>New poll</p>
         <input
           type="text"
-          placeholder="Vraag"
+          placeholder="Question"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
           style={{ marginBottom: 8 }}
@@ -79,19 +79,19 @@ export default function PollsPage() {
           <input
             key={i}
             type="text"
-            placeholder={`Optie ${i + 1}`}
+            placeholder={`Option ${i + 1}`}
             value={opt}
             onChange={(e) => updateOption(i, e.target.value)}
             style={{ marginBottom: 8 }}
           />
         ))}
         <button type="button" onClick={() => setOptions((o) => [...o, ""])} style={{ width: "auto", padding: "5px 10px", fontSize: 12, marginBottom: 10 }}>
-          + Optie toevoegen
+          + Add option
         </button>
         <br />
         {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 8 }}>{error}</p>}
         <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px" }}>
-          Aanmaken
+          Create
         </button>
       </form>
 
@@ -99,24 +99,24 @@ export default function PollsPage() {
         <div key={p.id} className="pending-item">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8 }}>
             <p style={{ fontWeight: 500, margin: 0 }}>{p.question}</p>
-            <span className="badge badge-muted">{p.active ? "Actief" : "Inactief"}</span>
+            <span className="badge badge-muted">{p.active ? "Active" : "Inactive"}</span>
           </div>
           {p.options.map((o) => {
             const total = p.options.reduce((s, x) => s + x.votes, 0);
             const pct = total > 0 ? Math.round((o.votes / total) * 100) : 0;
             return (
               <p key={o.id} style={{ fontSize: 13, margin: "4px 0" }}>
-                {o.text} — {o.votes} stemmen ({pct}%)
+                {o.text} — {o.votes} votes ({pct}%)
               </p>
             );
           })}
           <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "6px 0" }}>Poll-ID: {p.id}</p>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={() => toggleActive(p.id)} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-              {p.active ? "Deactiveren" : "Activeren"}
+              {p.active ? "Deactivate" : "Activate"}
             </button>
             <button onClick={() => remove(p.id)} className="danger" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-              Verwijderen
+              Delete
             </button>
           </div>
         </div>

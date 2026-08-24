@@ -36,26 +36,26 @@ export default function EzoicPage() {
     <>
       <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Ezoic</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Ezoic vraagt geen publisher-ID of code-snippet — de koppeling met je site gebeurt via
-        domeinverificatie in het Ezoic-dashboard zelf. Zodra je dat daar hebt afgerond, zet je
-        het hieronder aan om het benodigde scriptje op de site te laten laden.
+        Ezoic doesn't require a publisher ID or code snippet — the connection with your site happens
+        via domain verification in the Ezoic dashboard itself. Once you've completed that there,
+        turn this on below to have the necessary script load on the site.
       </p>
       <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 20 }}>
-        Net als bij AdSense laadt dit scriptje pas nadat een bezoeker cookies heeft geaccepteerd
-        — Ezoic's eigen toestemmingsvenster wordt bewust niet gebruikt, om te voorkomen dat
-        bezoekers twee verschillende toestemmingsschermen te zien krijgen.
+        Just like with AdSense, this script only loads after a visitor has accepted cookies
+        — Ezoic's own consent popup is deliberately not used, to prevent
+        visitors from seeing two different consent screens.
       </p>
 
       <div className="admin-glass-card" style={{ padding: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Ezoic-script</p>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Ezoic script</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
-              {enabled ? "Actief — het scriptje wordt geladen na toestemming" : "Uitgeschakeld"}
+              {enabled ? "Active — the script loads after consent" : "Disabled"}
             </p>
           </div>
           <button onClick={toggle} disabled={busy} className={enabled ? "danger" : "primary"} style={{ width: "auto", padding: "8px 16px" }}>
-            {enabled ? "Uitzetten" : "Aanzetten"}
+            {enabled ? "Turn Off" : "Turn On"}
           </button>
         </div>
       </div>

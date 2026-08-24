@@ -20,7 +20,7 @@ const NAV = [
   },
   {
     href: "/review/account",
-    label: "Mijn account",
+    label: "My Account",
     group: null,
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -31,7 +31,7 @@ const NAV = [
   },
   {
     href: "/review/queue",
-    label: "Wachtrij",
+    label: "Queue",
     group: "Content",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -41,7 +41,7 @@ const NAV = [
   },
   {
     href: "/review/published",
-    label: "Gepubliceerd",
+    label: "Published",
     group: "Content",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -64,7 +64,7 @@ const NAV = [
   },
   {
     href: "/review/kaart",
-    label: "Kaart",
+    label: "Map",
     group: "Content",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -75,9 +75,9 @@ const NAV = [
   },
   {
     href: "/review/sources",
-    label: "Bronnen",
+    label: "Sources",
     adminOnly: true,
-    group: "Beheer",
+    group: "Management",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M5 5c8 0 14 6 14 14" />
@@ -90,7 +90,7 @@ const NAV = [
     href: "/review/webhooks",
     label: "Webhooks & API",
     adminOnly: true,
-    group: "Beheer",
+    group: "Management",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <path d="M8 12a4 4 0 1 1 8 0 4 4 0 0 1-8 0Z" />
@@ -100,9 +100,9 @@ const NAV = [
   },
   {
     href: "/review/settings",
-    label: "Instellingen",
+    label: "Settings",
     adminOnly: true,
-    group: "Beheer",
+    group: "Management",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
         <circle cx="12" cy="12" r="3" />
@@ -173,11 +173,11 @@ export default function ReviewLayout({ children }) {
         const stats = await res.json();
         const count = stats.pending_review || 0;
 
-        // Alleen een browsermelding tonen bij een ECHTE toename (niet bij de
-        // allereerste keer laden, anders krijg je 'm bij elke paginabezoek).
+        // Only show a browser notification on a REAL increase (not on the
+        // very first load, otherwise you'd get it on every page visit).
         if (notifiedOnce.current && count > lastCount.current && typeof Notification !== "undefined" && Notification.permission === "granted") {
-          new Notification("Novapers — nieuwe review", {
-            body: `${count} artikel(en) wachten op review`,
+          new Notification("Novapers — new review", {
+            body: `${count} article(s) awaiting review`,
           });
         }
         notifiedOnce.current = true;
@@ -185,7 +185,7 @@ export default function ReviewLayout({ children }) {
         setPendingCount(count);
         setPendingUpdatesCount(stats.pending_updates || 0);
       } catch {
-        // volgende poll probeert het gewoon opnieuw
+        // next poll will just try again
       }
     }
     poll();
@@ -244,7 +244,7 @@ export default function ReviewLayout({ children }) {
                   </span>
                 )}
                 {showUpdateBadge && (
-                  <span title="Artikelen met een nieuwe-informatie-melding" style={{
+                  <span title="Articles with a new information notification" style={{
                     marginLeft: "auto", background: "var(--accent-text)", color: "#fff", borderRadius: 10,
                     fontSize: 11, padding: "1px 7px", fontWeight: 600,
                   }}>
@@ -262,7 +262,7 @@ export default function ReviewLayout({ children }) {
           className="admin-nav-item"
         >
           <ArrowLeftIcon />
-          Naar de site
+          Go to site
         </a>
 
         <div className="admin-sidebar-spacer" />

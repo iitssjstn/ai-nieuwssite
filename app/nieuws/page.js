@@ -16,7 +16,7 @@ function getBaseUrl() {
 export function generateMetadata() {
   const { site_name } = getSiteSettings();
   return {
-    title: `Al het nieuws — ${site_name}`,
+    title: `All news — ${site_name}`,
     description: `Alle artikelen van ${site_name}, chronologisch.`,
     alternates: { canonical: `${getBaseUrl()}/nieuws` },
   };
@@ -30,10 +30,10 @@ export default function AllNewsPage() {
   return (
     <div className="container">
       <Header />
-      <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>Al het nieuws</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>All News</h1>
 
       {articles.length === 0 && (
-        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Nog geen gepubliceerde artikelen.</p>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>No published articles yet.</p>
       )}
 
       <div className="sidebar-box">

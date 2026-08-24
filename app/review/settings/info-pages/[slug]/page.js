@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import RichEditor from "../../../../components/RichEditor";
 
-const LABELS = { about: "Over ons", privacy: "Privacy" };
+const LABELS = { about: "About Us", privacy: "Privacy" };
 
 export default function EditInfoPage() {
   const { slug } = useParams();
@@ -41,12 +41,12 @@ export default function EditInfoPage() {
       setSaved(true);
     } else {
       const data = await res.json();
-      setError(data.error || "Opslaan mislukt");
+      setError(data.error || "Save failed");
     }
   }
 
   if (!LABELS[slug]) {
-    return <div className="container"><p>Onbekende pagina.</p></div>;
+    return <div className="container"><p>Unknown page.</p></div>;
   }
 
   if (loading) return null;
@@ -54,12 +54,12 @@ export default function EditInfoPage() {
   return (
     <div className="container">
       <button onClick={() => router.push("/review/settings/seo")} style={{ width: "auto", padding: "6px 12px", fontSize: 13, marginBottom: 16 }}>
-        ← Terug naar instellingen
+        ← Back to settings
       </button>
 
-      <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 16 }}>{LABELS[slug]} bewerken</h1>
+      <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 16 }}>Edit {LABELS[slug]}</h1>
 
-      <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Titel (verschijnt bovenaan de pagina)</p>
+      <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Title (appears at the top of the page)</p>
       <input
         type="text"
         value={title}
@@ -67,14 +67,14 @@ export default function EditInfoPage() {
         style={{ marginBottom: 16, fontWeight: 500 }}
       />
 
-      <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Inhoud</p>
+      <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Content</p>
       <RichEditor value={body} onChange={setBody} />
 
       {error && <p style={{ color: "var(--danger-text)", fontSize: 13, margin: "10px 0" }}>{error}</p>}
-      {saved && <p style={{ color: "var(--success-text)", fontSize: 13, margin: "10px 0" }}>Opgeslagen.</p>}
+      {saved && <p style={{ color: "var(--success-text)", fontSize: 13, margin: "10px 0" }}>Saved.</p>}
 
       <button onClick={handleSave} disabled={busy} className="primary" style={{ width: "auto", padding: "8px 16px", marginTop: 10 }}>
-        {busy ? "Bezig..." : "Opslaan"}
+        {busy ? "Working..." : "Save"}
       </button>
     </div>
   );

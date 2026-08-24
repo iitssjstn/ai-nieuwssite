@@ -92,7 +92,7 @@ export default function ReviewDetail() {
         lastSaved.current = { title, body, featuredImage, category };
         setAutosaveStatus("Automatisch opgeslagen · " + new Date().toLocaleTimeString("nl-NL"));
       } else {
-        setAutosaveStatus("Automatisch opslaan mislukt");
+        setAutosaveStatus("Auto-save failed");
       }
     }, 4000);
 
@@ -115,7 +115,7 @@ export default function ReviewDetail() {
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       setBusy(false);
-      alert(data.error || "Actie mislukt");
+      alert(data.error || "Action failed");
       return;
     }
     const updated = await res.json();
@@ -129,7 +129,7 @@ export default function ReviewDetail() {
   }
 
   async function remove() {
-    if (!(await confirm("Dit artikel definitief verwijderen? Dit kan niet ongedaan worden gemaakt."))) return;
+    if (!(await confirm("Permanently delete this article? This cannot be undone."))) return;
     setBusy(true);
     const res = await fetch(`/api/articles/${id}`, { method: "DELETE" });
     setBusy(false);
@@ -156,10 +156,10 @@ export default function ReviewDetail() {
         { headers: { "Accept-Language": "nl" } }
       );
       const results = await res.json();
-      if (!results[0]) throw new Error("Locatie niet gevonden");
+      if (!results[0]) throw new Error("Location not found");
       setLocationInput({ label: locationInput.label, lat: results[0].lat, lng: results[0].lon });
     } catch (err) {
-      alert("Locatie opzoeken mislukt: " + err.message);
+      alert("Location lookup failed: " + err.message);
     } finally {
       setGeocoding(false);
     }
@@ -178,7 +178,7 @@ export default function ReviewDetail() {
       if (!res.ok) throw new Error(data.error);
       setPhotoOptions(data.options);
     } catch (err) {
-      alert("Stockfoto zoeken mislukt: " + err.message);
+      alert("Stock photo search failed: " + err.message);
     } finally {
       setSearchingPhoto(false);
     }
@@ -199,14 +199,14 @@ export default function ReviewDetail() {
 
   function handleSchedule() {
     if (!scheduledAt) {
-      alert("Kies eerst een datum en tijd.");
+      alert("Choose a date and time first.");
       return;
     }
     act("schedule", { scheduledAt: new Date(scheduledAt).toISOString() });
   }
 
   async function restoreRevision(rev) {
-    if (!(await confirm("Deze oudere versie terugzetten? Je huidige concept wordt bewaard in de geschiedenis.", { danger: false, confirmLabel: "Terugzetten" }))) return;
+    if (!(await confirm("Restore this older version? Your current draft will be kept in the history.", { danger: false, confirmLabel: "Restore" }))) return;
     setTitle(rev.title);
     setBody(plainTextToHtml(rev.body));
     setFeaturedImage(rev.featured_image);
@@ -226,11 +226,11 @@ export default function ReviewDetail() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload mislukt");
       setFeaturedImage(data.url);
-      // Een zelf-geüploade foto heeft geen stockfoto-bron — anders blijft de
-      // credit van een eerder automatisch gevonden foto ten onrechte staan.
+      // A self-uploaded photo has no stock photo source — otherwise the
+      // credit of a previously auto-found photo would incorrectly remain.
       setFeaturedImageCredit(null);
     } catch (err) {
-      alert("Uitgelichte afbeelding uploaden mislukt: " + err.message);
+      alert("Featured image upload failed: " + err.message);
     } finally {
       setUploadingFeatured(false);
     }
@@ -292,7 +292,7 @@ export default function ReviewDetail() {
   }
 
   async function handleDeleteUpdate(updateId) {
-    if (!(await confirm("Deze update verwijderen?"))) return;
+    if (!(await confirm("Delete this update?"))) return;
     const res = await fetch(`/api/articles/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -308,7 +308,7 @@ export default function ReviewDetail() {
   const isAdmin = me?.role === "admin";
 
   const backHref = article.status === "published" || article.status === "archived" ? "/review/published" : "/review/queue";
-  const backLabel = article.status === "published" || article.status === "archived" ? "← Terug naar gepubliceerd" : "← Terug naar wachtrij";
+  const backLabel = article.status === "published" || article.status === "archived" ? "← Back to published" : "← Back to queue";
 
   return (
     <div className="container">
@@ -327,7 +327,7 @@ export default function ReviewDetail() {
       {article.pending_update && (
         <div style={{ background: "var(--accent-bg)", color: "var(--accent-text)", borderRadius: 8, padding: "12px 14px", margin: "16px 0", fontSize: 13 }}>
           <p style={{ margin: "0 0 6px", fontWeight: 500 }}>
-            🔔 Nieuwe informatie gevonden — artikel kan worden bijgewerkt
+            🔔 New information found — article can be updated
           </p>
           <p style={{ margin: "0 0 10px" }}>
             {article.pending_update.update_summary} (bron: {article.pending_update.source_name},
@@ -359,14 +359,14 @@ export default function ReviewDetail() {
         <div style={{ background: "var(--surface-1)", borderRadius: 8, padding: "10px 14px", margin: "16px 0", fontSize: 13 }}>
           <p style={{ margin: "0 0 8px", fontWeight: 500 }}>🔍 Claim-verificatie</p>
           <p style={{ margin: "0 0 10px", color: "var(--text-muted)", fontSize: 12 }}>
-            Klik op het icoon om de status handmatig om te zetten, of op de tekst om die te corrigeren.
+            Click the icon to manually toggle the status, or the text to correct it.
           </p>
           {article.claims.map((c, i) => (
             <div key={i} style={{ margin: "6px 0", display: "flex", alignItems: "flex-start", gap: 6 }}>
               <button
                 onClick={() => act("update_claim", { claimIndex: i, claim: { verified: !c.verified } })}
                 disabled={busy}
-                title={c.verified ? "Markeer als niet geverifieerd" : "Markeer als geverifieerd"}
+                title={c.verified ? "Mark as unverified" : "Mark as verified"}
                 style={{ width: "auto", padding: "2px 6px", fontSize: 14, flexShrink: 0, background: "transparent", border: "none", cursor: "pointer" }}
               >
                 {c.verified ? "✅" : "⚠️"}
@@ -401,11 +401,11 @@ export default function ReviewDetail() {
                 <span
                   onClick={() => { setEditingClaimIndex(i); setClaimTextDraft(c.text); }}
                   style={{ cursor: "pointer" }}
-                  title="Klik om te bewerken"
+                  title="Click to edit"
                 >
                   {c.text}
                   {c.confirmed_by_sources > 1 && (
-                    <span style={{ color: "var(--text-muted)" }}> — bevestigd door {c.confirmed_by_sources} bronnen</span>
+                    <span style={{ color: "var(--text-muted)" }}> — confirmed by {c.confirmed_by_sources} sources</span>
                   )}
                   {c.manually_reviewed && (
                     <span style={{ color: "var(--success-text)", fontSize: 11 }}> · handmatig gecontroleerd</span>
@@ -430,7 +430,7 @@ export default function ReviewDetail() {
           <p className="body-text">{article.source_raw_text}</p>
           {article.additional_sources?.length > 0 && (
             <div style={{ marginTop: 12, paddingTop: 10, borderTop: "1px solid var(--border)" }}>
-              <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Extra bronnen (fact-check):</p>
+              <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>Additional sources (fact-check):</p>
               {article.additional_sources.map((s, i) => (
                 <p key={i} style={{ fontSize: 13, margin: "2px 0" }}>
                   {s.url ? (
@@ -438,7 +438,7 @@ export default function ReviewDetail() {
                       🔗 {s.name || `Bron ${i + 2}`}
                     </a>
                   ) : (
-                    <span>{s.name || `Bron ${i + 2}`} (geen link opgegeven)</span>
+                    <span>{s.name || `Source ${i + 2}`} (no link provided)</span>
                   )}
                 </p>
               ))}
@@ -487,14 +487,14 @@ export default function ReviewDetail() {
               </div>
 
               <div style={{ marginBottom: 10 }}>
-                <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Uitgelichte afbeelding</p>
+                <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Featured image</p>
                 {featuredImage && (
                   <>
                     <img src={featuredImage} alt="" style={{ maxWidth: "100%", borderRadius: 8, marginBottom: 6, display: "block" }} />
                     <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 8 }}>
                       <input
                         type="text"
-                        placeholder="Naam van de maker (optioneel — vult zichzelf in bij een stockfoto)"
+                        placeholder="Creator name (optional — auto-fills for a stock photo)"
                         value={featuredImageCredit?.name || ""}
                         onChange={(e) => {
                           const value = e.target.value;
@@ -522,7 +522,7 @@ export default function ReviewDetail() {
                 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
                   <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleFeaturedUpload} disabled={uploadingFeatured} />
                   <button type="button" onClick={handleSearchStockPhoto} disabled={searchingPhoto} style={{ width: "auto", padding: "5px 10px", fontSize: 12 }}>
-                    {searchingPhoto ? "Bezig..." : "🔍 Nieuwe stockfoto's zoeken"}
+                    {searchingPhoto ? "Working..." : "🔍 Search new stock photos"}
                   </button>
                 </div>
 
@@ -559,14 +559,14 @@ export default function ReviewDetail() {
                 <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Poll-ID (optioneel, uit Polls-pagina)</p>
                 <input
                   type="text"
-                  placeholder="Plak hier een poll-ID"
+                  placeholder="Paste a poll ID here"
                   value={pollIdInput}
                   onChange={(e) => setPollIdInput(e.target.value)}
                 />
               </div>
 
               <div style={{ marginTop: 10 }}>
-                <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Locatie (voor de nieuwskaart, optioneel)</p>
+                <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Location (for the news map, optional)</p>
                 <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
                   <input
                     type="text"
@@ -630,13 +630,13 @@ export default function ReviewDetail() {
         {article.breaking && <span className="flag flag-warn">🔴 Breaking</span>}
         {article.featured && <span className="badge badge-muted">★ Uitgelicht</span>}
         {(article.status === "published" || article.status === "archived") && (
-          <span className="badge badge-muted">{article.views || 0} weergaven</span>
+          <span className="badge badge-muted">{article.views || 0} views</span>
         )}
         <span className={`flag ${article.flags?.figures_verified === false ? "flag-warn" : "flag-ok"}`}>
           {article.flags?.figures_verified === false ? "Cijfer wijkt af van bron" : "Cijfer matcht bron"}
         </span>
         <span className={`flag ${article.flags?.quote_unverified ? "flag-warn" : "flag-ok"}`}>
-          {article.flags?.quote_unverified ? "Citaat niet in bron gevonden" : "Geen ongeverifieerde citaten"}
+          {article.flags?.quote_unverified ? "Quote not found in source" : "No unverified quotes"}
         </span>
         <span className="flag flag-ok">
           Confidence: {article.confidence_score != null ? Math.round(article.confidence_score * 100) + "%" : "-"}
@@ -658,7 +658,7 @@ export default function ReviewDetail() {
       {isAdmin && (
         <div className="actions" style={{ marginBottom: 10 }}>
           <button disabled={busy} onClick={() => act("toggle_breaking")}>
-            {article.breaking ? "Breaking-status verwijderen" : "Als breaking news markeren"}
+            {article.breaking ? "Remove breaking status" : "Mark as breaking news"}
           </button>
           <button disabled={busy} onClick={() => act("toggle_featured")}>
             {article.featured ? "★ Uitgelicht (op hoofdpagina)" : "Uitlichten op hoofdpagina"}
@@ -761,7 +761,7 @@ export default function ReviewDetail() {
             </div>
           ))}
           {(article.liveblog_updates || []).length === 0 && (
-            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen updates geplaatst.</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No updates posted yet.</p>
           )}
         </div>
       )}
@@ -857,7 +857,7 @@ export default function ReviewDetail() {
       <div className="actions">
         {editing ? (
           <button className="primary" disabled={busy} onClick={saveEdit}>
-            Wijzigingen opslaan
+            Save Changes
           </button>
         ) : article.status === "published" ? (
           <>
@@ -868,7 +868,7 @@ export default function ReviewDetail() {
           </>
         ) : article.status === "archived" ? (
           <>
-            {isAdmin && <button className="primary" disabled={busy} onClick={() => act("unarchive")}>Terug naar gepubliceerd</button>}
+            {isAdmin && <button className="primary" disabled={busy} onClick={() => act("unarchive")}>Back to Published</button>}
             {isAdmin && <button className="danger" disabled={busy} onClick={remove}>Verwijderen</button>}
           </>
         ) : article.status === "approved" ? (

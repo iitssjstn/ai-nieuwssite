@@ -30,19 +30,19 @@ export default function InfoPagesSettingsPage() {
 
   return (
     <>
-      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Informatiepagina's</h2>
+      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Info Pages</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Zet je een pagina uit, dan verdwijnt de link uit de footer én geeft de pagina zelf een
-        "niet gevonden" i.p.v. de inhoud.
+        If you turn a page off, its link disappears from the footer and the page itself shows a
+        "not found" instead of the content.
       </p>
 
       <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-          <span style={{ fontSize: 13 }}>Over ons</span>
+          <span style={{ fontSize: 13 }}>About Us</span>
           <div style={{ display: "flex", gap: 8 }}>
-            <a href="/review/settings/info-pages/about" style={{ fontSize: 13, color: "var(--accent-text)", alignSelf: "center" }}>Bewerken</a>
+            <a href="/review/settings/info-pages/about" style={{ fontSize: 13, color: "var(--accent-text)", alignSelf: "center" }}>Edit</a>
             <button onClick={() => toggle("about_enabled")} disabled={busy} className={infoPages.about_enabled ? "danger" : "primary"} style={{ width: "auto", padding: "6px 14px", fontSize: 13 }}>
-              {infoPages.about_enabled ? "Uitzetten" : "Aanzetten"}
+              {infoPages.about_enabled ? "Turn Off" : "Turn On"}
             </button>
           </div>
         </div>
@@ -50,9 +50,9 @@ export default function InfoPagesSettingsPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: 13 }}>Privacy</span>
           <div style={{ display: "flex", gap: 8 }}>
-            <a href="/review/settings/info-pages/privacy" style={{ fontSize: 13, color: "var(--accent-text)", alignSelf: "center" }}>Bewerken</a>
+            <a href="/review/settings/info-pages/privacy" style={{ fontSize: 13, color: "var(--accent-text)", alignSelf: "center" }}>Edit</a>
             <button onClick={() => toggle("privacy_enabled")} disabled={busy} className={infoPages.privacy_enabled ? "danger" : "primary"} style={{ width: "auto", padding: "6px 14px", fontSize: 13 }}>
-              {infoPages.privacy_enabled ? "Uitzetten" : "Aanzetten"}
+              {infoPages.privacy_enabled ? "Turn Off" : "Turn On"}
             </button>
           </div>
         </div>

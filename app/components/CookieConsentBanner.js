@@ -12,8 +12,8 @@ export default function CookieConsentBanner() {
     setVisible(true);
   }, []);
 
-  // Niet tonen op het adminpaneel of de inlogpagina — dat is voor de
-  // redactie, niet voor bezoekers.
+  // Not shown on the admin panel or login page — that's for the
+  // editorial team, not for visitors.
   if (pathname?.startsWith("/review") || pathname?.startsWith("/login")) return null;
   if (!visible) return null;
 
@@ -33,7 +33,7 @@ export default function CookieConsentBanner() {
       }}
     >
       <p style={{ margin: 0, fontSize: 13, color: "var(--text-secondary)", maxWidth: 640 }}>
-        We gebruiken functionele cookies om de site te laten werken.{" "}
+        We use functional cookies to make the site work.{" "}
         <a href="/privacy" style={{ color: "var(--accent-text)" }}>Meer lezen</a>.
       </p>
       <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>

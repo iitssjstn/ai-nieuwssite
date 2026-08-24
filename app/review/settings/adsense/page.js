@@ -61,7 +61,7 @@ export default function AdSensePage() {
       await load();
     } else {
       const data = await res.json();
-      setError(data.error || "Opslaan mislukt");
+      setError(data.error || "Save failed");
     }
   }
 
@@ -69,16 +69,16 @@ export default function AdSensePage() {
     <>
       <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Google AdSense</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Je Google AdSense publisher-ID. Wordt gebruikt voor het advertentiescript op elke pagina
-        én voor <code>/ads.txt</code> — beide passen zich automatisch aan zodra je hier opslaat,
-        zonder dat er een herbuild nodig is.
+        Your Google AdSense publisher ID. Used for the ad script on every page
+        and for <code>/ads.txt</code> — both update automatically as soon as you save here,
+        no rebuild needed.
       </p>
 
       <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
-          <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Publisher-ID</p>
+          <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Publisher ID</p>
           <span className={`badge ${clientId ? "badge-muted" : ""}`} style={{ fontSize: 11 }}>
-            {clientId ? `Actief · ${clientId}` : "Niet ingesteld"}
+            {clientId ? `Active · ${clientId}` : "Not configured"}
           </span>
         </div>
 
@@ -91,27 +91,27 @@ export default function AdSensePage() {
             style={{ marginBottom: 10 }}
           />
           {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 8 }}>{error}</p>}
-          {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Opgeslagen.</p>}
+          {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Saved.</p>}
           <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px" }}>
-            {busy ? "Bezig..." : "Opslaan"}
+            {busy ? "Working..." : "Save"}
           </button>
         </form>
 
         {slots && (
           <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
-            <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Grote, responsive advertentie-eenheid</p>
+            <p style={{ fontSize: 13, fontWeight: 500, marginBottom: 4 }}>Large, responsive ad unit</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
-              De <code>data-ad-slot</code>-waarde van een AdSense-advertentie-eenheid. Verschijnt
-              als brede strook onderaan de hoofdpagina.
+              The <code>data-ad-slot</code> value of an AdSense ad unit. Appears
+              as a wide strip at the bottom of the homepage.
             </p>
             <input
               type="text"
-              placeholder="Bijv. 7555171901"
+              placeholder="e.g. 7555171901"
               defaultValue={slots.adsense_slot || ""}
               onBlur={(e) => saveSlots({ ...slots, adsense_slot: e.target.value.trim() || null })}
               disabled={slotBusy}
             />
-            {slotSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginTop: 8 }}>Opgeslagen.</p>}
+            {slotSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginTop: 8 }}>Saved.</p>}
           </div>
         )}
       </div>

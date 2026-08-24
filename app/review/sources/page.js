@@ -34,7 +34,7 @@ export default function SourcesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, feed_url: feedUrl, trust_level: trustLevel }),
       });
-      if (!res.ok) throw new Error((await res.json()).error || "Onbekende fout");
+      if (!res.ok) throw new Error((await res.json()).error || "Unknown error");
       setName("");
       setFeedUrl("");
       await load();
@@ -46,7 +46,7 @@ export default function SourcesPage() {
   }
 
   async function remove(id) {
-    if (!(await confirm("Deze bron verwijderen?"))) return;
+    if (!(await confirm("Delete this source?"))) return;
     await fetch(`/api/sources/${id}`, { method: "DELETE" });
     await load();
   }
@@ -60,13 +60,13 @@ export default function SourcesPage() {
       if (!res.ok) throw new Error(data.error);
       setFetchResult((r) => ({
         ...r,
-        [id]: `${data.created} nieuw(e) concept(en)` +
-          (data.merged > 0 ? `, ${data.merged} bron(nen) samengevoegd` : "") +
-          (data.updated > 0 ? `, ${data.updated} artikel(en) automatisch bijgewerkt` : "") +
-          (data.errors?.length ? `, ${data.errors.length} fout(en)` : ""),
+        [id]: `${data.created} new draft(s)` +
+          (data.merged > 0 ? `, ${data.merged} source(s) merged` : "") +
+          (data.updated > 0 ? `, ${data.updated} article(s) automatically updated` : "") +
+          (data.errors?.length ? `, ${data.errors.length} error(s)` : ""),
       }));
     } catch (err) {
-      setFetchResult((r) => ({ ...r, [id]: "Fout: " + err.message }));
+      setFetchResult((r) => ({ ...r, [id]: "Error: " + err.message }));
     } finally {
       setFetchingId(null);
     }
@@ -75,32 +75,32 @@ export default function SourcesPage() {
   return (
     <div className="container">
       {ConfirmDialog}
-      <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 16 }}>Bronnen ({sources.length})</h1>
+      <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 16 }}>Sources ({sources.length})</h1>
 
       <form onSubmit={handleAdd} style={{ marginBottom: 32, background: "var(--surface-1)", borderRadius: 12, padding: 16 }}>
-        <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>Nieuwe bron toevoegen</p>
+        <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>Add new source</p>
         <input
           type="text"
-          placeholder="Naam (bijv. NOS, Rijksoverheid)"
+          placeholder="Name (e.g. Reuters, AP)"
           value={name}
           onChange={(e) => setName(e.target.value)}
           style={{ marginBottom: 8 }}
         />
         <input
           type="text"
-          placeholder="RSS feed-URL (optioneel)"
+          placeholder="RSS feed URL (optional)"
           value={feedUrl}
           onChange={(e) => setFeedUrl(e.target.value)}
           style={{ marginBottom: 8 }}
         />
         <select value={trustLevel} onChange={(e) => setTrustLevel(e.target.value)} style={{ marginBottom: 10, padding: 8, borderRadius: 8, border: "1px solid var(--border)" }}>
-          <option value="official">Officieel (overheid)</option>
-          <option value="press_agency">Persbureau</option>
-          <option value="other">Overig</option>
+          <option value="official">Official (government)</option>
+          <option value="press_agency">Press agency</option>
+          <option value="other">Other</option>
         </select>
         {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 8 }}>{error}</p>}
         <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px" }}>
-          Toevoegen
+          Add
         </button>
       </form>
 
@@ -118,11 +118,11 @@ export default function SourcesPage() {
           <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
             {s.feed_url && (
               <button onClick={() => fetchNow(s.id)} disabled={fetchingId === s.id} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                {fetchingId === s.id ? "Bezig..." : "Nu ophalen"}
+                {fetchingId === s.id ? "Working..." : "Fetch Now"}
               </button>
             )}
             <button onClick={() => remove(s.id)} className="danger" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-              Verwijderen
+              Delete
             </button>
           </div>
         </div>
@@ -132,5 +132,5 @@ export default function SourcesPage() {
 }
 
 function trustLabel(level) {
-  return { official: "Officieel", press_agency: "Persbureau", other: "Overig" }[level] || level;
+  return { official: "Official", press_agency: "Press agency", other: "Other" }[level] || level;
 }

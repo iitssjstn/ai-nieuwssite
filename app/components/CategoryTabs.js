@@ -36,7 +36,7 @@ export default function CategoryTabs({ categories, articlesByCategory }) {
       </div>
 
       {items.length === 0 && (
-        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Nog geen artikelen in deze categorie.</p>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>No articles in this category yet.</p>
       )}
 
       {items.map((a) => (

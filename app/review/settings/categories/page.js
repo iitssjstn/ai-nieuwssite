@@ -38,8 +38,8 @@ export default function CategoriesPage() {
       setSaved(true);
     } else {
       const data = await res.json();
-      setError(data.error || "Opslaan mislukt");
-      await load(); // terugzetten naar de laatst geldige staat
+      setError(data.error || "Save failed");
+      await load(); // revert to the last valid state
     }
   }
 
@@ -69,26 +69,26 @@ export default function CategoriesPage() {
 
   async function remove(name) {
     if (categories.length <= 1) {
-      alert("Er moet minstens één categorie overblijven.");
+      alert("At least one category must remain.");
       return;
     }
-    if (!(await confirm(`Categorie "${name}" verwijderen? Bestaande artikelen behouden deze naam als tekst, maar de categorie verdwijnt uit de keuzelijsten en navigatie.`))) return;
+    if (!(await confirm(`Delete category "${name}"? Existing articles keep this name as text, but the category disappears from dropdowns and navigation.`))) return;
     save(categories.filter((c) => c.name !== name));
   }
 
   return (
     <>
       {ConfirmDialog}
-      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Categorieën</h2>
+      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Categories</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Deze categorieën gebruikt de AI om artikelen in te delen, en ze bepalen de navigatie op
-        de publieke site. Elke categorie heeft een eigen kleur voor de badges. De volgorde
-        hieronder bepaalt ook de volgorde in de navigatiebalk en footer — verplaats ze met de
-        pijltjes. Wijzigingen zijn direct actief.
+        The AI uses these categories to classify articles, and they determine the navigation on
+        the public site. Each category has its own color for the badges. The order
+        below also determines the order in the navigation bar and footer — move them with the
+        arrows. Changes take effect immediately.
       </p>
 
       {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 12 }}>{error}</p>}
-      {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 12 }}>Opgeslagen.</p>}
+      {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 12 }}>Saved.</p>}
 
       {categories.map((c, i) => (
         <div key={c.name} className="pending-item" style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -97,7 +97,7 @@ export default function CategoriesPage() {
               type="button"
               onClick={() => move(i, -1)}
               disabled={busy || i === 0}
-              aria-label="Omhoog verplaatsen"
+              aria-label="Move up"
               style={{ width: 24, height: 18, padding: 0, fontSize: 11, lineHeight: 1 }}
             >
               ▲
@@ -106,7 +106,7 @@ export default function CategoriesPage() {
               type="button"
               onClick={() => move(i, 1)}
               disabled={busy || i === categories.length - 1}
-              aria-label="Omlaag verplaatsen"
+              aria-label="Move down"
               style={{ width: 24, height: 18, padding: 0, fontSize: 11, lineHeight: 1 }}
             >
               ▼
@@ -134,7 +134,7 @@ export default function CategoriesPage() {
             {c.name}
           </span>
           <button onClick={() => remove(c.name)} className="danger" disabled={busy} style={{ width: "auto", padding: "6px 12px", fontSize: 13, flexShrink: 0 }}>
-            Verwijderen
+            Delete
           </button>
         </div>
       ))}
@@ -148,13 +148,13 @@ export default function CategoriesPage() {
         />
         <input
           type="text"
-          placeholder="Naam van de nieuwe categorie"
+          placeholder="Name of the new category"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           style={{ flex: 1 }}
         />
         <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px", flexShrink: 0 }}>
-          Toevoegen
+          Add
         </button>
       </form>
     </>

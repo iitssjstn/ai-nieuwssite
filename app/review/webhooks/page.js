@@ -37,12 +37,12 @@ export default function WebhooksPage() {
       setUrl("");
       await load();
     } else {
-      setError((await res.json()).error || "Aanmaken mislukt");
+      setError((await res.json()).error || "Creation failed");
     }
   }
 
   async function removeWebhook(id) {
-    if (!(await confirm("Deze webhook verwijderen?"))) return;
+    if (!(await confirm("Delete this webhook?"))) return;
     await fetch(`/api/webhooks/${id}`, { method: "DELETE" });
     await load();
   }
@@ -71,7 +71,7 @@ export default function WebhooksPage() {
   }
 
   async function removeKey(id) {
-    if (!(await confirm("Deze API-key verwijderen? Applicaties die 'm gebruiken werken dan niet meer."))) return;
+    if (!(await confirm("Delete this API key? Applications using it will stop working."))) return;
     await fetch(`/api/keys/${id}`, { method: "DELETE" });
     await load();
   }
@@ -83,21 +83,21 @@ export default function WebhooksPage() {
 
       <h2 style={{ fontSize: 15, fontWeight: 500, marginBottom: 8 }}>Webhooks</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 16 }}>
-        Krijgt automatisch een POST-verzoek zodra een artikel wordt gepubliceerd, met een
-        HMAC-SHA256-handtekening (header <code>X-Webhook-Signature</code>) zodat je kunt
-        verifiëren dat het verzoek echt van deze site komt.
+        Automatically receives a POST request as soon as an article is published, with an
+        HMAC-SHA256 signature (header <code>X-Webhook-Signature</code>) so you can
+        verify that the request really came from this site.
       </p>
       <form onSubmit={addWebhook} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
         <input
           type="text"
-          placeholder="https://jouw-app.nl/webhook"
+          placeholder="https://your-app.com/webhook"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           style={{ marginBottom: 8 }}
         />
         {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 8 }}>{error}</p>}
         <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px" }}>
-          Toevoegen
+          Add
         </button>
       </form>
       {webhooks.map((w) => (
@@ -111,36 +111,36 @@ export default function WebhooksPage() {
             </div>
             <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
               <button onClick={() => toggleWebhook(w.id)} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                {w.active ? "Deactiveren" : "Activeren"}
+                {w.active ? "Deactivate" : "Activate"}
               </button>
               <button onClick={() => removeWebhook(w.id)} className="danger" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                Verwijderen
+                Delete
               </button>
             </div>
           </div>
         </div>
       ))}
 
-      <h2 style={{ fontSize: 15, fontWeight: 500, margin: "28px 0 8px" }}>Externe API</h2>
+      <h2 style={{ fontSize: 15, fontWeight: 500, margin: "28px 0 8px" }}>External API</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 16 }}>
-        Andere applicaties kunnen gepubliceerde artikelen ophalen via{" "}
-        <code>GET /api/v1/articles</code> met een <code>X-API-Key</code>-header.
+        Other applications can fetch published articles via{" "}
+        <code>GET /api/v1/articles</code> with an <code>X-API-Key</code> header.
       </p>
       <form onSubmit={addKey} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
         <input
           type="text"
-          placeholder="Naam (bijv. 'Mijn app')"
+          placeholder="Name (e.g. 'My app')"
           value={keyName}
           onChange={(e) => setKeyName(e.target.value)}
           style={{ marginBottom: 8 }}
         />
         <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px" }}>
-          Nieuwe key genereren
+          Generate New Key
         </button>
       </form>
       {newKeyValue && (
         <div style={{ background: "#412402", color: "#f0b154", borderRadius: 8, padding: 12, marginBottom: 16, fontSize: 13 }}>
-          <p style={{ margin: "0 0 6px", fontWeight: 500 }}>Bewaar deze key nu — hij wordt niet nogmaals getoond:</p>
+          <p style={{ margin: "0 0 6px", fontWeight: 500 }}>Save this key now — it will not be shown again:</p>
           <code style={{ wordBreak: "break-all" }}>{newKeyValue}</code>
         </div>
       )}
@@ -149,11 +149,11 @@ export default function WebhooksPage() {
           <div>
             <p style={{ fontWeight: 500, margin: 0 }}>{k.name}</p>
             <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "4px 0 0" }}>
-              Aangemaakt: {new Date(k.created_at).toLocaleDateString("nl-NL")}
+              Created: {new Date(k.created_at).toLocaleDateString("en-US")}
             </p>
           </div>
           <button onClick={() => removeKey(k.id)} className="danger" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-            Verwijderen
+            Delete
           </button>
         </div>
       ))}

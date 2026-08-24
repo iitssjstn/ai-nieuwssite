@@ -1,8 +1,8 @@
 "use client";
 
-// Zet het huidige (mogelijk admin.-)hostname om naar de publieke domeinnaam,
-// zodat de gedeelde link altijd naar de echte site wijst, nooit naar het
-// adminpaneel.
+// Converts the current (possibly admin.-)hostname to the public domain name,
+// so the shared link always points to the real site, never to the
+// admin panel.
 function getPublicOrigin() {
   const { protocol, hostname, port } = window.location;
   const publicHostname = hostname.replace(/^admin\./, "");

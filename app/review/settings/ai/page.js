@@ -44,16 +44,16 @@ export default function AiProvidersPage() {
       await load();
     } else {
       const data = await res.json();
-      setError(data.error || "Opslaan mislukt");
+      setError(data.error || "Save failed");
     }
   }
 
   return (
     <>
-      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>AI-providers</h2>
+      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>AI Providers</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Stel meerdere gratis providers in — als de eerste faalt (limiet bereikt, storing),
-        valt het systeem automatisch terug op de volgende in deze volgorde.
+        Configure multiple free providers — if the first one fails (limit reached, outage),
+        the system automatically falls back to the next one in this order.
       </p>
 
       {providers.map((p) => (
@@ -61,27 +61,27 @@ export default function AiProvidersPage() {
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
             <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>{p.label}</p>
             <span className={`badge ${p.hasKey ? "badge-muted" : ""}`} style={{ fontSize: 11 }}>
-              {p.hasKey ? `Actief · ${p.masked}` : "Niet ingesteld"}
+              {p.hasKey ? `Active · ${p.masked}` : "Not configured"}
             </span>
           </div>
 
           <input
             type="text"
-            placeholder={p.hasKey ? "Nieuwe API-key (laat leeg om te behouden)" : "API-key"}
+            placeholder={p.hasKey ? "New API key (leave blank to keep)" : "API key"}
             value={drafts[p.id]?.apiKey ?? ""}
             onChange={(e) => updateDraft(p.id, "apiKey", e.target.value)}
             style={{ marginBottom: 8 }}
           />
           <input
             type="text"
-            placeholder={`Model (standaard: ${p.defaultModel})`}
+            placeholder={`Model (default: ${p.defaultModel})`}
             value={drafts[p.id]?.model ?? p.model ?? ""}
             onChange={(e) => updateDraft(p.id, "model", e.target.value)}
             style={{ marginBottom: 10 }}
           />
 
           {error && busyId === null && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 8 }}>{error}</p>}
-          {savedId === p.id && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Opgeslagen.</p>}
+          {savedId === p.id && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Saved.</p>}
 
           <button
             onClick={() => handleSave(p)}
@@ -89,7 +89,7 @@ export default function AiProvidersPage() {
             disabled={busyId === p.id}
             style={{ width: "auto", padding: "8px 16px" }}
           >
-            {busyId === p.id ? "Bezig..." : "Opslaan"}
+            {busyId === p.id ? "Working..." : "Save"}
           </button>
         </div>
       ))}

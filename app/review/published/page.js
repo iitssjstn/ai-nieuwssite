@@ -8,11 +8,11 @@ import { useConfirmDialog } from "../../components/ConfirmDialog";
 import ShareButtons from "../../components/ShareButtons";
 
 const TABS = [
-  { id: "published", label: "Gepubliceerd" },
-  { id: "approved", label: "Goedgekeurd" },
-  { id: "scheduled", label: "Gepland" },
-  { id: "rejected", label: "Afgekeurd" },
-  { id: "archived", label: "Gearchiveerd" },
+  { id: "published", label: "Published" },
+  { id: "approved", label: "Approved" },
+  { id: "scheduled", label: "Scheduled" },
+  { id: "rejected", label: "Rejected" },
+  { id: "archived", label: "Archived" },
 ];
 
 export default function PublishedArticles() {
@@ -60,7 +60,7 @@ export default function PublishedArticles() {
   }
 
   async function remove(id) {
-    if (!(await confirm("Dit artikel definitief verwijderen? Dit kan niet ongedaan worden gemaakt."))) return;
+    if (!(await confirm("Permanently delete this article? This cannot be undone."))) return;
     setBusyId(id);
     await fetch(`/api/articles/${id}`, { method: "DELETE" });
     await load();
@@ -93,10 +93,10 @@ export default function PublishedArticles() {
   const activeTabLabel = TABS.find((t) => t.id === tab)?.label || "";
 
   function dateLine(a) {
-    if (tab === "scheduled" && a.scheduled_at) return `Gepland voor: ${new Date(a.scheduled_at).toLocaleString("nl-NL")}`;
-    if ((tab === "approved" || tab === "rejected") && a.reviewed_at) return `Beoordeeld: ${new Date(a.reviewed_at).toLocaleString("nl-NL")}`;
-    if (a.published_at) return `Gepubliceerd: ${new Date(a.published_at).toLocaleString("nl-NL")} · ${a.views || 0} weergaven`;
-    return `Aangemaakt: ${new Date(a.created_at).toLocaleString("nl-NL")}`;
+    if (tab === "scheduled" && a.scheduled_at) return `Scheduled for: ${new Date(a.scheduled_at).toLocaleString("en-US")}`;
+    if ((tab === "approved" || tab === "rejected") && a.reviewed_at) return `Reviewed: ${new Date(a.reviewed_at).toLocaleString("en-US")}`;
+    if (a.published_at) return `Published: ${new Date(a.published_at).toLocaleString("en-US")} · ${a.views || 0} views`;
+    return `Created: ${new Date(a.created_at).toLocaleString("en-US")}`;
   }
 
   return (
@@ -119,13 +119,13 @@ export default function PublishedArticles() {
       </div>
 
       <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 16 }}>
-        {activeTabLabel} ({filtered.length} van {articles.length})
+        {activeTabLabel} ({filtered.length} of {articles.length})
       </h1>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
         <input
           type="text"
-          placeholder="Zoeken op titel of tag..."
+          placeholder="Search by title or tag..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{ flex: "1 1 220px" }}
@@ -145,7 +145,7 @@ export default function PublishedArticles() {
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
           {articles.length === 0
             ? `Nog niets in "${activeTabLabel}".`
-            : "Geen artikelen komen overeen met je zoekopdracht/filter."}
+            : "No articles match your search/filter."}
         </p>
       )}
 
@@ -192,42 +192,42 @@ export default function PublishedArticles() {
           </div>
           <div style={{ display: "flex", gap: 8, flexShrink: 0, alignItems: "center" }}>
             <Link href={`/review/${a.id}`}>
-              <button disabled={busyId === a.id} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>Bewerken</button>
+              <button disabled={busyId === a.id} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>Edit</button>
             </Link>
             {tab === "published" && <ShareButtons slug={a.slug} title={a.title} />}
             {isAdmin && tab === "published" && (
               <>
                 <button disabled={busyId === a.id} onClick={() => doAction(a.id, "unpublish")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                  Depubliceren
+                  Unpublish
                 </button>
                 <button disabled={busyId === a.id} onClick={() => doAction(a.id, "archive")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                  Archiveren
+                  Archive
                 </button>
               </>
             )}
             {isAdmin && tab === "approved" && (
               <>
                 <button disabled={busyId === a.id} onClick={() => doAction(a.id, "publish")} className="primary" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                  Publiceren
+                  Publish
                 </button>
                 <button disabled={busyId === a.id} onClick={() => doAction(a.id, "unpublish")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                  Terug naar wachtrij
+                  Back to queue
                 </button>
               </>
             )}
             {isAdmin && tab === "scheduled" && (
               <button disabled={busyId === a.id} onClick={() => doAction(a.id, "unschedule")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                Planning annuleren
+                Cancel schedule
               </button>
             )}
             {isAdmin && tab === "rejected" && (
               <button disabled={busyId === a.id} onClick={() => doAction(a.id, "unpublish")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                Opnieuw indienen
+                Resubmit
               </button>
             )}
             {isAdmin && tab === "archived" && (
               <button disabled={busyId === a.id} onClick={() => doAction(a.id, "unarchive")} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                Terugzetten
+                Restore
               </button>
             )}
             {isAdmin && (

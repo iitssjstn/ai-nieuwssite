@@ -8,10 +8,10 @@ function computeLabel(publishedAt) {
   const mins = Math.floor(diffMs / 60000);
 
   if (mins < 15) return { text: "Net binnen", fresh: true };
-  if (mins < 60) return { text: `${mins} min. geleden`, fresh: false };
+  if (mins < 60) return { text: `${mins} min. ago`, fresh: false };
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return { text: `${hours} uur geleden`, fresh: false };
-  return { text: `${Math.floor(hours / 24)} dag(en) geleden`, fresh: false };
+  if (hours < 24) return { text: `${hours} hours ago`, fresh: false };
+  return { text: `${Math.floor(hours / 24)} day(s) ago`, fresh: false };
 }
 
 export default function LiveTimeLabel({ publishedAt, category, children }) {

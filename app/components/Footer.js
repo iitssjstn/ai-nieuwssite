@@ -49,25 +49,25 @@ export default function Footer() {
         </div>
 
         <div className="site-footer-links">
-          <p className="site-footer-heading">Categorieën</p>
+          <p className="site-footer-heading">Categories</p>
           {categories.map((c) => (
             <Link key={c.name} href={`/categorie/${encodeURIComponent(c.name.toLowerCase())}`}>{c.name}</Link>
           ))}
         </div>
 
         <div className="site-footer-links">
-          <p className="site-footer-heading">Diensten</p>
-          <Link href="/kaart">Nieuwskaart</Link>
+          <p className="site-footer-heading">Services</p>
+          <Link href="/kaart">News Map</Link>
           <Link href="/polls">Polls</Link>
-          <Link href="/liveblog">Liveblogs</Link>
-          {newsletterEnabled && <Link href="/#nieuwsbrief">Nieuwsbrief</Link>}
+          <Link href="/liveblog">Live Blogs</Link>
+          {newsletterEnabled && <Link href="/#nieuwsbrief">Newsletter</Link>}
           <Link href="/feed.xml">RSS Feed</Link>
         </div>
 
         {(about_enabled || privacy_enabled) && (
           <div className="site-footer-links">
-            <p className="site-footer-heading">Informatie</p>
-            {about_enabled && <Link href="/over-ons">Over ons</Link>}
+            <p className="site-footer-heading">Information</p>
+            {about_enabled && <Link href="/over-ons">About Us</Link>}
             {privacy_enabled && <Link href="/privacy">Privacy</Link>}
           </div>
         )}

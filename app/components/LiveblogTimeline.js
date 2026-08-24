@@ -5,10 +5,10 @@ import { useEffect, useState } from "react";
 function timeAgo(dateStr) {
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 1) return "zojuist";
-  if (mins < 60) return `${mins} min. geleden`;
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins} min. ago`;
   const hours = Math.floor(mins / 60);
-  return `${hours} uur geleden`;
+  return `${hours} hours ago`;
 }
 
 export default function LiveblogTimeline({ articleId, initialUpdates }) {
@@ -29,7 +29,7 @@ export default function LiveblogTimeline({ articleId, initialUpdates }) {
   }, [articleId]);
 
   if (updates.length === 0) {
-    return <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Nog geen updates.</p>;
+    return <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>No updates yet.</p>;
   }
 
   return (

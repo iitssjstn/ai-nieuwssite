@@ -14,9 +14,9 @@ export default function NewsMap({ articles }) {
     import("leaflet").then((L) => {
       if (cancelled || !containerRef.current || mapRef.current) return;
 
-      // Leaflet's standaard marker-iconen verwijzen naar bestanden die met
-      // Next.js' bundelaar niet automatisch meekomen — dit herstelt ze met
-      // de iconen die wél gewoon in het npm-pakket zitten.
+      // Leaflet's default marker icons reference files that don't get
+      // bundled automatically by Next.js' bundler — this restores them
+      // using the icons that are simply included in the npm package.
       delete L.Icon.Default.prototype._getIconUrl;
       L.Icon.Default.mergeOptions({
         iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",

@@ -49,7 +49,7 @@ export default function MyAccountPage() {
       setSaved(true);
     } else {
       const data = await res.json();
-      setError(data.error || "Opslaan mislukt");
+      setError(data.error || "Save failed");
     }
   }
 
@@ -58,7 +58,7 @@ export default function MyAccountPage() {
     setPwError(null);
     setPwSaved(false);
     if (newPassword !== confirmPassword) {
-      setPwError("Nieuwe wachtwoorden komen niet overeen");
+      setPwError("New passwords do not match");
       return;
     }
     setPwBusy(true);
@@ -75,7 +75,7 @@ export default function MyAccountPage() {
       setConfirmPassword("");
     } else {
       const data = await res.json();
-      setPwError(data.error || "Wijzigen mislukt");
+      setPwError(data.error || "Change failed");
     }
   }
 
@@ -83,37 +83,37 @@ export default function MyAccountPage() {
 
   return (
     <div className="container">
-      <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 4 }}>Mijn account</h1>
+      <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 4 }}>My Account</h1>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Gebruikersnaam: <strong>{profile.username}</strong> · Rol: {profile.role === "admin" ? "Admin" : "Redacteur"}
+        Username: <strong>{profile.username}</strong> · Role: {profile.role === "admin" ? "Admin" : "Editor"}
       </p>
 
       <form onSubmit={handleSaveProfile} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16, maxWidth: 420 }}>
-        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Profielgegevens</p>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Profile Information</p>
 
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Volledige naam</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Full name</p>
         <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} style={{ marginBottom: 10 }} />
 
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>E-mailadres</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Email address</p>
         <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} style={{ marginBottom: 10 }} />
 
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Telefoonnummer</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Phone number</p>
         <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} style={{ marginBottom: 10 }} />
 
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Adres</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Address</p>
         <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} style={{ marginBottom: 10 }} />
 
         {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 8 }}>{error}</p>}
-        {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Opgeslagen.</p>}
+        {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Saved.</p>}
         <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px" }}>
-          Opslaan
+          Save
         </button>
       </form>
 
       <form onSubmit={handleChangePassword} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, maxWidth: 420 }}>
-        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Wachtwoord wijzigen</p>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Change Password</p>
 
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Huidig wachtwoord</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Current password</p>
         <input
           type="password"
           value={currentPassword}
@@ -121,7 +121,7 @@ export default function MyAccountPage() {
           style={{ marginBottom: 10 }}
         />
 
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Nieuw wachtwoord (min. 8 tekens)</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>New password (min. 8 characters)</p>
         <input
           type="password"
           value={newPassword}
@@ -129,7 +129,7 @@ export default function MyAccountPage() {
           style={{ marginBottom: 10 }}
         />
 
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Herhaal nieuw wachtwoord</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Repeat new password</p>
         <input
           type="password"
           value={confirmPassword}
@@ -138,9 +138,9 @@ export default function MyAccountPage() {
         />
 
         {pwError && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 8 }}>{pwError}</p>}
-        {pwSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Wachtwoord gewijzigd.</p>}
+        {pwSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Password changed.</p>}
         <button type="submit" className="primary" disabled={pwBusy} style={{ width: "auto", padding: "8px 16px" }}>
-          Wachtwoord wijzigen
+          Change Password
         </button>
       </form>
     </div>

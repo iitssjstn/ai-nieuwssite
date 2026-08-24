@@ -4,20 +4,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const SECTIONS = [
-  { href: "/review/settings/seo", label: "SEO & Branding", desc: "Sitenaam, beschrijving en favicon" },
-  { href: "/review/settings/categories", label: "Categorieën", desc: "Zelf categorieën met kleur toevoegen/bewerken" },
-  { href: "/review/settings/ai", label: "AI-providers", desc: "Gratis tekst-AI's voor het genereren van concepten" },
-  { href: "/review/settings/automation", label: "Automatisering", desc: "De automatische RSS-import aan/uit en instellen" },
-  { href: "/review/settings/rss-schedule", label: "RSS-schema", desc: "Hoe vaak en wanneer bronnen worden opgehaald" },
-  { href: "/review/settings/images", label: "Afbeeldingen", desc: "Gratis stockfoto-providers voor artikelen" },
-  { href: "/review/settings/adsense", label: "Google AdSense", desc: "Publisher-ID en de grote advertentie-eenheid" },
-  { href: "/review/settings/adsterra", label: "Adsterra", desc: "Social Bar, native banner en bannerslots" },
-  { href: "/review/settings/ezoic", label: "Ezoic", desc: "Ezoic-integratie aan/uit" },
-  { href: "/review/settings/newsletter", label: "Nieuwsbrief", desc: "Afzender-e-mailadres en aanmeldingen" },
-  { href: "/review/settings/social", label: "Social media", desc: "Links naar je profielen voor de footer" },
-  { href: "/review/settings/info-pages", label: "Informatiepagina's", desc: "Over ons & Privacy aan/uit en bewerken" },
-  { href: "/review/settings/backups", label: "Back-ups", desc: "Automatische dagelijkse back-ups bekijken en downloaden" },
-  { href: "/review/settings/users", label: "Redacteuren", desc: "Accounts, rollen en contactgegevens" },
+  { href: "/review/settings/seo", label: "SEO & Branding", desc: "Site name, description, and favicon" },
+  { href: "/review/settings/categories", label: "Categories", desc: "Add/edit your own categories with color" },
+  { href: "/review/settings/ai", label: "AI Providers", desc: "Free text AIs for generating drafts" },
+  { href: "/review/settings/automation", label: "Automation", desc: "Turn automatic RSS import on/off and configure it" },
+  { href: "/review/settings/rss-schedule", label: "RSS Schedule", desc: "How often and when sources are fetched" },
+  { href: "/review/settings/images", label: "Images", desc: "Free stock photo providers for articles" },
+  { href: "/review/settings/adsense", label: "Google AdSense", desc: "Publisher ID and the large ad unit" },
+  { href: "/review/settings/adsterra", label: "Adsterra", desc: "Social Bar, native banner, and ad slots" },
+  { href: "/review/settings/ezoic", label: "Ezoic", desc: "Turn Ezoic integration on/off" },
+  { href: "/review/settings/newsletter", label: "Newsletter", desc: "Sender email address and subscriptions" },
+  { href: "/review/settings/social", label: "Social Media", desc: "Links to your profiles for the footer" },
+  { href: "/review/settings/info-pages", label: "Info Pages", desc: "Turn About Us & Privacy on/off and edit them" },
+  { href: "/review/settings/backups", label: "Backups", desc: "View and download automatic daily backups" },
+  { href: "/review/settings/users", label: "Editors", desc: "Accounts, roles, and contact details" },
 ];
 
 export default function SettingsLayout({ children }) {
@@ -25,7 +25,7 @@ export default function SettingsLayout({ children }) {
 
   return (
     <div className="container">
-      <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 20 }}>Instellingen</h1>
+      <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 20 }}>Settings</h1>
 
       <div className="settings-layout">
         <nav className="settings-subnav">

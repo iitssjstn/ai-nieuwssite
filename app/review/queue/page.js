@@ -9,10 +9,10 @@ function timeAgo(dateStr) {
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diffMs / 60000);
   if (mins < 1) return "zojuist";
-  if (mins < 60) return `${mins} min. geleden`;
+  if (mins < 60) return `${mins} min. ago`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} uur geleden`;
-  return `${Math.floor(hours / 24)} dag(en) geleden`;
+  if (hours < 24) return `${hours} hours ago`;
+  return `${Math.floor(hours / 24)} day(s) ago`;
 }
 
 function sourceName(sourceId, sources) {
@@ -78,7 +78,7 @@ export default function QueuePage() {
   async function quickDelete(e, id) {
     e.preventDefault();
     e.stopPropagation();
-    if (!(await confirm("Dit concept definitief verwijderen? Dit kan niet ongedaan worden gemaakt."))) return;
+    if (!(await confirm("Permanently delete this draft? This cannot be undone."))) return;
     setBusyId(id);
     await fetch(`/api/articles/${id}`, { method: "DELETE" });
     await loadAll();
@@ -118,7 +118,7 @@ export default function QueuePage() {
 
   async function bulkDelete() {
     if (selectedIds.size === 0) return;
-    if (!(await confirm(`${selectedIds.size} concept(en) definitief verwijderen? Dit kan niet ongedaan worden gemaakt.`))) return;
+    if (!(await confirm(`Permanently delete ${selectedIds.size} draft(s)? This cannot be undone.`))) return;
     setBulkBusy(true);
     await Promise.all([...selectedIds].map((id) => fetch(`/api/articles/${id}`, { method: "DELETE" })));
     setSelectedIds(new Set());
@@ -176,7 +176,7 @@ export default function QueuePage() {
         <div style={{ marginBottom: 10 }}>
           {sources.length === 0 ? (
             <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>
-              Nog geen bronnen. Voeg er eerst een toe bij <Link href="/review/sources">Bronnen</Link>.
+              No sources yet. Add one first at <Link href="/review/sources">Sources</Link>.
             </p>
           ) : (
             <select value={sourceId} onChange={(e) => setSourceId(e.target.value)} style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)", marginRight: 8 }}>
@@ -198,14 +198,14 @@ export default function QueuePage() {
         </div>
         <input
           type="text"
-          placeholder="Link naar het bronartikel (optioneel, voor verificatie)"
+          placeholder="Link to the source article (optional, for verification)"
           value={sourceUrl}
           onChange={(e) => setSourceUrl(e.target.value)}
           style={{ marginBottom: 8 }}
         />
         <textarea
           rows={4}
-          placeholder="Plak hier de brontekst (bijv. uit een RSS-item of persbericht)..."
+          placeholder="Paste the source text here (e.g. from an RSS item or press release)..."
           value={sourceText}
           onChange={(e) => setSourceText(e.target.value)}
           style={{ marginBottom: 10 }}
@@ -214,7 +214,7 @@ export default function QueuePage() {
         {extraSources.map((s, i) => (
           <div key={i} style={{ marginBottom: 8 }}>
             <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 4 }}>
-              Extra bron {i + 2} (voor fact-checking)
+              Additional source {i + 2} (for fact-checking)
             </p>
             <input
               type="text"
@@ -229,7 +229,7 @@ export default function QueuePage() {
             />
             <input
               type="text"
-              placeholder="Link naar deze bron (optioneel)"
+              placeholder="Link to this source (optional)"
               value={s.url || ""}
               onChange={(e) => {
                 const copy = [...extraSources];
@@ -255,18 +255,18 @@ export default function QueuePage() {
           onClick={() => setExtraSources((s) => [...s, { name: "", text: "" }])}
           style={{ width: "auto", padding: "5px 10px", fontSize: 12, marginBottom: 10 }}
         >
-          + Nog een bron toevoegen (fact-check)
+          + Add another source (fact-check)
         </button>
         <br />
 
         {error && <p style={{ color: "var(--danger-text)", fontSize: 13 }}>{error}</p>}
         <button type="submit" className="primary" disabled={loading || sources.length === 0} style={{ width: "auto", padding: "10px 20px" }}>
-          {loading ? "Bezig met genereren..." : "Concept genereren"}
+          {loading ? "Generating..." : "Generate Draft"}
         </button>
       </form>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-        <h2 style={{ fontSize: 16, fontWeight: 500, margin: 0 }}>Wachtrij ({pending.length})</h2>
+        <h2 style={{ fontSize: 16, fontWeight: 500, margin: 0 }}>Queue ({pending.length})</h2>
         {me?.role === "admin" && pending.length > 0 && (
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, cursor: "pointer" }}>
@@ -276,16 +276,16 @@ export default function QueuePage() {
                 checked={selectedIds.size === pending.length}
                 onChange={toggleSelectAll}
               />
-              Alles selecteren
+              Select All
             </label>
             {selectedIds.size > 0 && (
               <>
-                <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{selectedIds.size} geselecteerd</span>
+                <span style={{ fontSize: 13, color: "var(--text-muted)" }}>{selectedIds.size} selected</span>
                 <button disabled={bulkBusy} onClick={bulkReject} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                  Afkeuren
+                  Reject
                 </button>
                 <button disabled={bulkBusy} onClick={bulkDelete} className="danger" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                  Verwijderen
+                  Delete
                 </button>
               </>
             )}
@@ -293,7 +293,7 @@ export default function QueuePage() {
         )}
       </div>
       {pending.length === 0 && (
-        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Niets te reviewen.</p>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Nothing to review.</p>
       )}
       {pending.map((a) => (
         <div key={a.id} className="pending-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
@@ -312,24 +312,24 @@ export default function QueuePage() {
               <span className="flag flag-warn" style={{ marginLeft: 8 }}>⚠ mogelijk duplicaat</span>
             )}
             {a.flags?.content_thin && (
-              <span className="flag flag-warn" style={{ marginLeft: 8 }} title="Ruim onder de beoogde 350-500 woorden — overweeg aan te vullen vóór publicatie">
-                ⚠ dunne content ({a.flags.word_count} woorden)
+              <span className="flag flag-warn" style={{ marginLeft: 8 }} title="Well below the intended 350-500 words — consider expanding before publishing">
+                ⚠ thin content ({a.flags.word_count} words)
               </span>
             )}
             <p style={{ fontWeight: 500, margin: 0 }}>{a.title}</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
               {timeAgo(a.created_at)} · Confidence: {a.confidence_score != null ? Math.round(a.confidence_score * 100) + "%" : "-"}
-              {sourceName(a.source_id, sources) && ` · Bron: ${sourceName(a.source_id, sources)}`}
+              {sourceName(a.source_id, sources) && ` · Source: ${sourceName(a.source_id, sources)}`}
               {a.source_url && " · 🔗 bron-link beschikbaar"}
             </p>
           </Link>
           {me?.role === "admin" && (
             <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
               <button disabled={busyId === a.id} onClick={(e) => quickReject(e, a.id)} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                Afkeuren
+                Reject
               </button>
               <button disabled={busyId === a.id} onClick={(e) => quickDelete(e, a.id)} className="danger" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                Verwijderen
+                Delete
               </button>
             </div>
           )}

@@ -35,10 +35,10 @@ export default function SocialSettingsPage() {
 
   return (
     <>
-      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Social media</h2>
+      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Social Media</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Alleen ingevulde profielen krijgen een icoontje in de footer — laat een veld leeg om dat
-        icoon te verbergen.
+        Only filled-in profiles get an icon in the footer — leave a field blank to hide
+        that icon.
       </p>
 
       <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16 }}>
@@ -54,7 +54,7 @@ export default function SocialSettingsPage() {
             />
           </div>
         ))}
-        {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginTop: 8 }}>Opgeslagen.</p>}
+        {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginTop: 8 }}>Saved.</p>}
       </div>
     </>
   );

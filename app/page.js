@@ -49,10 +49,10 @@ function timeAgo(dateStr) {
   if (!dateStr) return "";
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 60) return `${mins} min. geleden`;
+  if (mins < 60) return `${mins} min. ago`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} uur geleden`;
-  return `${Math.floor(hours / 24)} dag(en) geleden`;
+  if (hours < 24) return `${hours} hours ago`;
+  return `${Math.floor(hours / 24)} day(s) ago`;
 }
 
 export default function HomePage() {
@@ -160,7 +160,7 @@ export default function HomePage() {
           {!hero && published.length > 0 && (
             <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: "24px 20px", textAlign: "center" }}>
               <p style={{ color: "var(--text-secondary)", fontSize: 14, margin: 0 }}>
-                Nog geen artikel uitgelicht op de hoofdpagina.
+                No article featured on the homepage yet.
               </p>
               <p style={{ color: "var(--text-muted)", fontSize: 13, margin: "6px 0 0" }}>
                 Bekijk alle nieuwe artikelen in "Laatste nieuws" hiernaast.
@@ -170,7 +170,7 @@ export default function HomePage() {
 
           {published.length === 0 && (
             <p style={{ color: "var(--text-secondary)" }}>
-              Nog geen gepubliceerde artikelen.
+              No published articles yet.
             </p>
           )}
         </div>
@@ -179,7 +179,7 @@ export default function HomePage() {
         <div className="sidebar-box">
           <h3>Laatste nieuws</h3>
           {latestNews.length === 0 && (
-            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen artikelen.</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No articles yet.</p>
           )}
           {latestNews.map((a) => (
             <Link key={a.id} href={`/artikel/${a.slug}`} className="latest-news-row">
@@ -190,16 +190,16 @@ export default function HomePage() {
           ))}
           {published.length > 5 && (
             <Link href="/nieuws" style={{ display: "block", textAlign: "center", fontSize: 13, color: "var(--accent-text)", marginTop: 12, paddingTop: 12, borderTop: "1px dashed var(--border)" }}>
-              Meer nieuws →
+              More news →
             </Link>
           )}
         </div>
 
-        {/* Meest gelezen */}
+        {/* Most read */}
         <div className="sidebar-box">
-          <h3>Meest gelezen</h3>
+          <h3>Most Read</h3>
           {mostRead.length === 0 && (
-            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen weergaven.</p>
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No views yet.</p>
           )}
           {mostRead.map((a, i) => (
             <Link key={a.id} href={`/artikel/${a.slug}`} className="sidebar-item">
@@ -211,13 +211,13 @@ export default function HomePage() {
       </div>
 
       <div className="home-layout">
-        {/* Hoofdkolom */}
+        {/* Main column */}
         <div>
-          <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>Direct naar</p>
+          <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>Jump to</p>
           <div style={{ display: "flex", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
             {[
               {
-                href: "/kaart", label: "Kaart",
+                href: "/kaart", label: "Map",
                 icon: (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                     <path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 13V4m0 3-6-3" />
@@ -233,7 +233,7 @@ export default function HomePage() {
                 ),
               },
               {
-                href: "/liveblog", label: "Liveblog",
+                href: "/liveblog", label: "Live Blog",
                 icon: (
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                     <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
@@ -243,7 +243,7 @@ export default function HomePage() {
               },
               ...(newsletterEnabled
                 ? [{
-                    href: "/#nieuwsbrief", label: "Nieuwsbrief",
+                    href: "/#nieuwsbrief", label: "Newsletter",
                     icon: (
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                         <rect x="3" y="5" width="18" height="14" rx="2" />
@@ -320,7 +320,7 @@ export default function HomePage() {
 
           {activePoll && (
             <div className="sidebar-box" style={{ marginTop: 20 }}>
-              <h3>Poll van de dag</h3>
+              <h3>Poll of the Day</h3>
               <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>{activePoll.question}</p>
               <PollWidget pollId={activePoll.id} compact />
               <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>

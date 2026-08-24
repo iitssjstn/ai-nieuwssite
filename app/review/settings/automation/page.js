@@ -85,28 +85,28 @@ export default function AutomationPage() {
 
   return (
     <>
-      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Automatisering</h2>
+      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Automation</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        De automatische RSS-import gebruikt dezelfde gratis AI-quota als het handmatig genereren
-        van concepten. Loop je tegen een limiet aan, zet 'm hier tijdelijk uit — geen herbuild
-        nodig, dit werkt meteen bij de volgende controleronde van de achtergrondtaak.
+        Automatic RSS import uses the same free AI quota as manually generating
+        drafts. If you hit a limit, turn it off here temporarily — no rebuild
+        needed, this takes effect on the background task's next check cycle.
       </p>
 
       <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <div>
-            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Automatische RSS-import</p>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Automatic RSS import</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
-              {settings.enabled ? "Actief — haalt periodiek nieuwe items op" : "Uitgeschakeld"}
+              {settings.enabled ? "Active — periodically fetches new items" : "Disabled"}
             </p>
           </div>
           <button onClick={toggle} disabled={busy} className={settings.enabled ? "danger" : "primary"} style={{ width: "auto", padding: "8px 16px" }}>
-            {settings.enabled ? "Uitzetten" : "Aanzetten"}
+            {settings.enabled ? "Turn Off" : "Turn On"}
           </button>
         </div>
 
         <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
-          Max. nieuwe concepten per bron, per controleronde
+          Max new drafts per source, per check cycle
         </p>
         <input
           type="number"
@@ -118,32 +118,32 @@ export default function AutomationPage() {
           style={{ width: 100 }}
         />
 
-        {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginTop: 10 }}>Opgeslagen.</p>}
+        {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginTop: 10 }}>Saved.</p>}
       </div>
 
       <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, border: settings.auto_publish ? "1px solid var(--danger-text)" : "1px solid transparent" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <div>
-            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Automatisch publiceren</p>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Automatic publishing</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
-              {settings.auto_publish ? "Actief — geen menselijke controle voor publicatie" : "Uitgeschakeld — alles wacht op jouw goedkeuring"}
+              {settings.auto_publish ? "Active — no human review before publishing" : "Disabled — everything awaits your approval"}
             </p>
           </div>
           <button onClick={toggleAutoPublish} disabled={busy} className={settings.auto_publish ? "danger" : "primary"} style={{ width: "auto", padding: "8px 16px" }}>
-            {settings.auto_publish ? "Uitzetten" : "Aanzetten"}
+            {settings.auto_publish ? "Turn Off" : "Turn On"}
           </button>
         </div>
 
         <p style={{ fontSize: 12, color: "var(--danger-text)", marginBottom: 14, lineHeight: 1.5 }}>
-          ⚠ Bij inschakelen publiceert de site zelfstandig, zonder dat jij het artikel ooit hebt
-          gezien — bijvoorbeeld 's nachts. Een concept wordt alleen automatisch gepubliceerd als
-          het aan ALLE voorwaarden voldoet: geen ongeverifieerd citaat, geen afwijkend cijfer,
-          geen mogelijk duplicaat, geen onbevestigde claim, én minstens de confidence-score
-          hieronder. Twijfelt de AI, dan blijft het gewoon in de wachtrij staan.
+          ⚠ When enabled, the site publishes autonomously, without you ever having
+          seen the article — for example, overnight. A draft is only published automatically if
+          it meets ALL conditions: no unverified quote, no deviating figure,
+          no possible duplicate, no unconfirmed claim, AND at least the confidence score
+          below. If the AI is uncertain, it simply stays in the queue.
         </p>
 
         <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
-          Minimale confidence-score om automatisch te publiceren ({Math.round(settings.auto_publish_min_confidence * 100)}%)
+          Minimum confidence score to publish automatically ({Math.round(settings.auto_publish_min_confidence * 100)}%)
         </p>
         <input
           type="range"
@@ -160,48 +160,48 @@ export default function AutomationPage() {
       <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <div>
-            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Bronnen automatisch samenvoegen</p>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Automatically merge sources</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
-              {settings.auto_gather_sources ? "Actief" : "Uitgeschakeld"}
+              {settings.auto_gather_sources ? "Active" : "Disabled"}
             </p>
           </div>
           <button onClick={() => patchField("auto_gather_sources", !settings.auto_gather_sources)} disabled={busy} className={settings.auto_gather_sources ? "danger" : "primary"} style={{ width: "auto", padding: "8px 16px" }}>
-            {settings.auto_gather_sources ? "Uitzetten" : "Aanzetten"}
+            {settings.auto_gather_sources ? "Turn Off" : "Turn On"}
           </button>
         </div>
         <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>
-          Komt een nieuw RSS-item binnen dat waarschijnlijk over hetzelfde onderwerp gaat als een
-          concept dat nog in de wachtrij staat (op basis van titel-overeenkomst), dan wordt de
-          nieuwe bron er automatisch bij samengevoegd tot één beter onderbouwd concept — i.p.v.
-          een los, mogelijk dubbel concept aan te maken. Er komt hoe dan ook nog gewoon jouw
-          goedkeuring aan te pas vóór publicatie.
+          If a new RSS item comes in that likely covers the same topic as a
+          draft still in the queue (based on title similarity), the
+          new source is automatically merged into one better-supported draft — instead of
+          creating a separate, possibly duplicate draft. Your
+          approval is still required before publication either way.
         </p>
       </div>
 
       <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16, border: settings.auto_update_published ? "1px solid var(--danger-text)" : "1px solid transparent" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <div>
-            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Gepubliceerde artikelen automatisch bijwerken</p>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Automatically update published articles</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
-              {settings.auto_update_published ? "Actief — content die al live staat kan wijzigen" : "Uitgeschakeld — alles wacht op jouw goedkeuring"}
+              {settings.auto_update_published ? "Active — content already live can change" : "Disabled — everything awaits your approval"}
             </p>
           </div>
           <button onClick={() => patchField("auto_update_published", !settings.auto_update_published)} disabled={busy} className={settings.auto_update_published ? "danger" : "primary"} style={{ width: "auto", padding: "8px 16px" }}>
-            {settings.auto_update_published ? "Uitzetten" : "Aanzetten"}
+            {settings.auto_update_published ? "Turn Off" : "Turn On"}
           </button>
         </div>
 
         <p style={{ fontSize: 12, color: "var(--danger-text)", marginBottom: 14, lineHeight: 1.5 }}>
-          ⚠ Voor "levende" onderwerpen (bijv. een doorlopende gebeurtenis): komt er een nieuwe
-          bron binnen die aantoonbaar nieuwe informatie bevat over een al gepubliceerd artikel,
-          dan werkt het systeem de artikeltekst zelf bij — zonder dat jij het ooit hebt gezien.
-          De vorige versie blijft altijd bewaard in de revisiegeschiedenis. Alleen als de nieuwe
-          informatie én de confidence-score hieronder halen, wordt de update toegepast; anders
-          gebeurt er niets.
+          ⚠ For "developing" topics (e.g. an ongoing event): if a new
+          source comes in that demonstrably contains new information about an already published
+          article, the system updates the article text itself — without you ever having seen it.
+          The previous version is always kept in the revision history. Only if the new
+          information AND the confidence score below are met is the update applied; otherwise
+          nothing happens.
         </p>
 
         <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
-          Minimale confidence-score om automatisch bij te werken ({Math.round(settings.auto_update_min_confidence * 100)}%)
+          Minimum confidence score to update automatically ({Math.round(settings.auto_update_min_confidence * 100)}%)
         </p>
         <input
           type="range"
@@ -218,21 +218,21 @@ export default function AutomationPage() {
       <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16, border: settings.use_source_image ? "1px solid var(--danger-text)" : "1px solid transparent" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <div>
-            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Bron-afbeelding gebruiken</p>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Use source image</p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
-              {settings.use_source_image ? "Actief" : "Uitgeschakeld — er wordt een stockfoto gezocht"}
+              {settings.use_source_image ? "Active" : "Disabled — a stock photo will be searched for"}
             </p>
           </div>
           <button onClick={() => patchField("use_source_image", !settings.use_source_image)} disabled={busy} className={settings.use_source_image ? "danger" : "primary"} style={{ width: "auto", padding: "8px 16px" }}>
-            {settings.use_source_image ? "Uitzetten" : "Aanzetten"}
+            {settings.use_source_image ? "Turn Off" : "Turn On"}
           </button>
         </div>
         <p style={{ fontSize: 12, color: "var(--danger-text)", lineHeight: 1.5 }}>
-          ⚠ Als een RSS-bron zelf een afbeelding meelevert (via hun feed), gebruiken we die
-          i.p.v. een stockfoto te zoeken. Let op: die foto is vaak eigendom van de bron of hun
-          fotograaf — controleer of hergebruik is toegestaan volgens de voorwaarden van je
-          bronnen, wij controleren dit niet automatisch. Staat dit uit, dan blijft alles zoals
-          voorheen (Pexels/Unsplash/Pixabay-stockfoto's).
+          ⚠ If an RSS source itself supplies an image (via their feed), we use that
+          instead of searching for a stock photo. Note: that photo is often owned by the source or their
+          photographer — check whether reuse is allowed under your sources' terms;
+          we don't check this automatically. If this is off, everything stays as
+          before (Pexels/Unsplash/Pixabay stock photos).
         </p>
       </div>
     </>

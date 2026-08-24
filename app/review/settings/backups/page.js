@@ -11,17 +11,17 @@ function formatBytes(bytes) {
 }
 
 function formatMoment(iso) {
-  return new Date(iso).toLocaleString("nl-NL", {
+  return new Date(iso).toLocaleString("en-US", {
     timeZone: "Europe/Amsterdam", day: "numeric", month: "short",
     hour: "2-digit", minute: "2-digit",
   });
 }
 
 function formatFrequencyLabel(hours) {
-  if (hours === 168) return "Elke week";
-  if (hours === 24) return "Elke dag";
-  if (hours === 48) return "Elke 2 dagen";
-  return `Elke ${hours} uur`;
+  if (hours === 168) return "Every week";
+  if (hours === 24) return "Every day";
+  if (hours === 48) return "Every 2 days";
+  return `Every ${hours} hours`;
 }
 
 export default function BackupsPage() {
@@ -42,13 +42,13 @@ export default function BackupsPage() {
       const res = await fetch("/api/backups");
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error || "Ophalen van back-ups mislukt");
+        setError(data.error || "Failed to fetch backups");
         setBackups([]);
         return;
       }
       setBackups(data.backups || []);
     } catch {
-      setError("Kon geen verbinding maken om back-ups op te halen. Ververs de pagina om het opnieuw te proberen.");
+      setError("Could not connect to fetch backups. Refresh the page to try again.");
       setBackups([]);
     }
   }
@@ -64,10 +64,10 @@ export default function BackupsPage() {
       const data = await res.json();
       setRemote(data);
       setRemoteUrlDraft(data.url || "");
-      // Bewust NIET vooraf invullen — de sleutel komt nu ook al niet meer
-      // van de server terug (zie API-route), maar ook als dat wel zo was:
-      // een wachtwoordveld met de echte waarde erin blijft via
-      // "Inspecteren" af te lezen, ook met type="password".
+      // Deliberately NOT pre-filled — the key no longer comes back
+      // from the server anyway (see API route), but even if it did:
+      // a password field with the actual value in it can still be
+      // read via "Inspect Element", even with type="password".
     }
   }
 
@@ -89,11 +89,11 @@ export default function BackupsPage() {
     setRemoteBusy(false);
     if (res.ok) {
       setRemote(await res.json());
-      setRemoteKeyDraft(""); // zojuist getypte waarde niet in de DOM laten hangen na opslaan
+      setRemoteKeyDraft(""); // don't leave the just-typed value hanging in the DOM after saving
       setRemoteSaved(true);
     } else {
       const data = await res.json();
-      setError(data.error || "Opslaan van externe back-up-instellingen mislukt");
+      setError(data.error || "Failed to save remote backup settings");
     }
   }
 
@@ -108,10 +108,10 @@ export default function BackupsPage() {
         setBackups(data.backups || []);
         if (data.remote && !data.remote.skipped) setRemotePushStatus(data.remote);
       } else {
-        setError(data.error || "Back-uppen mislukt");
+        setError(data.error || "Backup failed");
       }
     } catch {
-      setError("Kon geen verbinding maken met de server om te back-uppen. Probeer het opnieuw, en check zo nodig de serverlogs.");
+      setError("Could not connect to the server to back up. Try again, and check the server logs if needed.");
     } finally {
       setBusy(false);
     }
@@ -134,18 +134,18 @@ export default function BackupsPage() {
 
   return (
     <>
-      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Back-ups</h2>
+      <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Backups</h2>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Er wordt automatisch een kopie van het databestand gemaakt (artikelen, instellingen,
-        gebruikers — alles), op de frequentie die je hieronder instelt. Er blijft altijd ongeveer
-        14 dagen aan geschiedenis bewaard, ongeacht hoe vaak je back-upt; oudere back-ups worden
-        automatisch opgeruimd. Download regelmatig een kopie naar je eigen computer voor extra
-        zekerheid — deze back-ups staan namelijk op dezelfde server als de site zelf, tenzij je
-        hieronder een externe ontvanger instelt.
+        A copy of the database file (articles, settings,
+        users — everything) is automatically made, at the frequency you set below. About
+        14 days of history is always kept, regardless of how often you back up; older backups are
+        automatically cleaned up. Download a copy to your own computer regularly for extra
+        peace of mind — these backups live on the same server as the site itself, unless
+        you configure a remote receiver below.
       </p>
 
       <div className="admin-glass-card" style={{ padding: 16, marginBottom: 16 }}>
-        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Hoe vaak</p>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>How often</p>
         <select
           value={settings.backup_frequency_hours}
           onChange={(e) => handleFrequencyChange(parseInt(e.target.value, 10))}
@@ -159,33 +159,33 @@ export default function BackupsPage() {
       </div>
 
       <form onSubmit={handleSaveRemote} className="admin-glass-card" style={{ padding: 16, marginBottom: 16 }}>
-        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Externe back-up-ontvanger (optioneel)</p>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Remote backup receiver (optional)</p>
         <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>
-          Elke nieuwe back-up wordt hier automatisch ook naartoe gestuurd — bedoeld voor een
-          losse "backup-receiver"-applicatie op een tweede server, zodat je back-ups niet alleen
-          hier staan.
+          Every new backup is automatically sent here too — intended for a
+          separate "backup-receiver" application on a second server, so your backups aren't only
+          stored here.
         </p>
-        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>URL van de ontvanger</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Receiver URL</p>
         <input
           type="text"
-          placeholder="https://back-up.jouwdomein.nl"
+          placeholder="https://backup.yourdomain.com"
           value={remoteUrlDraft}
           onChange={(e) => setRemoteUrlDraft(e.target.value)}
           style={{ marginBottom: 8 }}
         />
         <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
-          Wachtwoord {remote?.hasKey && <span style={{ color: "var(--success-text)" }}>— al ingesteld</span>}
+          Password {remote?.hasKey && <span style={{ color: "var(--success-text)" }}>— already set</span>}
         </p>
         <input
           type="password"
-          placeholder={remote?.hasKey ? "Laat leeg om te behouden, of typ een nieuw wachtwoord" : "Het wachtwoord dat je op de ontvanger zelf hebt ingesteld"}
+          placeholder={remote?.hasKey ? "Leave blank to keep, or type a new password" : "The password you set on the receiver itself"}
           value={remoteKeyDraft}
           onChange={(e) => setRemoteKeyDraft(e.target.value)}
           style={{ marginBottom: 10 }}
         />
-        {remoteSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Opgeslagen.</p>}
+        {remoteSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Saved.</p>}
         <button type="submit" className="primary" disabled={remoteBusy} style={{ width: "auto", padding: "8px 16px" }}>
-          Opslaan
+          Save
         </button>
       </form>
 
@@ -193,30 +193,30 @@ export default function BackupsPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
             <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>
-              {newest ? `Laatste back-up: ${formatMoment(newest.createdAt)}` : "Nog geen back-up gemaakt"}
+              {newest ? `Last backup: ${formatMoment(newest.createdAt)}` : "No backup made yet"}
             </p>
             <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "4px 0 0" }}>
-              {backups.length} back-up(s) beschikbaar
+              {backups.length} backup(s) available
             </p>
           </div>
           <button onClick={handleBackupNow} disabled={busy} className="primary" style={{ width: "auto", padding: "8px 16px" }}>
-            {busy ? "Bezig..." : "Nu back-uppen"}
+            {busy ? "Working..." : "Backup Now"}
           </button>
         </div>
         {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginTop: 10 }}>{error}</p>}
         {remotePushStatus && (
           <p style={{ color: remotePushStatus.success ? "var(--success-text)" : "var(--danger-text)", fontSize: 13, marginTop: 10 }}>
             {remotePushStatus.success
-              ? "✓ Ook verstuurd naar de externe ontvanger."
-              : `⚠ Versturen naar de externe ontvanger mislukt: ${remotePushStatus.error}`}
+              ? "✓ Also sent to the remote receiver."
+              : `⚠ Failed to send to the remote receiver: ${remotePushStatus.error}`}
           </p>
         )}
       </div>
 
       {backups.length === 0 ? (
         <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
-          Nog geen back-ups — de eerste wordt automatisch binnen een kwartier aangemaakt, of klik
-          op "Nu back-uppen" hierboven.
+          No backups yet — the first one is created automatically within a quarter of an hour, or click
+          "Backup Now" above.
         </p>
       ) : (
         <div className="admin-glass-card" style={{ padding: 0, overflow: "hidden" }}>
@@ -232,7 +232,7 @@ export default function BackupsPage() {
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                 <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{formatBytes(b.sizeBytes)}</span>
                 <a href={`/api/backups/download/${b.filename}`} style={{ fontSize: 13, color: "var(--accent-text)" }}>
-                  Downloaden
+                  Download
                 </a>
               </div>
             </div>
