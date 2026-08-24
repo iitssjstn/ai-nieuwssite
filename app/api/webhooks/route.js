@@ -10,7 +10,7 @@ export async function GET() {
 export async function POST(request) {
   const { url, events } = await request.json();
   if (!url || !url.trim()) {
-    return NextResponse.json({ error: "URL is verplicht" }, { status: 400 });
+    return NextResponse.json({ error: "URL is required" }, { status: 400 });
   }
   const webhook = createWebhook({ url: url.trim(), events });
   return NextResponse.json(webhook, { status: 201 });

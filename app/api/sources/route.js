@@ -8,7 +8,7 @@ export async function GET() {
 export async function POST(request) {
   const body = await request.json();
   if (!body.name) {
-    return NextResponse.json({ error: "name is verplicht" }, { status: 400 });
+    return NextResponse.json({ error: "name is required" }, { status: 400 });
   }
   const source = addSource({
     name: body.name,

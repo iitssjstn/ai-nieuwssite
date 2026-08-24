@@ -15,8 +15,8 @@ function getBaseUrl() {
 export function generateMetadata() {
   const { site_name } = getSiteSettings();
   return {
-    title: `Over ons — ${site_name}`,
-    description: `Hoe ${site_name} werkt: AI-gegenereerde artikelen, gecontroleerd door menselijke redactie.`,
+    title: `About Us — ${site_name}`,
+    description: `How ${site_name} works: AI-generated articles, reviewed by our human editorial team.`,
     alternates: { canonical: `${getBaseUrl()}/over-ons` },
   };
 }

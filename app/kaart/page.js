@@ -17,8 +17,8 @@ export function generateMetadata() {
   const baseUrl = getBaseUrl();
   const { site_name } = getSiteSettings();
   const url = `${baseUrl}/kaart`;
-  const title = `Nieuwskaart — ${site_name}`;
-  const description = `Bekijk waar het nieuws zich afspeelt op de interactieve kaart van ${site_name}.`;
+  const title = `News Map — ${site_name}`;
+  const description = `See where the news is happening on ${site_name}'s interactive map.`;
   return {
     title,
     description,
@@ -34,10 +34,10 @@ export default function KaartPage() {
   return (
     <div className="container" style={{ maxWidth: 1000 }}>
       <Header />
-      <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>Nieuwskaart</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>News Map</h1>
       {articles.length === 0 ? (
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
-          Nog geen artikelen met een gekoppelde locatie.
+          No articles with a linked location yet.
         </p>
       ) : (
         <NewsMap articles={articles} />

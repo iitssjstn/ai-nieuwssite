@@ -8,13 +8,13 @@ export function generateMetadata({ searchParams }) {
   const { site_name } = getSiteSettings();
   const q = searchParams?.q || "";
   return {
-    title: q ? `Zoeken: ${q} — ${site_name}` : `Zoeken — ${site_name}`,
-    // Zoekresultaten horen niet geïndexeerd te worden — elke zoekopdracht is
-    // technisch een aparte URL (?q=...) met grotendeels dezelfde opmaak
-    // eromheen, wat Google als dubbele content zonder canonical ziet. Google
-    // adviseert zelf ook expliciet om dit soort pagina's op noindex te
-    // zetten i.p.v. een canonical te kiezen (er ís geen "hoofdversie" van
-    // een zoekresultaat).
+    title: q ? `Search: ${q} — ${site_name}` : `Search — ${site_name}`,
+    // Search results shouldn't be indexed — every search query is
+    // technically a separate URL (?q=...) with largely the same layout
+    // around it, which Google sees as duplicate content without a
+    // canonical. Google itself explicitly advises setting this kind of
+    // page to noindex instead of choosing a canonical (there IS no
+    // "main version" of a search result).
     robots: { index: false, follow: true },
   };
 }
@@ -38,7 +38,7 @@ export default function SearchPage({ searchParams }) {
           type="text"
           name="q"
           defaultValue={q}
-          placeholder="Zoek in artikelen..."
+          placeholder="Search articles..."
           autoFocus
           style={{ fontSize: 15, padding: "10px 14px" }}
         />
@@ -46,12 +46,12 @@ export default function SearchPage({ searchParams }) {
 
       {q && (
         <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 16 }}>
-          {results.length} resultaten voor "{q}"
+          {results.length} results for "{q}"
         </p>
       )}
 
       {q && results.length === 0 && (
-        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Niets gevonden. Probeer een andere zoekterm.</p>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Nothing found. Try a different search term.</p>
       )}
 
       {results.map((a) => (

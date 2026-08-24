@@ -39,7 +39,7 @@ export default function LoginPage() {
       router.refresh();
     } else {
       const data = await res.json();
-      setError(data.error || "Inloggen mislukt");
+      setError(data.error || "Login failed");
     }
   }
 
@@ -47,7 +47,7 @@ export default function LoginPage() {
     e.preventDefault();
     setError(null);
     if (password !== confirmPassword) {
-      setError("Wachtwoorden komen niet overeen");
+      setError("Passwords do not match");
       return;
     }
     setBusy(true);
@@ -62,7 +62,7 @@ export default function LoginPage() {
       router.refresh();
     } else {
       const data = await res.json();
-      setError(data.error || "Account aanmaken mislukt");
+      setError(data.error || "Account creation failed");
     }
   }
 
@@ -74,11 +74,11 @@ export default function LoginPage() {
     <div className="container" style={{ maxWidth: 360, paddingTop: 80 }}>
       {hasAccount ? (
         <>
-          <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 20 }}>Redactie — inloggen</h1>
+          <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 20 }}>Editorial — Login</h1>
           <form onSubmit={handleLogin}>
             <input
               type="text"
-              placeholder="Gebruikersnaam"
+              placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               style={{ marginBottom: 8 }}
@@ -86,27 +86,27 @@ export default function LoginPage() {
             />
             <input
               type="password"
-              placeholder="Wachtwoord"
+              placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={{ marginBottom: 12 }}
             />
             {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 12 }}>{error}</p>}
             <button type="submit" className="primary" disabled={busy} style={{ width: "100%" }}>
-              {busy ? "Bezig..." : "Inloggen"}
+              {busy ? "Working..." : "Login"}
             </button>
           </form>
         </>
       ) : (
         <>
-          <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Admin-account aanmaken</h1>
+          <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Create Admin Account</h1>
           <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-            Er bestaat nog geen account. Dit kan maar één keer — kies nu je gebruikersnaam en wachtwoord.
+            No account exists yet. This can only be done once — choose your username and password now.
           </p>
           <form onSubmit={handleSetup}>
             <input
               type="text"
-              placeholder="Gebruikersnaam"
+              placeholder="Username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               style={{ marginBottom: 8 }}
@@ -114,20 +114,20 @@ export default function LoginPage() {
             />
             <input
               type="password"
-              placeholder="Nieuw wachtwoord (min. 8 tekens)"
+              placeholder="New password (min. 8 characters)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={{ marginBottom: 8 }}
             />
             <input
               type="password"
-              placeholder="Herhaal wachtwoord"
+              placeholder="Repeat password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               style={{ marginBottom: 16 }}
             />
             <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 6 }}>
-              Google API-key (optioneel — kun je ook later toevoegen via Instellingen)
+              Google API key (optional — can also be added later via Settings)
             </p>
             <input
               type="text"
@@ -138,7 +138,7 @@ export default function LoginPage() {
             />
             {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 12 }}>{error}</p>}
             <button type="submit" className="primary" disabled={busy} style={{ width: "100%" }}>
-              {busy ? "Bezig..." : "Account aanmaken"}
+              {busy ? "Working..." : "Create Account"}
             </button>
           </form>
         </>

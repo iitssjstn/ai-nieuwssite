@@ -10,18 +10,18 @@ export async function POST(request) {
 
   if (!source_id || !source_text) {
     return NextResponse.json(
-      { error: "source_id en source_text zijn verplicht" },
+      { error: "source_id and source_text are required" },
       { status: 400 }
     );
   }
 
   if (category_override && !getCategories().some((c) => c.name === category_override)) {
-    return NextResponse.json({ error: "Onbekende categorie" }, { status: 400 });
+    return NextResponse.json({ error: "Unknown category" }, { status: 400 });
   }
 
   const source = getSources().find((s) => s.id === source_id);
   if (!source) {
-    return NextResponse.json({ error: "Onbekende bron" }, { status: 400 });
+    return NextResponse.json({ error: "Unknown source" }, { status: 400 });
   }
 
   const additionalSources = Array.isArray(additional_sources)

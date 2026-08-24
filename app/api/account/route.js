@@ -8,7 +8,7 @@ export async function GET(request) {
   const session = await getSessionFromRequest(request);
   if (!session) return NextResponse.json({ error: "Niet ingelogd" }, { status: 401 });
   const user = getUserById(session.userId);
-  if (!user) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
+  if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
   const { password_hash, invite_token, ...safe } = user;
   return NextResponse.json(safe);
 }
@@ -28,6 +28,6 @@ export async function PATCH(request) {
     phone: phone !== undefined ? (phone.trim() || null) : undefined,
     address: address !== undefined ? (address.trim() || null) : undefined,
   });
-  if (!updated) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
+  if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(updated);
 }

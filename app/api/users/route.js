@@ -12,7 +12,7 @@ export async function POST(request) {
   const { username, password, role, full_name, email, phone, address } = await request.json();
 
   if (email && email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
-    return NextResponse.json({ error: "Ongeldig e-mailadres" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid email address" }, { status: 400 });
   }
 
   const profile = {

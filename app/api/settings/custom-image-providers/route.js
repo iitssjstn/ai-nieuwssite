@@ -14,22 +14,22 @@ export async function POST(request) {
   const { label, url_template, auth_type, auth_header_name, auth_header_prefix, auth_query_param, results_path, image_field, thumb_field, credit_name_field, credit_url_field } = body;
 
   if (!label || !label.trim()) {
-    return NextResponse.json({ error: "Naam is verplicht" }, { status: 400 });
+    return NextResponse.json({ error: "Name is required" }, { status: 400 });
   }
   if (!url_template || !url_template.includes("{q}")) {
-    return NextResponse.json({ error: "De URL moet de placeholder {q} bevatten voor de zoekterm" }, { status: 400 });
+    return NextResponse.json({ error: "The URL must contain the {q} placeholder for the search term" }, { status: 400 });
   }
   if (auth_type === "header" && !auth_header_name?.trim()) {
-    return NextResponse.json({ error: "Geef een headernaam op (bijv. Authorization)" }, { status: 400 });
+    return NextResponse.json({ error: "Provide a header name (e.g. Authorization)" }, { status: 400 });
   }
   if (auth_type === "query" && !auth_query_param?.trim()) {
-    return NextResponse.json({ error: "Geef een queryparameternaam op (bijv. key)" }, { status: 400 });
+    return NextResponse.json({ error: "Provide a query parameter name (e.g. key)" }, { status: 400 });
   }
   if (!results_path?.trim()) {
-    return NextResponse.json({ error: "Geef aan waar de resultatenlijst in de respons staat (bijv. \"photos\" of \"data.items\")" }, { status: 400 });
+    return NextResponse.json({ error: "Indicate where the results list is in the response (e.g. \"photos\" or \"data.items\")" }, { status: 400 });
   }
   if (!image_field?.trim()) {
-    return NextResponse.json({ error: "Geef aan welk veld de afbeeldings-URL bevat" }, { status: 400 });
+    return NextResponse.json({ error: "Indicate which field contains the image URL" }, { status: 400 });
   }
 
   const existing = getCustomImageProviders();

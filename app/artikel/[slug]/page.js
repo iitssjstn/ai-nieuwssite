@@ -27,9 +27,9 @@ function timeAgo(dateStr) {
   if (!dateStr) return "";
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 60) return `${mins} minuten geleden`;
+  if (mins < 60) return `${mins} minutes ago`;
   const hours = Math.floor(mins / 60);
-  return `${hours} uur geleden`;
+  return `${hours} hours ago`;
 }
 
 function getBaseUrl() {
@@ -135,7 +135,7 @@ export default async function ArticlePage({ params }) {
       )}
       {article.updated_at && (
         <span className="badge badge-muted" style={{ marginLeft: 6 }} title={article.last_update_summary || undefined}>
-          🔄 Bijgewerkt: {article.last_update_summary || new Date(article.updated_at).toLocaleDateString("nl-NL")}
+          🔄 Updated: {article.last_update_summary || new Date(article.updated_at).toLocaleDateString("en-US")}
         </span>
       )}
       <article>
@@ -143,8 +143,8 @@ export default async function ArticlePage({ params }) {
         <div className="byline">
           <div className="icon-circle">{site_name.charAt(0)}</div>
           <div>
-            <p>Opgesteld met AI, gecontroleerd door redactie</p>
-            <p className="small">{timeAgo(article.published_at)} · Bron: {article.source_id}</p>
+            <p>Written with AI, reviewed by our editorial team</p>
+            <p className="small">{timeAgo(article.published_at)} · Source: {article.source_id}</p>
           </div>
         </div>
 
@@ -225,15 +225,15 @@ export default async function ArticlePage({ params }) {
       </article>
 
       <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 24, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
-        Dit artikel is opgesteld met behulp van AI op basis van een bron van {article.source_id} en gecontroleerd voor publicatie.
+        This article was written with the help of AI based on a source from {article.source_id} and reviewed before publication.
       </p>
         </div>
 
         <div>
           <div className="sidebar-box">
-            <h3>Laatste nieuws</h3>
+            <h3>Latest News</h3>
             {latestNews.length === 0 && (
-              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Nog geen andere artikelen.</p>
+              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No other articles yet.</p>
             )}
             {latestNews.map((a) => (
               <Link key={a.id} href={`/artikel/${a.slug}`} className="latest-news-row">

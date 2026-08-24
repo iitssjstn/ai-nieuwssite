@@ -20,14 +20,14 @@ export default function InvitePage() {
       .then(async (r) => {
         if (!r.ok) {
           const data = await r.json();
-          setInviteError(data.error || "Ongeldige link");
+          setInviteError(data.error || "Invalid link");
         } else {
           setInvite(await r.json());
         }
         setChecking(false);
       })
       .catch(() => {
-        setInviteError("Er ging iets mis bij het controleren van deze link.");
+        setInviteError("Something went wrong while checking this link.");
         setChecking(false);
       });
   }, [token]);
@@ -36,7 +36,7 @@ export default function InvitePage() {
     e.preventDefault();
     setError(null);
     if (password !== confirmPassword) {
-      setError("Wachtwoorden komen niet overeen");
+      setError("Passwords do not match");
       return;
     }
     setBusy(true);
@@ -51,7 +51,7 @@ export default function InvitePage() {
       setTimeout(() => router.push("/login"), 2000);
     } else {
       const data = await res.json();
-      setError(data.error || "Instellen mislukt");
+      setError(data.error || "Setup failed");
     }
   }
 
@@ -62,10 +62,10 @@ export default function InvitePage() {
   if (inviteError) {
     return (
       <div className="container" style={{ maxWidth: 360, paddingTop: 80 }}>
-        <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Uitnodiging niet geldig</h1>
+        <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Invitation Not Valid</h1>
         <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>{inviteError}</p>
         <p style={{ fontSize: 13, color: "var(--text-secondary)", marginTop: 8 }}>
-          Vraag de beheerder om een nieuwe uitnodigingslink.
+          Ask the administrator for a new invitation link.
         </p>
       </div>
     );
@@ -74,8 +74,8 @@ export default function InvitePage() {
   if (done) {
     return (
       <div className="container" style={{ maxWidth: 360, paddingTop: 80 }}>
-        <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Wachtwoord ingesteld</h1>
-        <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>Je wordt doorgestuurd naar de inlogpagina...</p>
+        <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>Password Set</h1>
+        <p style={{ fontSize: 13, color: "var(--text-secondary)" }}>You're being redirected to the login page...</p>
       </div>
     );
   }
@@ -83,16 +83,16 @@ export default function InvitePage() {
   return (
     <div className="container" style={{ maxWidth: 360, paddingTop: 80 }}>
       <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>
-        Welkom{invite.full_name ? `, ${invite.full_name}` : ""}
+        Welcome{invite.full_name ? `, ${invite.full_name}` : ""}
       </h1>
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
-        Je bent uitgenodigd als redacteur (gebruikersnaam: <strong>{invite.username}</strong>). Kies
-        hieronder je eigen wachtwoord om je account te activeren.
+        You've been invited as an editor (username: <strong>{invite.username}</strong>). Choose
+        your own password below to activate your account.
       </p>
       <form onSubmit={handleSubmit}>
         <input
           type="password"
-          placeholder="Nieuw wachtwoord (min. 8 tekens)"
+          placeholder="New password (min. 8 characters)"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={{ marginBottom: 8 }}
@@ -100,14 +100,14 @@ export default function InvitePage() {
         />
         <input
           type="password"
-          placeholder="Herhaal wachtwoord"
+          placeholder="Repeat password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           style={{ marginBottom: 12 }}
         />
         {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 12 }}>{error}</p>}
         <button type="submit" className="primary" disabled={busy} style={{ width: "100%" }}>
-          {busy ? "Bezig..." : "Wachtwoord instellen"}
+          {busy ? "Working..." : "Set Password"}
         </button>
       </form>
     </div>

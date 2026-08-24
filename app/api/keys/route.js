@@ -11,7 +11,7 @@ export async function GET() {
 export async function POST(request) {
   const { name } = await request.json();
   if (!name || !name.trim()) {
-    return NextResponse.json({ error: "Naam is verplicht" }, { status: 400 });
+    return NextResponse.json({ error: "Name is required" }, { status: 400 });
   }
   const rawKey = createApiKey(name.trim());
   // De ruwe key is hierna nergens meer op te vragen — alleen de hash blijft

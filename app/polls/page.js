@@ -15,7 +15,7 @@ export function generateMetadata() {
   const { site_name } = getSiteSettings();
   return {
     title: `Polls — ${site_name}`,
-    description: `Alle polls van ${site_name}.`,
+    description: `All polls from ${site_name}.`,
     alternates: { canonical: `${getBaseUrl()}/polls` },
   };
 }
@@ -30,7 +30,7 @@ export default function PollsHubPage() {
       <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>Polls</h1>
 
       {polls.length === 0 && (
-        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Nog geen polls.</p>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>No polls yet.</p>
       )}
 
       {polls.map((poll) => {
@@ -54,9 +54,9 @@ export default function PollsHubPage() {
               );
             })}
             <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 8 }}>
-              {totalVotes} stemmen
+              {totalVotes} votes
               {linkedArticle && (
-                <> · <Link href={`/artikel/${linkedArticle.slug}`} style={{ color: "var(--accent-text)" }}>Bekijk artikel</Link></>
+                <> · <Link href={`/artikel/${linkedArticle.slug}`} style={{ color: "var(--accent-text)" }}>View article</Link></>
               )}
             </p>
           </div>

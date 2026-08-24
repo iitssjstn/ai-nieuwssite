@@ -15,7 +15,7 @@ function getBaseUrl() {
 export function generateMetadata() {
   const { site_name } = getSiteSettings();
   return {
-    title: `Privacyverklaring — ${site_name}`,
+    title: `Privacy Policy — ${site_name}`,
     alternates: { canonical: `${getBaseUrl()}/privacy` },
   };
 }

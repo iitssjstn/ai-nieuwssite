@@ -10,7 +10,7 @@ export async function POST(request) {
   // overschrijven via dit endpoint.
   if (hasAdminAccount()) {
     return NextResponse.json(
-      { error: "Er bestaat al een account. Gebruik /login." },
+      { error: "An account already exists. Use /login." },
       { status: 409 }
     );
   }

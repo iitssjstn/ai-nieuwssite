@@ -7,7 +7,7 @@ export async function POST(request) {
 
   const user = await verifyCredentials(username || "", password || "");
   if (!user) {
-    return NextResponse.json({ error: "Onjuiste gebruikersnaam of wachtwoord" }, { status: 401 });
+    return NextResponse.json({ error: "Incorrect username or password" }, { status: 401 });
   }
 
   let token;
@@ -18,8 +18,8 @@ export async function POST(request) {
   }
   const res = NextResponse.json({ success: true, user: { username: user.username, role: user.role } });
 
-  // Alleen "Secure" zetten als de binnenkomende request ook echt via HTTPS
-  // loopt — zie eerdere aantekening: anders wordt de cookie stil genegeerd.
+  // Only set "Secure" if the incoming request actually goes via HTTPS
+  // otherwise the cookie is silently ignored (see earlier note).
   const forwardedProto = request.headers.get("x-forwarded-proto");
   const isHttps = forwardedProto === "https" || request.nextUrl.protocol === "https:";
 
@@ -28,7 +28,7 @@ export async function POST(request) {
     secure: isHttps,
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 30, // 30 dagen
+    maxAge: 60 * 60 * 24 * 30, // 30 days
     domain: getCookieDomain(request),
   });
   return res;

@@ -25,10 +25,10 @@ export async function PATCH(request) {
 
   const known = PROVIDERS.find((p) => p.id === providerId);
   if (!known) {
-    return NextResponse.json({ error: "Onbekende provider" }, { status: 400 });
+    return NextResponse.json({ error: "Unknown provider" }, { status: 400 });
   }
   if (apiKey !== undefined && !apiKey.trim()) {
-    return NextResponse.json({ error: "Geef een geldige API-key op" }, { status: 400 });
+    return NextResponse.json({ error: "Provide a valid API key" }, { status: 400 });
   }
 
   setProviderConfig(providerId, {

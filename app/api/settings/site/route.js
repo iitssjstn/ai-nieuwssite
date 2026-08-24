@@ -11,7 +11,7 @@ export async function PATCH(request) {
   const { site_name, site_description, favicon_url } = await request.json();
 
   if (site_name !== undefined && !site_name.trim()) {
-    return NextResponse.json({ error: "Sitenaam mag niet leeg zijn" }, { status: 400 });
+    return NextResponse.json({ error: "Site name cannot be empty" }, { status: 400 });
   }
 
   setSiteSettings({

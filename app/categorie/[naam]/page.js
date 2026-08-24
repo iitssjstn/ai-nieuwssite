@@ -22,8 +22,8 @@ export function generateMetadata({ params }) {
   const baseUrl = getBaseUrl();
   const { site_name } = getSiteSettings();
   const url = `${baseUrl}/categorie/${encodeURIComponent(naam.toLowerCase())}`;
-  const title = `${capitalized} nieuws — ${site_name}`;
-  const description = `Het laatste ${capitalized.toLowerCase()}-nieuws, samengesteld met AI en gecontroleerd door de redactie.`;
+  const title = `${capitalized} news — ${site_name}`;
+  const description = `The latest ${capitalized.toLowerCase()} news, compiled with AI and reviewed by the editorial team.`;
   return {
     title,
     description,
@@ -37,10 +37,10 @@ function timeAgo(dateStr) {
   if (!dateStr) return "";
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 60) return `${mins} min. geleden`;
+  if (mins < 60) return `${mins} min. ago`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} uur geleden`;
-  return `${Math.floor(hours / 24)} dag(en) geleden`;
+  if (hours < 24) return `${hours} hours ago`;
+  return `${Math.floor(hours / 24)} day(s) ago`;
 }
 
 export default function CategoryPage({ params }) {
@@ -60,7 +60,7 @@ export default function CategoryPage({ params }) {
 
       {articles.length === 0 && (
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
-          Nog geen artikelen in deze categorie.
+          No articles in this category yet.
         </p>
       )}
 

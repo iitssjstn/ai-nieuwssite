@@ -5,7 +5,7 @@ import { setUserPassword } from "@/lib/auth-node";
 export async function DELETE(request, { params }) {
   try {
     const ok = deleteUser(params.id);
-    if (!ok) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
+    if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 400 });
@@ -31,7 +31,7 @@ export async function PATCH(request, { params }) {
       address: address !== undefined ? (address.trim() || null) : undefined,
       role,
     });
-    if (!updated) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
+    if (!updated) return NextResponse.json({ error: "Not found" }, { status: 404 });
     return NextResponse.json(updated);
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 400 });

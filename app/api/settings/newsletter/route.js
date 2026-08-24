@@ -18,7 +18,7 @@ export async function GET(request) {
 export async function PATCH(request) {
   const session = await getSessionFromRequest(request);
   if (session?.role !== "admin") {
-    return NextResponse.json({ error: "Alleen voor admins" }, { status: 403 });
+    return NextResponse.json({ error: "Admin only" }, { status: 403 });
   }
   const { sender_email } = await request.json();
   if (sender_email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sender_email)) {

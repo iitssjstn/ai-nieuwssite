@@ -4,7 +4,7 @@ import { votePoll, getPoll } from "@/lib/db";
 export async function POST(request, { params }) {
   const { optionId } = await request.json();
   if (!optionId) {
-    return NextResponse.json({ error: "optionId is verplicht" }, { status: 400 });
+    return NextResponse.json({ error: "optionId is required" }, { status: 400 });
   }
 
   const cookieName = `voted_${params.id}`;
@@ -14,9 +14,9 @@ export async function POST(request, { params }) {
   }
 
   const existing = getPoll(params.id);
-  if (!existing) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
   if (!existing.active) {
-    return NextResponse.json({ error: "Deze poll is niet meer actief" }, { status: 400 });
+    return NextResponse.json({ error: "This poll is no longer active" }, { status: 400 });
   }
 
   const poll = votePoll(params.id, optionId);

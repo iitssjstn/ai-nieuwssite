@@ -8,6 +8,6 @@ export async function DELETE(request, { params }) {
 
 export async function PATCH(request, { params }) {
   const poll = togglePollActive(params.id);
-  if (!poll) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
+  if (!poll) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(poll);
 }

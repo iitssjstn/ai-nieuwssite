@@ -17,18 +17,18 @@ export async function POST(request) {
   const file = formData.get("file");
 
   if (!file || typeof file === "string") {
-    return NextResponse.json({ error: "Geen bestand ontvangen" }, { status: 400 });
+    return NextResponse.json({ error: "No file received" }, { status: 400 });
   }
 
   const ext = ALLOWED_TYPES[file.type];
   if (!ext) {
     return NextResponse.json(
-      { error: "Alleen JPEG, PNG, WEBP of GIF toegestaan" },
+      { error: "Only JPEG, PNG, WEBP, or GIF allowed" },
       { status: 400 }
     );
   }
   if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: "Bestand is groter dan 5MB" }, { status: 400 });
+    return NextResponse.json({ error: "File is larger than 5MB" }, { status: 400 });
   }
 
   const filename = `${crypto.randomUUID()}.${ext}`;
@@ -42,7 +42,7 @@ export async function POST(request) {
     // data-map is niet schrijfbaar voor de containergebruiker) — dit geeft
     // nu een duidelijke melding i.p.v. een stille crash.
     return NextResponse.json(
-      { error: "Kon bestand niet opslaan op de server: " + err.message },
+      { error: "Could not save file on the server: " + err.message },
       { status: 500 }
     );
   }

@@ -28,10 +28,10 @@ export async function PATCH(request) {
   }
   const timeRegex = /^([01]\d|2[0-3]):([0-5]\d)$/;
   if (active_hours_start !== undefined && !timeRegex.test(active_hours_start)) {
-    return NextResponse.json({ error: "active_hours_start moet een geldige tijd zijn (HH:MM)" }, { status: 400 });
+    return NextResponse.json({ error: "active_hours_start must be a valid time (HH:MM)" }, { status: 400 });
   }
   if (active_hours_end !== undefined && !timeRegex.test(active_hours_end)) {
-    return NextResponse.json({ error: "active_hours_end moet een geldige tijd zijn (HH:MM)" }, { status: 400 });
+    return NextResponse.json({ error: "active_hours_end must be a valid time (HH:MM)" }, { status: 400 });
   }
   if (backup_frequency_hours !== undefined && (backup_frequency_hours < 1 || backup_frequency_hours > 168)) {
     return NextResponse.json({ error: "backup_frequency_hours moet tussen 1 en 168 liggen" }, { status: 400 });

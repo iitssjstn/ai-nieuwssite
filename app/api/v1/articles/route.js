@@ -9,7 +9,7 @@ export async function GET(request) {
   const valid = await verifyApiKey(apiKey);
   if (!valid) {
     return NextResponse.json(
-      { error: "Ongeldige of ontbrekende API-key. Geef 'm mee via de header X-API-Key." },
+      { error: "Invalid or missing API key. Provide it via the X-API-Key header." },
       { status: 401 }
     );
   }

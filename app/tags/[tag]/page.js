@@ -17,7 +17,7 @@ export function generateMetadata({ params }) {
   const { site_name } = getSiteSettings();
   const url = `${baseUrl}/tags/${encodeURIComponent(tag.toLowerCase())}`;
   const title = `#${tag} — ${site_name}`;
-  const description = `Alle artikelen getagd met "${tag}", samengesteld met AI en gecontroleerd door de redactie.`;
+  const description = `All articles tagged with "${tag}", compiled with AI and reviewed by the editorial team.`;
   return {
     title,
     description,
@@ -31,10 +31,10 @@ function timeAgo(dateStr) {
   if (!dateStr) return "";
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diffMs / 60000);
-  if (mins < 60) return `${mins} min. geleden`;
+  if (mins < 60) return `${mins} min. ago`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} uur geleden`;
-  return `${Math.floor(hours / 24)} dag(en) geleden`;
+  if (hours < 24) return `${hours} hours ago`;
+  return `${Math.floor(hours / 24)} day(s) ago`;
 }
 
 export default function TagPage({ params }) {
@@ -50,7 +50,7 @@ export default function TagPage({ params }) {
 
       {articles.length === 0 && (
         <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
-          Nog geen artikelen met deze tag.
+          No articles with this tag yet.
         </p>
       )}
 

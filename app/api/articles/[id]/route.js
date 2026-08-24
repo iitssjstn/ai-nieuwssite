@@ -4,8 +4,8 @@ import { getSessionFromRequest } from "@/lib/auth";
 import { computeReadability } from "@/lib/readability";
 import { triggerWebhooks } from "@/lib/webhooks";
 
-// Acties die alleen een admin mag uitvoeren — een redacteur mag artikelen
-// aanmaken/bewerken/inleveren, maar niet zelf goedkeuren/publiceren/afkeuren.
+// Actions only an admin may perform — an editor may create/edit/submit
+// articles, but not approve/publish/reject them.
 const ADMIN_ONLY_ACTIONS = [
   "approve", "publish", "reject", "unpublish",
   "schedule", "unschedule", "archive", "unarchive", "toggle_breaking", "toggle_featured",
@@ -14,7 +14,7 @@ const ADMIN_ONLY_ACTIONS = [
 
 export async function GET(request, { params }) {
   const article = getArticle(params.id);
-  if (!article) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
+  if (!article) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({ ...article, readability: computeReadability(article.body) });
 }
 
@@ -26,19 +26,19 @@ export async function PATCH(request, { params }) {
   const { action, title, articleBody, featuredImage, featuredImageCredit, tags, scheduledAt, liveblogText, updateId, location, pollId, category, claimIndex, claim } = body;
 
   if (ADMIN_ONLY_ACTIONS.includes(action) && session?.role !== "admin") {
-    return NextResponse.json({ error: "Alleen voor admins" }, { status: 403 });
+    return NextResponse.json({ error: "Admin only" }, { status: 403 });
   }
 
   const existing = getArticle(params.id);
-  if (!existing) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const reviewer = session?.username || "onbekend";
+  const reviewer = session?.username || "unknown";
   let updated;
   let diff = null;
 
   if (action === "approve") {
-    // Goedkeuren ≠ publiceren: het artikel wacht daarna nog op de losse
-    // publiceer-stap (of kan direct aansluitend gepubliceerd worden).
+    // Approving ≠ publishing: the article then still awaits the separate
+    // publish step (or can be published immediately after).
     updated = updateArticle(params.id, {
       status: "approved",
       reviewer_id: reviewer,
@@ -73,7 +73,7 @@ export async function PATCH(request, { params }) {
     });
   } else if (action === "schedule") {
     if (!scheduledAt) {
-      return NextResponse.json({ error: "scheduledAt is verplicht" }, { status: 400 });
+      return NextResponse.json({ error: "scheduledAt is required" }, { status: 400 });
     }
     updated = updateArticle(params.id, {
       status: "scheduled",
@@ -88,12 +88,12 @@ export async function PATCH(request, { params }) {
     updated = updateArticle(params.id, { is_liveblog: !existing.is_liveblog });
   } else if (action === "add_liveblog_update") {
     if (!liveblogText || !liveblogText.trim()) {
-      return NextResponse.json({ error: "Tekst voor de update is verplicht" }, { status: 400 });
+      return NextResponse.json({ error: "Text for the update is required" }, { status: 400 });
     }
     updated = addLiveblogUpdate(params.id, { text: liveblogText.trim(), author: reviewer });
   } else if (action === "delete_liveblog_update") {
     if (!updateId) {
-      return NextResponse.json({ error: "updateId is verplicht" }, { status: 400 });
+      return NextResponse.json({ error: "updateId is required" }, { status: 400 });
     }
     updated = deleteLiveblogUpdate(params.id, updateId);
   } else if (action === "edit") {
@@ -127,11 +127,11 @@ export async function PATCH(request, { params }) {
     triggerWebhooks("article.updated", updated).catch(() => {});
   } else if (action === "update_claim") {
     if (!Number.isInteger(claimIndex) || claimIndex < 0) {
-      return NextResponse.json({ error: "claimIndex is verplicht" }, { status: 400 });
+      return NextResponse.json({ error: "claimIndex is required" }, { status: 400 });
     }
     const currentClaims = existing.claims || [];
     if (claimIndex >= currentClaims.length) {
-      return NextResponse.json({ error: "Claim niet gevonden" }, { status: 400 });
+      return NextResponse.json({ error: "Claim not found" }, { status: 400 });
     }
     const newClaims = currentClaims.map((c, i) =>
       i === claimIndex ? { ...c, ...claim, manually_reviewed: true } : c
@@ -141,7 +141,7 @@ export async function PATCH(request, { params }) {
   } else if (action === "dismiss_pending_update") {
     updated = updateArticle(params.id, { pending_update: null });
   } else {
-    return NextResponse.json({ error: "Onbekende actie" }, { status: 400 });
+    return NextResponse.json({ error: "Unknown action" }, { status: 400 });
   }
 
   addReviewLogEntry({ article_id: params.id, action, diff, by: reviewer });
@@ -151,11 +151,11 @@ export async function PATCH(request, { params }) {
 export async function DELETE(request, { params }) {
   const session = await getSessionFromRequest(request);
   if (session?.role !== "admin") {
-    return NextResponse.json({ error: "Alleen voor admins" }, { status: 403 });
+    return NextResponse.json({ error: "Admin only" }, { status: 403 });
   }
 
   const existing = getArticle(params.id);
-  if (!existing) return NextResponse.json({ error: "Niet gevonden" }, { status: 404 });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   deleteArticle(params.id);
   addReviewLogEntry({ article_id: params.id, action: "delete", diff: null, by: session.username });

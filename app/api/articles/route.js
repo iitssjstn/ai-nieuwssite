@@ -12,7 +12,7 @@ export async function POST(request) {
   const body = await request.json();
   if (!body.title || !body.body || !body.source_id) {
     return NextResponse.json(
-      { error: "title, body en source_id zijn verplicht" },
+      { error: "title, body, and source_id are required" },
       { status: 400 }
     );
   }

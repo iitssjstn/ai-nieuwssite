@@ -5,7 +5,7 @@ import { searchStockPhoto, searchStockPhotoOptions } from "@/lib/image-search";
 export async function POST(request) {
   const { query, multiple } = await request.json();
   if (!query || !query.trim()) {
-    return NextResponse.json({ error: "Geef een zoekopdracht op" }, { status: 400 });
+    return NextResponse.json({ error: "Provide a search query" }, { status: 400 });
   }
   const providerConfigs = getAllImageProviderConfigs();
   const customProviders = getCustomImageProviders();
@@ -15,7 +15,7 @@ export async function POST(request) {
       const options = await searchStockPhotoOptions(query.trim(), providerConfigs, customProviders);
       if (options.length === 0) {
         return NextResponse.json(
-          { error: "Geen resultaat gevonden — check of er een provider is ingesteld, of probeer een andere zoekopdracht." },
+          { error: "No results found — check whether a provider is configured, or try a different search query." },
           { status: 404 }
         );
       }
@@ -31,7 +31,7 @@ export async function POST(request) {
     const photo = await searchStockPhoto(query.trim(), providerConfigs, customProviders);
     if (!photo) {
       return NextResponse.json(
-        { error: "Geen resultaat gevonden — check of er een provider is ingesteld, of probeer een andere zoekopdracht." },
+        { error: "No results found — check whether a provider is configured, or try a different search query." },
         { status: 404 }
       );
     }

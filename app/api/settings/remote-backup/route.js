@@ -19,7 +19,7 @@ export async function GET() {
 export async function PATCH(request) {
   const { url, key } = await request.json();
   if (url !== undefined && url.trim() && !/^https?:\/\//.test(url.trim())) {
-    return NextResponse.json({ error: "URL moet beginnen met http:// of https://" }, { status: 400 });
+    return NextResponse.json({ error: "URL must start with http:// or https://" }, { status: 400 });
   }
   setRemoteBackupSettings({
     url: url !== undefined ? (url.trim() || null) : undefined,

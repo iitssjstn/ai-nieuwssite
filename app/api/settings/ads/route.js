@@ -10,11 +10,11 @@ export async function GET() {
 export async function PATCH(request) {
   const { clientId } = await request.json();
   if (!clientId || !clientId.trim()) {
-    return NextResponse.json({ error: "Geef een geldige client-ID op" }, { status: 400 });
+    return NextResponse.json({ error: "Provide a valid client ID" }, { status: 400 });
   }
   if (!/^ca-pub-\d+$/.test(clientId.trim())) {
     return NextResponse.json(
-      { error: "Client-ID moet het formaat ca-pub-XXXXXXXXXX hebben" },
+      { error: "Client ID must have the format ca-pub-XXXXXXXXXX" },
       { status: 400 }
     );
   }

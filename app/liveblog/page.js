@@ -14,8 +14,8 @@ function getBaseUrl() {
 export function generateMetadata() {
   const { site_name } = getSiteSettings();
   return {
-    title: `Liveblogs — ${site_name}`,
-    description: `Alle doorlopende liveblogs van ${site_name}.`,
+    title: `Live Blogs — ${site_name}`,
+    description: `All ongoing live blogs from ${site_name}.`,
     alternates: { canonical: `${getBaseUrl()}/liveblog` },
   };
 }
@@ -28,10 +28,10 @@ export default function LiveblogHubPage() {
   return (
     <div className="container">
       <Header />
-      <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>Liveblogs</h1>
+      <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>Live Blogs</h1>
 
       {liveArticles.length === 0 && (
-        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>Er loopt momenteel geen liveblog.</p>
+        <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>There is no live blog running at the moment.</p>
       )}
 
       {liveArticles.map((a) => (
