@@ -73,10 +73,10 @@ export default function HomePage() {
     (a, b) => new Date(b.published_at) - new Date(a.published_at)
   );
 
-  // Hero/grid tonen UITSLUITEND handmatig uitgelichte artikelen (nieuwst-
-  // uitgelicht eerst). Licht je niets uit, dan blijft dit gebied leeg en
-  // staat alles gewoon in "Laatste nieuws" — geen automatische terugval op
-  // "nieuwste eerst" meer, dat was bewust ongewenst.
+  // Hero/grid show ONLY manually featured articles (most recently
+  // featured first). If you don't feature anything, this area stays empty
+  // and everything just lives in "Latest News" — no automatic fallback to
+  // "newest first" anymore, that was deliberately undesired.
   const featured = published
     .filter((a) => a.featured)
     .sort((a, b) => new Date(b.featured_at) - new Date(a.featured_at));
@@ -92,9 +92,9 @@ export default function HomePage() {
     .filter((p) => p.active)
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
 
-  // Per categorie de 3 meest recente artikelen klaarzetten, met vooraf
-  // berekende leestijd/tijdsaanduiding/samenvatting — CategoryTabs is een
-  // client-component en kan deze server-only helpers niet zelf aanroepen.
+  // Prepare the 3 most recent articles per category, with pre-
+  // computed reading time/timestamp/excerpt — CategoryTabs is a
+  // client component and can't call these server-only helpers itself.
   const articlesByCategory = {};
   for (const c of categories) {
     articlesByCategory[c.name] = published
@@ -163,7 +163,7 @@ export default function HomePage() {
                 No article featured on the homepage yet.
               </p>
               <p style={{ color: "var(--text-muted)", fontSize: 13, margin: "6px 0 0" }}>
-                Bekijk alle nieuwe artikelen in "Laatste nieuws" hiernaast.
+                View all new articles in "Latest News" alongside.
               </p>
             </div>
           )}
@@ -175,9 +175,9 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Laatste nieuws */}
+        {/* Latest News */}
         <div className="sidebar-box">
-          <h3>Laatste nieuws</h3>
+          <h3>Latest News</h3>
           {latestNews.length === 0 && (
             <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No articles yet.</p>
           )}
