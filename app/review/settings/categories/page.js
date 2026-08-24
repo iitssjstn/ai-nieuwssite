@@ -11,6 +11,7 @@ export default function CategoriesPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
+  const [renamedCount, setRenamedCount] = useState(null);
 
   async function load() {
     const res = await fetch("/api/categories");
@@ -22,20 +23,22 @@ export default function CategoriesPage() {
     load();
   }, []);
 
-  async function save(updated) {
+  async function save(updated, rename) {
     setError(null);
     setSaved(false);
+    setRenamedCount(null);
     setBusy(true);
     const res = await fetch("/api/categories", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ categories: updated }),
+      body: JSON.stringify({ categories: updated, rename }),
     });
     setBusy(false);
     if (res.ok) {
       const data = await res.json();
       setCategories(data.categories);
       setSaved(true);
+      if (rename && data.articlesUpdated > 0) setRenamedCount(data.articlesUpdated);
     } else {
       const data = await res.json();
       setError(data.error || "Save failed");
@@ -56,7 +59,10 @@ export default function CategoriesPage() {
   }
 
   function updateName(oldName, newName) {
-    save(categories.map((c) => (c.name === oldName ? { ...c, name: newName } : c)));
+    save(
+      categories.map((c) => (c.name === oldName ? { ...c, name: newName } : c)),
+      { from: oldName, to: newName }
+    );
   }
 
   function move(index, direction) {
@@ -89,6 +95,11 @@ export default function CategoriesPage() {
 
       {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 12 }}>{error}</p>}
       {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 12 }}>Saved.</p>}
+      {renamedCount !== null && (
+        <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 12 }}>
+          {renamedCount} existing article(s) updated to the new category name.
+        </p>
+      )}
 
       {categories.map((c, i) => (
         <div key={c.name} className="pending-item" style={{ display: "flex", alignItems: "center", gap: 12 }}>
