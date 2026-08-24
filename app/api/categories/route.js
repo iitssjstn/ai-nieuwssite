@@ -14,7 +14,7 @@ export async function PUT(request) {
     return NextResponse.json({ error: "Admin only" }, { status: 403 });
   }
 
-  const { categories } = await request.json();
+  const { categories, rename } = await request.json();
   if (!Array.isArray(categories) || categories.length === 0) {
     return NextResponse.json({ error: "At least one category is required" }, { status: 400 });
   }
@@ -30,6 +30,6 @@ export async function PUT(request) {
   if (new Set(names).size !== names.length) {
     return NextResponse.json({ error: "Category names must be unique" }, { status: 400 });
   }
-  setCategories(categories.map((c) => ({ name: c.name.trim(), color: c.color })));
-  return NextResponse.json({ categories: getCategories() });
+  const articlesUpdated = setCategories(categories.map((c) => ({ name: c.name.trim(), color: c.color })), rename);
+  return NextResponse.json({ categories: getCategories(), articlesUpdated });
 }
