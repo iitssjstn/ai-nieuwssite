@@ -232,7 +232,7 @@ export default function PublishedArticles() {
             )}
             {isAdmin && (
               <button disabled={busyId === a.id} onClick={() => remove(a.id)} className="danger" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-                Verwijderen
+                Delete
               </button>
             )}
           </div>
