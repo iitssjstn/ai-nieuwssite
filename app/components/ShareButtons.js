@@ -36,7 +36,7 @@ export default function ShareButtons({ slug, title }) {
     <div style={{ display: "flex", gap: 8 }}>
       <button onClick={() => handleShare("x")} style={buttonStyle}>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-7.6 8.7L23.3 22h-7l-5.5-7.2L4.5 22H1.4l8.1-9.3L1 2h7.2l5 6.6L18.9 2Z" /></svg>
-        Delen op X
+        Share on X
       </button>
       <button onClick={() => handleShare("facebook")} style={buttonStyle}>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3.1h-3.1V8c0-.9.3-1.5 1.6-1.5H17V3.6C16.6 3.5 15.6 3.4 14.5 3.4c-2.4 0-4 1.5-4 4.1v2.4H8v3.1h2.5V21h3Z" /></svg>
