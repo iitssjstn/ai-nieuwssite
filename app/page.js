@@ -126,7 +126,7 @@ export default function HomePage() {
       <h1 className="sr-only">{site_name} — Actueel Nederlands nieuws</h1>
 
       <p style={{ fontSize: 12, color: "var(--text-muted)", textTransform: "capitalize", margin: "0 0 16px" }}>
-        {new Date().toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+        {new Date().toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
       </p>
 
       <div className="hero-row">
