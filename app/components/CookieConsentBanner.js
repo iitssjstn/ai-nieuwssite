@@ -34,14 +34,14 @@ export default function CookieConsentBanner() {
     >
       <p style={{ margin: 0, fontSize: 13, color: "var(--text-secondary)", maxWidth: 640 }}>
         We use functional cookies to make the site work.{" "}
-        <a href="/privacy" style={{ color: "var(--accent-text)" }}>Meer lezen</a>.
+        <a href="/privacy" style={{ color: "var(--accent-text)" }}>Read more</a>.
       </p>
       <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
         <button onClick={() => choose("declined")} style={{ width: "auto", padding: "8px 16px", fontSize: 13 }}>
-          Alleen noodzakelijk
+          Necessary only
         </button>
         <button onClick={() => choose("accepted")} className="primary" style={{ width: "auto", padding: "8px 16px", fontSize: 13 }}>
-          Accepteren
+          Accept
         </button>
       </div>
     </div>
