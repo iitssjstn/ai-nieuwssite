@@ -18,8 +18,8 @@ export default function SettingsPanel() {
     setTheme(localStorage.getItem("theme") || "auto");
   }, []);
 
-  // "Automatisch" moet ook live meebewegen als het systeemthema verandert
-  // terwijl de site open staat, niet alleen bij het laden.
+  // "Automatic" should also update live if the system theme changes
+  // while the site is open, not just on load.
   useEffect(() => {
     if (theme !== "auto") return;
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -43,23 +43,23 @@ export default function SettingsPanel() {
   }
 
   const OPTIONS = [
-    { id: "auto", label: "Automatisch", sub: "Volgt je systeeminstelling" },
-    { id: "light", label: "Lichte weergave", sub: null },
-    { id: "dark", label: "Donkere weergave", sub: null },
+    { id: "auto", label: "Automatic", sub: "Follows your system setting" },
+    { id: "light", label: "Light mode", sub: null },
+    { id: "dark", label: "Dark mode", sub: null },
   ];
 
   return (
     <div ref={panelRef} style={{ position: "relative" }}>
       <button
         onClick={() => setOpen((o) => !o)}
-        aria-label="Instellingen"
+        aria-label="Settings"
         style={{ width: "auto", padding: "6px 10px", display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}
       >
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
           <circle cx="12" cy="12" r="3" />
           <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 0 1-4 0v-.09A1.7 1.7 0 0 0 9 19.35a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.65 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 0 1 0-4h.09A1.7 1.7 0 0 0 4.65 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.65a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 0 1 4 0v.09a1.7 1.7 0 0 0 1.04 1.56 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.35 9a1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 0 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15Z" />
         </svg>
-        Instellingen
+        Settings
       </button>
 
       {open && (
@@ -78,7 +78,7 @@ export default function SettingsPanel() {
           }}
         >
           <p style={{ fontSize: 11, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em", margin: "4px 6px 8px" }}>
-            Weergave
+            Display
           </p>
           {OPTIONS.map((opt) => (
             <button
