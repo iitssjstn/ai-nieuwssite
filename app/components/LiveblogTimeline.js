@@ -8,7 +8,7 @@ function timeAgo(dateStr) {
   if (mins < 1) return "just now";
   if (mins < 60) return `${mins} min. ago`;
   const hours = Math.floor(mins / 60);
-  return `${hours} hours ago`;
+  return `${hours} hour${hours === 1 ? "" : "s"} ago`;
 }
 
 export default function LiveblogTimeline({ articleId, initialUpdates }) {
