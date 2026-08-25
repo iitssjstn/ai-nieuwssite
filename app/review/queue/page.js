@@ -240,7 +240,7 @@ export default function QueuePage() {
             />
             <textarea
               rows={3}
-              placeholder="Brontekst van deze extra bron..."
+              placeholder="Source text for this additional source..."
               value={s.text}
               onChange={(e) => {
                 const copy = [...extraSources];
