@@ -10,7 +10,7 @@ function computeLabel(publishedAt) {
   if (mins < 15) return { text: "Net binnen", fresh: true };
   if (mins < 60) return { text: `${mins} min. ago`, fresh: false };
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return { text: `${hours} hours ago`, fresh: false };
+  if (hours < 24) return { text: `${hours} hour${hours === 1 ? "" : "s"} ago`, fresh: false };
   return { text: `${Math.floor(hours / 24)} day(s) ago`, fresh: false };
 }
 
