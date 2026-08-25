@@ -139,7 +139,7 @@ function pageTitle(pathname) {
   if (pathname.startsWith("/review/sources")) return "Bronnen";
   if (pathname.startsWith("/review/settings")) return "Instellingen";
   if (/^\/review\/[^/]+$/.test(pathname)) return "Artikel reviewen";
-  return "Redactie";
+  return "Editorial";
 }
 
 export default function ReviewLayout({ children }) {
