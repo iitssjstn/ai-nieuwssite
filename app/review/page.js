@@ -252,7 +252,7 @@ export default function ReviewOverview() {
                 <span className="badge badge-muted" style={{ flexShrink: 0 }}>{a.category}</span>
                 <span style={{ flex: 1, fontSize: 13, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.title}</span>
                 <span style={{ fontSize: 12, color: "var(--text-muted)", flexShrink: 0 }}>
-                  {new Date(a.published_at).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}
+                  {new Date(a.published_at).toLocaleDateString("en-US", { day: "numeric", month: "short" })}
                 </span>
                 <Link href={`/review/${a.id}`} style={{ flexShrink: 0 }}>
                   <button style={{ width: "auto", padding: "5px 12px", fontSize: 12 }}>Bewerken</button>
@@ -425,5 +425,5 @@ function AlertIcon({ type }) {
 
 function formatDayLabel(dateStr) {
   const d = new Date(dateStr + "T00:00:00");
-  return d.toLocaleDateString("nl-NL", { weekday: "short", day: "numeric", month: "short" });
+  return d.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
 }
