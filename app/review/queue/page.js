@@ -218,7 +218,7 @@ export default function QueuePage() {
             </p>
             <input
               type="text"
-              placeholder="Naam van deze bron (bijv. NOS)"
+              placeholder="Name of this source"
               value={s.name}
               onChange={(e) => {
                 const copy = [...extraSources];
