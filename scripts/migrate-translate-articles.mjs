@@ -52,26 +52,48 @@ async function main() {
   let done = 0;
   let failed = 0;
   const errors = [];
+  // Bij dit specifieke soort fout (het AI-model levert géén geldige JSON,
+  // bijv. omdat een "redenerend" model zijn eigen denkstappen laat lekken
+  // in plaats van het antwoord) helpt simpelweg opnieuw proberen vaak al —
+  // het is doorgaans een kwestie van pech bij die ene aanroep, niet een
+  // structureel probleem met dat specifieke artikel.
+  const MAX_ATTEMPTS = 3;
 
   for (const article of targets) {
     const position = done + failed + 1;
-    try {
-      const { title, body } = await translateArticleToEnglish({
-        title: article.title,
-        body: article.body,
-      });
-      if (!DRY_RUN) {
-        // updateArticle leest zelf vers van schijf en schrijft meteen weg
-        // — voortgang gaat dus nooit verloren, ook niet bij een crash
-        // halverwege de volledige lijst.
-        updateArticle(article.id, { title, body, translated_to_en: true });
+    let lastErr = null;
+    let success = false;
+
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS && !success; attempt++) {
+      try {
+        const { title, body } = await translateArticleToEnglish({
+          title: article.title,
+          body: article.body,
+        });
+        if (!DRY_RUN) {
+          // updateArticle leest zelf vers van schijf en schrijft meteen weg
+          // — voortgang gaat dus nooit verloren, ook niet bij een crash
+          // halverwege de volledige lijst.
+          updateArticle(article.id, { title, body, translated_to_en: true });
+        }
+        done++;
+        success = true;
+        const attemptNote = attempt > 1 ? ` (na ${attempt} pogingen)` : "";
+        console.log(`[migratie] (${position}/${targets.length}) OK${attemptNote} — ${article.id}: "${title.slice(0, 70)}"`);
+      } catch (err) {
+        lastErr = err;
+        const isParseError = err.message.includes("could not parse AI response as JSON") || err.message.includes("No valid translation received");
+        if (isParseError && attempt < MAX_ATTEMPTS) {
+          console.error(`[migratie] (${position}/${targets.length}) poging ${attempt} mislukte (ongeldig AI-antwoord) — ${article.id}, probeer opnieuw...`);
+          await sleep(2000);
+        }
       }
-      done++;
-      console.log(`[migratie] (${position}/${targets.length}) OK — ${article.id}: "${title.slice(0, 70)}"`);
-    } catch (err) {
+    }
+
+    if (!success) {
       failed++;
-      errors.push({ id: article.id, title: article.title, error: err.message });
-      console.error(`[migratie] (${position}/${targets.length}) FOUT — ${article.id}: ${err.message}`);
+      errors.push({ id: article.id, title: article.title, error: lastErr.message });
+      console.error(`[migratie] (${position}/${targets.length}) FOUT (na ${MAX_ATTEMPTS} pogingen) — ${article.id}: ${lastErr.message}`);
     }
     // Geen pauze na de allerlaatste — scheelt onnodig wachten aan het einde.
     if (position < targets.length) await sleep(DELAY_MS);
