@@ -66,15 +66,16 @@ async function main() {
 
     for (let attempt = 1; attempt <= MAX_ATTEMPTS && !success; attempt++) {
       try {
-        const { title, body } = await translateArticleToEnglish({
+        const { title, body, claims } = await translateArticleToEnglish({
           title: article.title,
           body: article.body,
+          claims: article.claims,
         });
         if (!DRY_RUN) {
           // updateArticle leest zelf vers van schijf en schrijft meteen weg
           // — voortgang gaat dus nooit verloren, ook niet bij een crash
           // halverwege de volledige lijst.
-          updateArticle(article.id, { title, body, translated_to_en: true });
+          updateArticle(article.id, { title, body, claims, translated_to_en: true });
         }
         done++;
         success = true;
