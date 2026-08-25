@@ -90,7 +90,7 @@ export default function ReviewDetail() {
       });
       if (res.ok) {
         lastSaved.current = { title, body, featuredImage, category };
-        setAutosaveStatus("Automatisch opgeslagen · " + new Date().toLocaleTimeString("nl-NL"));
+        setAutosaveStatus("Auto-saved · " + new Date().toLocaleTimeString("en-US"));
       } else {
         setAutosaveStatus("Auto-save failed");
       }
@@ -624,7 +624,7 @@ export default function ReviewDetail() {
         <span className="badge badge-muted">{statusLabel(article.status)}</span>
         {article.status === "scheduled" && article.scheduled_at && (
           <span className="badge badge-muted">
-            Gepland: {new Date(article.scheduled_at).toLocaleString("nl-NL")}
+            Scheduled: {new Date(article.scheduled_at).toLocaleString("en-US")}
           </span>
         )}
         {article.breaking && <span className="flag flag-warn">🔴 Breaking</span>}
@@ -752,7 +752,7 @@ export default function ReviewDetail() {
               <div>
                 <p style={{ fontSize: 13, margin: 0 }}>{u.text}</p>
                 <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "2px 0 0" }}>
-                  {new Date(u.created_at).toLocaleString("nl-NL")} · {u.author}
+                  {new Date(u.created_at).toLocaleString("en-US")} · {u.author}
                 </p>
               </div>
               <button onClick={() => handleDeleteUpdate(u.id)} style={{ width: "auto", padding: "2px 8px", fontSize: 11, color: "var(--danger-text)" }}>
@@ -825,7 +825,7 @@ export default function ReviewDetail() {
               <div style={{ minWidth: 0 }}>
                 <p style={{ fontSize: 13, fontWeight: 500, margin: 0 }}>{rev.title}</p>
                 <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "2px 0 0" }}>
-                  {new Date(rev.edited_at).toLocaleString("nl-NL")}
+                  {new Date(rev.edited_at).toLocaleString("en-US")}
                 </p>
               </div>
               <button onClick={() => restoreRevision(rev)} style={{ width: "auto", padding: "4px 10px", fontSize: 12, flexShrink: 0 }}>
@@ -890,12 +890,12 @@ export default function ReviewDetail() {
 
 function statusLabel(status) {
   return {
-    published: "Gepubliceerd",
-    pending_review: "Te reviewen",
-    approved: "Goedgekeurd",
-    rejected: "Afgekeurd",
-    scheduled: "Gepland",
-    archived: "Gearchiveerd",
+    published: "Published",
+    pending_review: "To Review",
+    approved: "Approved",
+    rejected: "Rejected",
+    scheduled: "Scheduled",
+    archived: "Archived",
   }[status] || status;
 }
 
