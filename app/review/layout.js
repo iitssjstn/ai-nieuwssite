@@ -283,7 +283,7 @@ export default function ReviewLayout({ children }) {
         <div className="admin-user-chip" style={{ justifyContent: "center" }}>
           <button
             className="admin-logout-btn"
-            aria-label="Uitloggen"
+            aria-label="Log Out"
             style={{ marginLeft: 0, display: "flex", alignItems: "center", gap: 8, fontSize: 12 }}
             onClick={async () => {
               await fetch("/api/auth/logout", { method: "POST" });
@@ -291,7 +291,7 @@ export default function ReviewLayout({ children }) {
             }}
           >
             <LogoutIcon />
-            Uitloggen
+            Log Out
           </button>
         </div>
       </aside>
