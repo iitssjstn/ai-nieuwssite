@@ -29,7 +29,7 @@ function timeAgo(dateStr) {
   const mins = Math.floor(diffMs / 60000);
   if (mins < 60) return `${mins} minutes ago`;
   const hours = Math.floor(mins / 60);
-  return `${hours} hours ago`;
+  return `${hours} hour${hours === 1 ? "" : "s"} ago`;
 }
 
 function getBaseUrl() {
