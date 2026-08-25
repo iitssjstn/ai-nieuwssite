@@ -81,7 +81,7 @@ export default function SourcesPage() {
         <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>Add new source</p>
         <input
           type="text"
-          placeholder="Name (e.g. Reuters, AP)"
+          placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           style={{ marginBottom: 8 }}
