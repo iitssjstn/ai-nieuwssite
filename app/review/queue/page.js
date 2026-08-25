@@ -11,7 +11,7 @@ function timeAgo(dateStr) {
   if (mins < 1) return "zojuist";
   if (mins < 60) return `${mins} min. ago`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours} hours ago`;
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} ago`;
   return `${Math.floor(hours / 24)} day(s) ago`;
 }
 
