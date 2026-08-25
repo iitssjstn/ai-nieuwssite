@@ -335,10 +335,10 @@ export default function ReviewDetail() {
           </p>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={() => act("apply_pending_update")} disabled={busy} className="primary" style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-              Update toepassen
+              Apply Update
             </button>
             <button onClick={() => act("dismiss_pending_update")} disabled={busy} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
-              Negeren
+              Dismiss
             </button>
           </div>
         </div>
@@ -388,13 +388,13 @@ export default function ReviewDetail() {
                     disabled={busy}
                     style={{ width: "auto", padding: "4px 10px", fontSize: 12 }}
                   >
-                    Opslaan
+                    Save
                   </button>
                   <button
                     onClick={() => setEditingClaimIndex(null)}
                     style={{ width: "auto", padding: "4px 10px", fontSize: 12 }}
                   >
-                    Annuleren
+                    Cancel
                   </button>
                 </span>
               ) : (
@@ -669,7 +669,7 @@ export default function ReviewDetail() {
             </button>
           )}
           <button disabled={busy} onClick={() => setShowExtras((s) => !s)}>
-            Extra content genereren
+            Generate Extra Content
           </button>
           <button disabled={busy} onClick={() => act("toggle_liveblog")}>
             {article.is_liveblog ? "Liveblog uitzetten" : "Als liveblog markeren"}
@@ -829,7 +829,7 @@ export default function ReviewDetail() {
                 </p>
               </div>
               <button onClick={() => restoreRevision(rev)} style={{ width: "auto", padding: "4px 10px", fontSize: 12, flexShrink: 0 }}>
-                Terugzetten
+                Restore
               </button>
             </div>
           ))}
@@ -909,7 +909,7 @@ function ExtraField({ label, value, multiline }) {
           onClick={() => navigator.clipboard.writeText(value || "")}
           style={{ width: "auto", padding: "2px 8px", fontSize: 11 }}
         >
-          Kopiëren
+          Copy
         </button>
       </div>
       {multiline ? (
