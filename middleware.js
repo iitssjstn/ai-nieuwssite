@@ -101,7 +101,7 @@ export async function middleware(request) {
   }
 
   if (session.role !== "admin" && matchesPrefix(pathname, ADMIN_ONLY_PREFIXES) && !matchesPrefix(pathname, ADMIN_ONLY_EXCEPTIONS)) {
-    if (isApi) return NextResponse.json({ error: "Alleen voor admins" }, { status: 403 });
+    if (isApi) return NextResponse.json({ error: "Admin only" }, { status: 403 });
     return NextResponse.redirect(new URL("/review", request.url));
   }
 
