@@ -3,6 +3,12 @@ import { getArticle, updateArticle, editArticleWithRevision, deleteArticle, addR
 import { getSessionFromRequest } from "@/lib/auth";
 import { computeReadability } from "@/lib/readability";
 import { triggerWebhooks } from "@/lib/webhooks";
+import { pingIndexNow } from "@/lib/indexnow";
+
+function getBaseUrl(request) {
+  const proto = request.headers.get("x-forwarded-proto") || request.nextUrl.protocol.replace(":", "");
+  return `${proto}://${request.headers.get("host")}`;
+}
 
 // Actions only an admin may perform — an editor may create/edit/submit
 // articles, but not approve/publish/reject them.
@@ -50,6 +56,7 @@ export async function PATCH(request, { params }) {
       published_at: new Date().toISOString(),
     });
     triggerWebhooks("article.published", updated).catch(() => {});
+    pingIndexNow(getBaseUrl(request), `${getBaseUrl(request)}/artikel/${updated.slug}`);
   } else if (action === "reject") {
     updated = updateArticle(params.id, {
       status: "rejected",
@@ -125,6 +132,7 @@ export async function PATCH(request, { params }) {
       pending_update: null,
     });
     triggerWebhooks("article.updated", updated).catch(() => {});
+    pingIndexNow(getBaseUrl(request), `${getBaseUrl(request)}/artikel/${updated.slug}`);
   } else if (action === "update_claim") {
     if (!Number.isInteger(claimIndex) || claimIndex < 0) {
       return NextResponse.json({ error: "claimIndex is required" }, { status: 400 });
