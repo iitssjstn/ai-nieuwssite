@@ -38,7 +38,7 @@ export async function GET() {
     <news:news>
       <news:publication>
         <news:name>${escapeXml(site_name)}</news:name>
-        <news:language>nl</news:language>
+        <news:language>en</news:language>
       </news:publication>
       <news:publication_date>${new Date(a.published_at).toISOString()}</news:publication_date>
       <news:title>${escapeXml(a.title)}</news:title>
