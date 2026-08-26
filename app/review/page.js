@@ -67,7 +67,7 @@ export default function ReviewOverview() {
 
   useEffect(() => {
     loadActiveVisitors();
-    const interval = setInterval(loadActiveVisitors, 30000);
+    const interval = setInterval(loadActiveVisitors, 10000);
     return () => clearInterval(interval);
   }, []);
 
