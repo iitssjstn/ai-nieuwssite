@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 export default function AdMavenPage() {
   const [placementId, setPlacementId] = useState(null);
   const [draft, setDraft] = useState("");
+  const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
 
@@ -13,6 +14,7 @@ export default function AdMavenPage() {
     const data = await res.json();
     setPlacementId(data.placementId);
     setDraft(data.placementId || "");
+    setLoaded(true);
   }
 
   useEffect(() => {
@@ -36,7 +38,7 @@ export default function AdMavenPage() {
     }
   }
 
-  if (placementId === null && draft === "") return null;
+  if (!loaded) return null;
 
   return (
     <>
