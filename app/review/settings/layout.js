@@ -13,7 +13,6 @@ const SECTIONS = [
   { href: "/review/settings/adsense", label: "Google AdSense", desc: "Publisher ID and the large ad unit" },
   { href: "/review/settings/adsterra", label: "Adsterra", desc: "Social Bar, native banner, and ad slots" },
   { href: "/review/settings/ezoic", label: "Ezoic", desc: "Turn Ezoic integration on/off" },
-  { href: "/review/settings/admaven", label: "AdMaven", desc: "Site verification placement tag" },
   { href: "/review/settings/newsletter", label: "Newsletter", desc: "Sender email address and subscriptions" },
   { href: "/review/settings/social", label: "Social Media", desc: "Links to your profiles for the footer" },
   { href: "/review/settings/info-pages", label: "Info Pages", desc: "Turn About Us & Privacy on/off and edit them" },
