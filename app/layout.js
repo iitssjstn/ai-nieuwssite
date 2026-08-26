@@ -1,5 +1,5 @@
 import "./globals.css";
-import { getAdsenseClientId, getSiteSettings, getAdSlots, getEzoicEnabled, getAdMavenPlacementId } from "@/lib/db";
+import { getAdsenseClientId, getSiteSettings, getAdSlots, getEzoicEnabled } from "@/lib/db";
 import ConsentGatedScripts from "./components/ConsentGatedScripts";
 import CookieConsentBanner from "./components/CookieConsentBanner";
 
@@ -20,15 +20,11 @@ export function generateMetadata() {
 export default function RootLayout({ children }) {
   const adsenseClientId = getAdsenseClientId();
   const ezoicEnabled = getEzoicEnabled();
-  const admavenPlacementId = getAdMavenPlacementId();
   const { social_bar_url } = getAdSlots();
 
   return (
     <html lang="en">
       <head>
-        {admavenPlacementId && (
-          <meta name="admaven-placement" content={admavenPlacementId} />
-        )}
         {/* Set the correct mode before React loads — otherwise you'd
             briefly see the light site and then a flash to dark. */}
         <script
