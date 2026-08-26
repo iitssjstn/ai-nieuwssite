@@ -36,6 +36,10 @@ export default function BackupsPage() {
   const [busy, setBusy] = useState(false);
   const [freqBusy, setFreqBusy] = useState(false);
   const [error, setError] = useState(null);
+  const [restoringFilename, setRestoringFilename] = useState(null);
+  const [restoreStatus, setRestoreStatus] = useState(null);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadBusy, setUploadBusy] = useState(false);
 
   async function load() {
     try {
@@ -128,6 +132,61 @@ export default function BackupsPage() {
     if (res.ok) setSettings(await res.json());
   }
 
+  async function doRestore(body) {
+    setError(null);
+    setRestoreStatus(null);
+    try {
+      const res = await fetch("/api/backups/restore", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setBackups(data.backups || []);
+        setRestoreStatus({ success: true, safetyBackupFilename: data.safetyBackupFilename });
+      } else {
+        setRestoreStatus({ success: false, error: data.error || "Restore failed" });
+      }
+    } catch {
+      setRestoreStatus({ success: false, error: "Could not connect to the server to restore." });
+    }
+  }
+
+  async function handleRestoreLocal(filename) {
+    if (
+      !confirm(
+        `Restore the site to the state it was in at "${formatMoment(backups.find((b) => b.filename === filename)?.createdAt)}"? ` +
+          "This replaces ALL current articles, settings, and users with what's in that backup. " +
+          "A fresh backup of the current state is taken automatically first, so this can be undone " +
+          "by restoring that one — but articles or changes made after this backup's moment will still be lost."
+      )
+    ) {
+      return;
+    }
+    setRestoringFilename(filename);
+    await doRestore({ filename });
+    setRestoringFilename(null);
+  }
+
+  async function handleRestoreUpload() {
+    if (!uploadFile) return;
+    if (
+      !confirm(
+        "Restore the site from this uploaded file? This replaces ALL current articles, settings, and " +
+          "users with what's in the file. A fresh backup of the current state is taken automatically " +
+          "first, so this can be undone by restoring that one."
+      )
+    ) {
+      return;
+    }
+    setUploadBusy(true);
+    const content = await uploadFile.text();
+    await doRestore({ content });
+    setUploadBusy(false);
+    setUploadFile(null);
+  }
+
   if (!backups || !settings || !remote) return null;
 
   const newest = backups[0];
@@ -213,6 +272,51 @@ export default function BackupsPage() {
         )}
       </div>
 
+      {restoreStatus && (
+        <div className="admin-glass-card" style={{ padding: 16, marginBottom: 16 }}>
+          {restoreStatus.success ? (
+            <>
+              <p style={{ color: "var(--success-text)", fontSize: 13, margin: 0 }}>
+                ✓ Restore complete. The site now reflects that backup's state.
+              </p>
+              {restoreStatus.safetyBackupFilename && (
+                <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "6px 0 0" }}>
+                  A safety backup of the state right before this restore was saved as{" "}
+                  <strong>{restoreStatus.safetyBackupFilename}</strong> — restore that one to undo this.
+                </p>
+              )}
+            </>
+          ) : (
+            <p style={{ color: "var(--danger-text)", fontSize: 13, margin: 0 }}>
+              ⚠ Restore failed: {restoreStatus.error}. Nothing was changed.
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="admin-glass-card" style={{ padding: 16, marginBottom: 16 }}>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Restore from an uploaded file</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 10 }}>
+          For disaster recovery — e.g. if the backups below are also gone, restore from a copy you
+          downloaded earlier (from here, or from the remote receiver).
+        </p>
+        <input
+          type="file"
+          accept="application/json"
+          onChange={(e) => setUploadFile(e.target.files?.[0] || null)}
+          style={{ marginBottom: 10 }}
+        />
+        <br />
+        <button
+          onClick={handleRestoreUpload}
+          disabled={!uploadFile || uploadBusy}
+          className="danger"
+          style={{ width: "auto", padding: "8px 16px" }}
+        >
+          {uploadBusy ? "Restoring..." : "Restore from this file"}
+        </button>
+      </div>
+
       {backups.length === 0 ? (
         <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
           No backups yet — the first one is created automatically within a quarter of an hour, or click
@@ -234,6 +338,14 @@ export default function BackupsPage() {
                 <a href={`/api/backups/download/${b.filename}`} style={{ fontSize: 13, color: "var(--accent-text)" }}>
                   Download
                 </a>
+                <button
+                  onClick={() => handleRestoreLocal(b.filename)}
+                  disabled={restoringFilename !== null}
+                  className="danger"
+                  style={{ width: "auto", padding: "4px 10px", fontSize: 12 }}
+                >
+                  {restoringFilename === b.filename ? "Restoring..." : "Restore"}
+                </button>
               </div>
             </div>
           ))}
