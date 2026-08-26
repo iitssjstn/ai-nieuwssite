@@ -25,7 +25,7 @@ function getBaseUrl() {
 export function generateMetadata() {
   const baseUrl = getBaseUrl();
   const { site_name, site_description } = getSiteSettings();
-  const title = `${site_name} — Actueel nieuws`;
+  const title = `${site_name} — Latest news`;
   return {
     title,
     description: site_description,
@@ -64,6 +64,22 @@ export default function HomePage() {
     name: site_name,
     url: baseUrl,
     description: site_description,
+    logo: { "@type": "ImageObject", url: `${baseUrl}/icon.svg`, width: 512, height: 512 },
+  };
+
+  // Los van het Organization-blok hierboven: dit @type WebSite +
+  // SearchAction is wat Google nodig heeft om (optioneel) een zoekbalk
+  // direct onder het site-resultaat te tonen ("sitelinks search box").
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: site_name,
+    url: baseUrl,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${baseUrl}/zoeken?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
   };
 
   const categories = getCategories();
@@ -118,12 +134,16 @@ export default function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+      />
       <Header />
 
       <div style={{ margin: "16px 0" }}>
         <AdSlot config={{ ...adSlots.banners.top_banner, width: adSlots.banners.top_banner?.width || 728, height: adSlots.banners.top_banner?.height || 90 }} />
       </div>
-      <h1 className="sr-only">{site_name} — Actueel Nederlands nieuws</h1>
+      <h1 className="sr-only">{site_name} — Latest news</h1>
 
       <p style={{ fontSize: 12, color: "var(--text-muted)", textTransform: "capitalize", margin: "0 0 16px" }}>
         {new Date().toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
@@ -291,7 +311,7 @@ export default function HomePage() {
 
           {categories.length > 0 && (
             <div style={{ marginTop: 28 }}>
-              <h2 style={{ fontSize: 15, fontWeight: 500, marginBottom: 12 }}>Nieuws per categorie</h2>
+              <h2 style={{ fontSize: 15, fontWeight: 500, marginBottom: 12 }}>News by category</h2>
               <CategoryTabs categories={categories} articlesByCategory={articlesByCategory} />
             </div>
           )}
