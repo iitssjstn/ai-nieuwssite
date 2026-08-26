@@ -64,9 +64,16 @@ export function generateMetadata({ params }) {
   const images = article.featured_image ? [resolveImageUrl(article.featured_image, baseUrl)] : [];
 
   return {
-    title: article.title,
+    // Naast de kale titel ook de sitenaam meegeven: dit is wat Google
+    // meestal als bladtitel/linktekst in de zoekresultaten toont en helpt
+    // herkenning + merkopbouw bij herhaald zoeken.
+    title: `${article.title} | ${site_name}`,
     description,
+    keywords: article.tags?.length ? article.tags.join(", ") : undefined,
     alternates: { canonical: url },
+    // Expliciet i.p.v. impliciet vertrouwen op de default — voorkomt dat een
+    // toekomstige globale robots-wijziging per ongeluk artikelen uitsluit.
+    robots: { index: true, follow: true },
     openGraph: {
       title: article.title,
       description,
@@ -74,6 +81,11 @@ export function generateMetadata({ params }) {
       type: "article",
       images,
       siteName: site_name,
+      locale: "en_US",
+      publishedTime: article.published_at || undefined,
+      modifiedTime: article.updated_at || article.published_at || undefined,
+      section: article.category,
+      tags: article.tags,
     },
     twitter: {
       card: images.length ? "summary_large_image" : "summary",
@@ -109,11 +121,56 @@ export default async function ArticlePage({ params }) {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
     headline: article.title,
+    description: getExcerpt(article.body, 160),
     datePublished: article.published_at,
-    dateModified: article.published_at,
-    image: article.featured_image ? [resolveImageUrl(article.featured_image, baseUrl)] : undefined,
-    publisher: { "@type": "Organization", name: site_name },
-    mainEntityOfPage: `${baseUrl}/artikel/${article.slug}`,
+    dateModified: article.updated_at || article.published_at,
+    inLanguage: "en-US",
+    articleSection: article.category,
+    keywords: article.tags?.length ? article.tags.join(", ") : undefined,
+    image: article.featured_image
+      ? {
+          "@type": "ImageObject",
+          url: resolveImageUrl(article.featured_image, baseUrl),
+          // Komt overeen met de vaste afmetingen waarop de featured image
+          // hierboven daadwerkelijk gerenderd wordt.
+          width: 800,
+          height: 450,
+        }
+      : undefined,
+    author: {
+      "@type": "Organization",
+      name: site_name,
+      url: baseUrl,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: site_name,
+      logo: {
+        "@type": "ImageObject",
+        url: `${baseUrl}/icon.svg`,
+        width: 512,
+        height: 512,
+      },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${baseUrl}/artikel/${article.slug}` },
+  };
+
+  // Helpt Google de plek van het artikel in de sitestructuur begrijpen en
+  // kan als broodkruimel-pad in de zoekresultaten getoond worden i.p.v.
+  // de kale URL.
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: baseUrl },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: article.category,
+        item: `${baseUrl}/categorie/${encodeURIComponent(article.category.toLowerCase())}`,
+      },
+      { "@type": "ListItem", position: 3, name: article.title, item: `${baseUrl}/artikel/${article.slug}` },
+    ],
   };
 
   return (
@@ -122,6 +179,10 @@ export default async function ArticlePage({ params }) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       <div className="home-layout">
