@@ -13,7 +13,11 @@ export default function sitemap() {
 
   const articleEntries = published.map((a) => ({
     url: `${baseUrl}/artikel/${a.slug}`,
-    lastModified: a.published_at || a.created_at,
+    // Reflecteert de echte laatste wijziging (bijv. na een AI-update of
+    // handmatige redactie-edit), niet alleen de oorspronkelijke
+    // publicatiedatum — Google gebruikt lastmod als versheidssignaal om te
+    // bepalen hoe vaak een pagina opnieuw gecrawld moet worden.
+    lastModified: a.updated_at || a.published_at || a.created_at,
     changeFrequency: "hourly",
     priority: 0.8,
   }));
