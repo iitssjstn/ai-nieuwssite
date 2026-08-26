@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const HEARTBEAT_INTERVAL_MS = 45 * 1000;
+const HEARTBEAT_INTERVAL_MS = 15 * 1000;
 
 function getOrCreateVisitorId() {
   // sessionStorage i.p.v. localStorage: het ID verdwijnt zodra het
