@@ -63,6 +63,7 @@ export default function SourcesPage() {
         [id]: `${data.created} new draft(s)` +
           (data.merged > 0 ? `, ${data.merged} source(s) merged` : "") +
           (data.updated > 0 ? `, ${data.updated} article(s) automatically updated` : "") +
+          (data.skipped_video > 0 ? `, ${data.skipped_video} video item(s) skipped` : "") +
           (data.errors?.length ? `, ${data.errors.length} error(s)` : ""),
       }));
     } catch (err) {
