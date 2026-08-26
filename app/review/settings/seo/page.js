@@ -134,6 +134,17 @@ export default function SeoPage() {
         <input type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/gif" onChange={handleFaviconUpload} disabled={uploadingFavicon} />
         {uploadingFavicon && <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 8 }}>Uploading...</p>}
       </div>
+
+      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Faster indexing</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
+          Every article automatically pings IndexNow when published or updated, so Bing, Yandex,
+          and Seznam pick it up right away instead of waiting for their next scheduled crawl.
+          Google doesn't support this protocol directly — for Google, freshness comes from the
+          sitemap (regenerated on every publish) and correct structured data, both of which are
+          already in place.
+        </p>
+      </div>
     </>
   );
 }
