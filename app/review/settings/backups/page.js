@@ -38,6 +38,7 @@ export default function BackupsPage() {
   const [error, setError] = useState(null);
   const [restoringFilename, setRestoringFilename] = useState(null);
   const [restoreStatus, setRestoreStatus] = useState(null);
+  const [deletingFilename, setDeletingFilename] = useState(null);
   const [uploadFile, setUploadFile] = useState(null);
   const [uploadBusy, setUploadBusy] = useState(false);
 
@@ -185,6 +186,33 @@ export default function BackupsPage() {
     await doRestore({ content });
     setUploadBusy(false);
     setUploadFile(null);
+  }
+
+  async function handleDelete(filename) {
+    if (
+      !confirm(
+        `Permanently delete the backup from "${formatMoment(backups.find((b) => b.filename === filename)?.createdAt)}"? ` +
+          "This only removes this local copy — if you sent it to a remote receiver, that copy is untouched. " +
+          "This cannot be undone."
+      )
+    ) {
+      return;
+    }
+    setError(null);
+    setDeletingFilename(filename);
+    try {
+      const res = await fetch(`/api/backups/${encodeURIComponent(filename)}`, { method: "DELETE" });
+      const data = await res.json();
+      if (res.ok) {
+        setBackups(data.backups || []);
+      } else {
+        setError(data.error || "Delete failed");
+      }
+    } catch {
+      setError("Could not connect to the server to delete. Try again.");
+    } finally {
+      setDeletingFilename(null);
+    }
   }
 
   if (!backups || !settings || !remote) return null;
@@ -340,11 +368,19 @@ export default function BackupsPage() {
                 </a>
                 <button
                   onClick={() => handleRestoreLocal(b.filename)}
-                  disabled={restoringFilename !== null}
+                  disabled={restoringFilename !== null || deletingFilename !== null}
                   className="danger"
                   style={{ width: "auto", padding: "4px 10px", fontSize: 12 }}
                 >
                   {restoringFilename === b.filename ? "Restoring..." : "Restore"}
+                </button>
+                <button
+                  onClick={() => handleDelete(b.filename)}
+                  disabled={restoringFilename !== null || deletingFilename !== null}
+                  className="danger"
+                  style={{ width: "auto", padding: "4px 10px", fontSize: 12 }}
+                >
+                  {deletingFilename === b.filename ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </div>
