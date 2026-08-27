@@ -14,28 +14,21 @@ export default function CategoryTabs({ categories, articlesByCategory }) {
     <div>
       {sections.map((s, i) => (
         <div key={s.category.name} style={{ marginTop: i > 0 ? 28 : 0 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <span
-              style={{
-                display: "inline-block",
-                padding: "6px 14px",
-                borderRadius: 999,
-                border: `1px solid ${s.category.color}`,
-                background: s.category.color + "22",
-                color: s.category.color,
-                fontWeight: 600,
-                fontSize: 13,
-              }}
-            >
-              {s.category.name}
-            </span>
-            <Link
-              href={`/categorie/${encodeURIComponent(s.category.name.toLowerCase())}`}
-              style={{ fontSize: 13, color: "var(--text-secondary)" }}
-            >
-              View all →
-            </Link>
-          </div>
+          <span
+            style={{
+              display: "inline-block",
+              padding: "6px 14px",
+              borderRadius: 999,
+              border: `1px solid ${s.category.color}`,
+              background: s.category.color + "22",
+              color: s.category.color,
+              fontWeight: 600,
+              fontSize: 13,
+              marginBottom: 10,
+            }}
+          >
+            {s.category.name}
+          </span>
 
           {s.items.map((a) => (
             <Link key={a.id} href={`/artikel/${a.slug}`} className="list-row" style={{ gap: 14, justifyContent: "flex-start" }}>
@@ -49,6 +42,13 @@ export default function CategoryTabs({ categories, articlesByCategory }) {
               </div>
             </Link>
           ))}
+
+          <Link
+            href={`/categorie/${encodeURIComponent(s.category.name.toLowerCase())}`}
+            style={{ fontSize: 13, color: "var(--text-secondary)", display: "inline-block", marginTop: 10 }}
+          >
+            View all
+          </Link>
         </div>
       ))}
     </div>
