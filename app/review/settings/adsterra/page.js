@@ -7,6 +7,8 @@ const BANNER_SLOTS = [
   { id: "homepage_sidebar", label: "Homepage sidebar", hint: "Small banner, e.g. 320×50" },
   { id: "article_sidebar", label: "Article page sidebar", hint: "Vertical banner, e.g. 160×300" },
   { id: "article_incontent", label: "Below the article", hint: "Wide banner, e.g. 468×60" },
+  { id: "category_left", label: "Category page — left side", hint: "Skyscraper, e.g. 160×600" },
+  { id: "category_right", label: "Category page — right side", hint: "Skyscraper, e.g. 160×600" },
 ];
 
 export default function AdsterraPage() {
