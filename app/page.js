@@ -129,7 +129,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="container" style={{ maxWidth: 1350 }}>
+    <div className="container">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -195,99 +195,108 @@ export default function HomePage() {
           )}
         </div>
 
-        {/* Latest News */}
-        <div className="sidebar-box">
-          <h3>Latest News</h3>
-          {latestNews.length === 0 && (
-            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No articles yet.</p>
-          )}
-          {latestNews.map((a) => (
-            <Link key={a.id} href={`/artikel/${a.slug}`} className="latest-news-row">
-              <LiveTimeLabel publishedAt={a.published_at} category={a.category}>
-                <p className="latest-news-title">{a.title}</p>
-              </LiveTimeLabel>
-            </Link>
-          ))}
-          {published.length > 5 && (
-            <Link href="/nieuws" style={{ display: "block", textAlign: "center", fontSize: 13, color: "var(--accent-text)", marginTop: 12, paddingTop: 12, borderTop: "1px dashed var(--border)" }}>
-              More news →
-            </Link>
-          )}
-        </div>
+        {/* Sidebar column: Jump to, then Latest News, then room for an ad, then Most Read */}
+        <div>
+          <div style={{ marginBottom: 16 }}>
+            <p style={{ fontSize: 12, fontWeight: 500, margin: "0 0 8px" }}>Jump to</p>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {[
+                {
+                  href: "/kaart", label: "Map",
+                  icon: (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 13V4m0 3-6-3" />
+                    </svg>
+                  ),
+                },
+                {
+                  href: "/polls", label: "Polls",
+                  icon: (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <path d="M4 20V10m7 10V4m7 16v-7" />
+                    </svg>
+                  ),
+                },
+                {
+                  href: "/liveblog", label: "Live Blog",
+                  icon: (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                      <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
+                      <path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8" />
+                    </svg>
+                  ),
+                },
+                ...(newsletterEnabled
+                  ? [{
+                      href: "/#nieuwsbrief", label: "Newsletter",
+                      icon: (
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                          <rect x="3" y="5" width="18" height="14" rx="2" />
+                          <path d="m3 7 9 6 9-6" />
+                        </svg>
+                      ),
+                    }]
+                  : []),
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  style={{
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                    width: 68, padding: "10px 6px", borderRadius: 10, border: "1px solid var(--border)",
+                    background: "var(--surface-1)", textDecoration: "none", color: "var(--text-primary)",
+                    fontSize: 11, textAlign: "center",
+                  }}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              ))}
+            </div>
+          </div>
 
-        {/* Most read */}
-        <div className="sidebar-box">
-          <h3>Most Read</h3>
-          {mostRead.length === 0 && (
-            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No views yet.</p>
-          )}
-          {mostRead.map((a, i) => (
-            <Link key={a.id} href={`/artikel/${a.slug}`} className="sidebar-item">
-              <span className="sidebar-rank">{i + 1}</span>
-              <p>{a.title}</p>
-            </Link>
-          ))}
+          <div className="sidebar-box">
+            <h3>Latest News</h3>
+            {latestNews.length === 0 && (
+              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No articles yet.</p>
+            )}
+            {latestNews.map((a) => (
+              <Link key={a.id} href={`/artikel/${a.slug}`} className="latest-news-row">
+                <LiveTimeLabel publishedAt={a.published_at} category={a.category}>
+                  <p className="latest-news-title">{a.title}</p>
+                </LiveTimeLabel>
+              </Link>
+            ))}
+            {published.length > 5 && (
+              <Link href="/nieuws" style={{ display: "block", textAlign: "center", fontSize: 13, color: "var(--accent-text)", marginTop: 12, paddingTop: 12, borderTop: "1px dashed var(--border)" }}>
+                More news →
+              </Link>
+            )}
+          </div>
+
+          {/* Room for an ad between Latest News and Most Read */}
+          <div style={{ margin: "20px 0" }}>
+            <AdSlot config={null} label="Ad space 260 x 100" />
+          </div>
+
+          <div className="sidebar-box">
+            <h3>Most Read</h3>
+            {mostRead.length === 0 && (
+              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No views yet.</p>
+            )}
+            {mostRead.map((a, i) => (
+              <Link key={a.id} href={`/artikel/${a.slug}`} className="sidebar-item">
+                <span className="sidebar-rank">{i + 1}</span>
+                <p>{a.title}</p>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="home-layout">
         {/* Main column */}
         <div>
-          <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>Jump to</p>
-          <div style={{ display: "flex", gap: 10, marginBottom: 8, flexWrap: "wrap" }}>
-            {[
-              {
-                href: "/kaart", label: "Map",
-                icon: (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <path d="M9 20 3 17V4l6 3m0 13 6-3m-6 3V7m6 10 6 3V7l-6-3m0 13V4m0 3-6-3" />
-                  </svg>
-                ),
-              },
-              {
-                href: "/polls", label: "Polls",
-                icon: (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <path d="M4 20V10m7 10V4m7 16v-7" />
-                  </svg>
-                ),
-              },
-              {
-                href: "/liveblog", label: "Live Blog",
-                icon: (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                    <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
-                    <path d="M8.5 8.5a5 5 0 0 0 0 7M15.5 8.5a5 5 0 0 1 0 7M5.6 5.6a9 9 0 0 0 0 12.8M18.4 5.6a9 9 0 0 1 0 12.8" />
-                  </svg>
-                ),
-              },
-              ...(newsletterEnabled
-                ? [{
-                    href: "/#nieuwsbrief", label: "Newsletter",
-                    icon: (
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-                        <rect x="3" y="5" width="18" height="14" rx="2" />
-                        <path d="m3 7 9 6 9-6" />
-                      </svg>
-                    ),
-                  }]
-                : []),
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                style={{
-                  display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
-                  width: 92, padding: "14px 8px", borderRadius: 12, border: "1px solid var(--border)",
-                  background: "var(--surface-1)", textDecoration: "none", color: "var(--text-primary)",
-                  fontSize: 12, textAlign: "center",
-                }}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            ))}
-          </div>
 
           {gridItems.length > 0 && (
             <>
@@ -325,7 +334,7 @@ export default function HomePage() {
 
           {trendingTags.length > 0 && (
             <div className="sidebar-box" style={{ marginTop: 20 }}>
-              <h3>Trending onderwerpen</h3>
+              <h3>Trending Topics</h3>
               {trendingTags.map((t, i) => (
                 <Link key={t.tag} href={`/tags/${encodeURIComponent(t.tag.toLowerCase())}`} className="sidebar-item" style={{ justifyContent: "space-between" }}>
                   <span style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
