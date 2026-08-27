@@ -404,7 +404,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
 }
 .breaking-title { font-weight: 500; }
 
-/* Voorpagina met sidebar */
+/* Homepage with sidebar */
 .home-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 280px;
@@ -413,6 +413,24 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
 }
 @media (max-width: 720px) {
   .home-layout { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Category page with a skyscraper ad slot on each side — collapses to a
+   single, centered column once the viewport is too narrow for both side
+   ads to fit alongside a readable content width. */
+.category-layout {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr) 160px;
+  gap: 24px;
+  align-items: start;
+}
+.category-layout-ad {
+  position: sticky;
+  top: 20px;
+}
+@media (max-width: 1100px) {
+  .category-layout { grid-template-columns: minmax(0, 1fr); }
+  .category-layout-ad { display: none; }
 }
 
 .sidebar-box {
