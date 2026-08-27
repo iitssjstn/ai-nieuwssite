@@ -22,8 +22,8 @@ export async function POST(request) {
       // _downloadLocation blijft intern nodig (voor de confirm-stap hierna),
       // maar de API-key zelf gaat nooit mee naar de browser.
       return NextResponse.json({
-        options: options.map(({ url, thumb, credit_name, credit_url, source, _downloadLocation }) => ({
-          url, thumb: thumb || url, credit_name, credit_url, source, confirmUrl: _downloadLocation || null,
+        options: options.map(({ url, thumb, credit_name, credit_url, source, alt, _downloadLocation }) => ({
+          url, thumb: thumb || url, credit_name, credit_url, source, alt, confirmUrl: _downloadLocation || null,
         })),
       });
     }
