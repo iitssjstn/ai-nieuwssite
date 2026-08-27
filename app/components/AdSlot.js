@@ -26,7 +26,7 @@ export default function AdSlot({ config, label }) {
         margin: "0 auto",
       }}
     >
-      {label || `Advertentie ruimte ${width} x ${height}`}
+      {label || `Ad space ${width} x ${height}`}
     </div>
   );
 }
