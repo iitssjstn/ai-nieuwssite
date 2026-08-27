@@ -6,10 +6,13 @@ export default function SeoPage() {
   const [settings, setSettings] = useState(null);
   const [nameDraft, setNameDraft] = useState("");
   const [descDraft, setDescDraft] = useState("");
+  const [googleVerificationDraft, setGoogleVerificationDraft] = useState("");
+  const [bingVerificationDraft, setBingVerificationDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [uploadingFavicon, setUploadingFavicon] = useState(false);
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
+  const [verificationSaved, setVerificationSaved] = useState(false);
 
   async function load() {
     const res = await fetch("/api/settings/site");
@@ -17,6 +20,8 @@ export default function SeoPage() {
     setSettings(data);
     setNameDraft(data.site_name);
     setDescDraft(data.site_description);
+    setGoogleVerificationDraft(data.google_site_verification || "");
+    setBingVerificationDraft(data.bing_site_verification || "");
   }
 
   useEffect(() => {
@@ -82,6 +87,29 @@ export default function SeoPage() {
     if (res.ok) setSettings(await res.json());
   }
 
+  async function handleSaveVerification(e) {
+    e.preventDefault();
+    setError(null);
+    setVerificationSaved(false);
+    setBusy(true);
+    const res = await fetch("/api/settings/site", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        google_site_verification: googleVerificationDraft,
+        bing_site_verification: bingVerificationDraft,
+      }),
+    });
+    setBusy(false);
+    if (res.ok) {
+      setSettings(await res.json());
+      setVerificationSaved(true);
+    } else {
+      const data = await res.json();
+      setError(data.error || "Save failed");
+    }
+  }
+
   if (!settings) return null;
 
   return (
@@ -133,6 +161,43 @@ export default function SeoPage() {
         )}
         <input type="file" accept="image/png,image/jpeg,image/webp,image/avif,image/gif" onChange={handleFaviconUpload} disabled={uploadingFavicon} />
         {uploadingFavicon && <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 8 }}>Uploading...</p>}
+      </div>
+
+      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Search engine ownership verification</p>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
+          Paste only the verification code itself here — not the full HTML tag. Get it from{" "}
+          <strong>Google Search Console</strong> (Settings → Ownership verification → HTML tag method)
+          or <strong>Bing Webmaster Tools</strong> (Settings → your site → verify by meta tag). Once
+          saved, it appears in the site's &lt;head&gt; immediately — no rebuild needed — so you can
+          click "Verify" on their end right after.
+        </p>
+        <form onSubmit={handleSaveVerification}>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
+            Google Search Console verification code
+          </p>
+          <input
+            type="text"
+            placeholder="e.g. AbCdEf12345..."
+            value={googleVerificationDraft}
+            onChange={(e) => setGoogleVerificationDraft(e.target.value)}
+            style={{ marginBottom: 10 }}
+          />
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
+            Bing Webmaster Tools verification code
+          </p>
+          <input
+            type="text"
+            placeholder="e.g. 1234ABCD..."
+            value={bingVerificationDraft}
+            onChange={(e) => setBingVerificationDraft(e.target.value)}
+            style={{ marginBottom: 10 }}
+          />
+          {verificationSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Saved.</p>}
+          <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px" }}>
+            Save
+          </button>
+        </form>
       </div>
 
       <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
