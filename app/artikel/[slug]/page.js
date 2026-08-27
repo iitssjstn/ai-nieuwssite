@@ -215,10 +215,6 @@ export default async function ArticlePage({ params }) {
           </div>
         </div>
 
-        <div style={{ margin: "0 0 20px" }}>
-          <ShareButtons slug={article.slug} title={article.title} />
-        </div>
-
         {article.featured_image && (
           <>
             <Image
@@ -293,6 +289,11 @@ export default async function ArticlePage({ params }) {
             ))}
           </div>
         )}
+
+        <div style={{ marginTop: 28 }}>
+          <p style={{ fontSize: 13, color: "var(--text-muted)", marginBottom: 8 }}>Found this useful? Share it:</p>
+          <ShareButtons slug={article.slug} title={article.title} />
+        </div>
       </article>
 
       <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 24, paddingTop: 16, borderTop: "1px solid var(--border)" }}>
