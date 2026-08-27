@@ -68,16 +68,20 @@ body {
 }
 
 .container {
-  max-width: 780px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 24px 20px 60px;
+  padding: 14px 20px 60px;
 }
 
 .site-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 0 14px;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
 }
 
 .site-header a {
@@ -85,7 +89,7 @@ body {
   text-decoration: none;
 }
 
-.logo { font-weight: 700; font-size: 19px; letter-spacing: -0.01em; }
+.logo { font-weight: 700; font-size: 19px; letter-spacing: -0.01em; display: flex; align-items: center; }
 
 .nav { display: flex; gap: 16px; font-size: 13px; color: var(--text-secondary); }
 
@@ -93,10 +97,8 @@ body {
   display: flex;
   gap: 6px;
   overflow-x: auto;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 12px;
-  margin-bottom: 24px;
   scrollbar-width: none;
+  min-width: 0;
 }
 .category-bar::-webkit-scrollbar { display: none; }
 
@@ -415,7 +417,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
 
 .hero-row {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) 260px 260px;
+  grid-template-columns: minmax(0, 2fr) 260px;
   gap: 20px;
   align-items: stretch;
   margin-bottom: 24px;
