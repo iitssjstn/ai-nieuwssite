@@ -12,21 +12,30 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function pollAllSources() {
-  // Bij elke ronde opnieuw checken (niet alleen bij opstarten) — zo werkt
-  // de aan/uit-schakelaar, interval en tijdvenster in Instellingen meteen,
+// Elke bron mag zijn eigen poll_interval_minutes hebben (ingesteld via
+// Instellingen → Bronnen); staat die op null, dan geldt het globale
+// interval uit Instellingen → RSS-schema. Om dat per bron te kunnen
+// respecteren, draait deze "tick" elke minuut i.p.v. één keer per
+// (variabel) globaal interval — en bepaalt per bron zelf of die al aan de
+// beurt is, op basis van last_polled_at.
+const TICK_MS = 60 * 1000;
+
+function isSourceDue(source, globalIntervalMinutes) {
+  if (!source.last_polled_at) return true; // nog nooit gepolld
+  const intervalMinutes = source.poll_interval_minutes ?? globalIntervalMinutes;
+  const dueAt = new Date(source.last_polled_at).getTime() + Math.max(1, intervalMinutes) * 60 * 1000;
+  return Date.now() >= dueAt;
+}
+
+async function pollDueSources() {
+  // Bij elke tick opnieuw checken (niet alleen bij opstarten) — zo werkt
+  // de aan/uit-schakelaar en het tijdvenster in Instellingen meteen,
   // zonder herstart nodig.
   const settings = getAutomationSettings();
-  if (!settings.enabled) {
-    console.log("[RSS-scheduler] overgeslagen — automatisering staat uit in Instellingen");
-    return;
-  }
-  if (!isWithinActiveHours(settings)) {
-    console.log(`[RSS-scheduler] overgeslagen — buiten het ingestelde tijdvenster (${settings.active_hours_start}–${settings.active_hours_end})`);
-    return;
-  }
+  if (!settings.enabled) return;
+  if (!isWithinActiveHours(settings)) return;
 
-  const sources = getSources().filter((s) => s.feed_url);
+  const sources = getSources().filter((s) => s.feed_url && isSourceDue(s, settings.poll_interval_minutes));
   for (const source of sources) {
     try {
       const result = await fetchAndImportFromSource(source.id, { limit: settings.max_per_source });
@@ -82,23 +91,20 @@ async function checkScheduledBackup() {
 checkScheduledBackup();
 setInterval(checkScheduledBackup, 15 * 60 * 1000);
 
-// RSS-polling gebruikt bewust een zichzelf-herplannende setTimeout i.p.v.
-// een vaste setInterval — zo werkt een wijziging van de interval- of
-// tijdvenster-instelling in Instellingen → RSS-schema meteen, zonder dat
-// de container herstart hoeft te worden. Niet meteen bij opstarten pollen
-// (voorkomt een piek aan AI-aanroepen bij elke herstart/redeploy) — de
-// eerste ronde start na één interval.
-async function scheduleNextPoll() {
-  const { poll_interval_minutes } = getAutomationSettings();
-  const intervalMs = Math.max(1, poll_interval_minutes || 30) * 60 * 1000;
-  await sleep(intervalMs);
+// RSS-polling gebruikt een vaste tick van 1 minuut i.p.v. het globale
+// interval als sleep-duur — dat is wat per-bron-intervallen mogelijk maakt
+// (zie isSourceDue hierboven). Niet meteen bij opstarten pollen (voorkomt
+// een piek aan AI-aanroepen bij elke herstart/redeploy) — de eerste tick
+// start na TICK_MS.
+async function tick() {
+  await sleep(TICK_MS);
   try {
-    await pollAllSources();
+    await pollDueSources();
   } catch (err) {
     console.error("[RSS-scheduler] onverwachte fout tijdens pollen:", err.message);
   }
-  scheduleNextPoll();
+  tick();
 }
 
-console.log("[RSS-scheduler] gestart — interval en tijdvenster instelbaar via Instellingen → RSS-schema");
-scheduleNextPoll();
+console.log("[RSS-scheduler] gestart — interval per bron instelbaar via Instellingen → Bronnen, globaal via Instellingen → RSS-schema");
+tick();
