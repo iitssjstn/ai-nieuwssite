@@ -6,7 +6,7 @@ import CookieConsentBanner from "./components/CookieConsentBanner";
 export const dynamic = "force-dynamic";
 
 export function generateMetadata() {
-  const { site_name, site_description, favicon_url } = getSiteSettings();
+  const { site_name, site_description, favicon_url, google_site_verification, bing_site_verification } = getSiteSettings();
   return {
     title: site_name,
     description: site_description,
@@ -14,6 +14,14 @@ export function generateMetadata() {
     // automatically — explicitly overridden here as soon as a custom
     // favicon has been uploaded via Settings.
     ...(favicon_url ? { icons: { icon: favicon_url } } : {}),
+    // Ownership-verification meta tags for Google Search Console and Bing
+    // Webmaster Tools. Rendered on every page (Next.js injects these into
+    // <head> automatically) so verification works regardless of which URL
+    // the tool happens to check first.
+    verification: {
+      ...(google_site_verification ? { google: google_site_verification } : {}),
+      ...(bing_site_verification ? { other: { "msvalidate.01": bing_site_verification } } : {}),
+    },
   };
 }
 
