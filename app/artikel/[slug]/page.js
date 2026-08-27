@@ -13,6 +13,7 @@ import { notFound, redirect } from "next/navigation";
 import { headers, cookies } from "next/headers";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { isHtmlBody, getExcerpt, resolveImageUrl, getCategoryStyle } from "@/lib/content";
+import { isBotUserAgent } from "@/lib/bot-detection";
 
 // Voorkomt dat het bezoek van de ingelogde admin/redacteur zelf (bijv. even
 // een net gepubliceerd artikel controleren) meetelt als een gewone
@@ -100,7 +101,11 @@ export default async function ArticlePage({ params }) {
   const article = resolveArticle(params.slug);
   if (!article || article.status !== "published") notFound();
 
-  if (!(await isAdminSession())) {
+  // Alleen echte, menselijke bezoeken meetellen — niet de admin zelf, en
+  // niet crawlers/linkpreview-bots/scanners (zie lib/bot-detection.js).
+  // Belangrijk voor betrouwbare cijfers, o.a. als basis voor
+  // advertentietarieven.
+  if (!(await isAdminSession()) && !isBotUserAgent(headers().get("user-agent"))) {
     incrementViews(article.id);
   }
 
