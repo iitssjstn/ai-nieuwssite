@@ -8,11 +8,14 @@ export default function SeoPage() {
   const [descDraft, setDescDraft] = useState("");
   const [googleVerificationDraft, setGoogleVerificationDraft] = useState("");
   const [bingVerificationDraft, setBingVerificationDraft] = useState("");
+  const [siteUrlDraft, setSiteUrlDraft] = useState("");
+  const [bingApiKeyDraft, setBingApiKeyDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [uploadingFavicon, setUploadingFavicon] = useState(false);
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
   const [verificationSaved, setVerificationSaved] = useState(false);
+  const [indexingSaved, setIndexingSaved] = useState(false);
 
   async function load() {
     const res = await fetch("/api/settings/site");
@@ -22,6 +25,7 @@ export default function SeoPage() {
     setDescDraft(data.site_description);
     setGoogleVerificationDraft(data.google_site_verification || "");
     setBingVerificationDraft(data.bing_site_verification || "");
+    setSiteUrlDraft(data.site_url || "");
   }
 
   useEffect(() => {
@@ -104,6 +108,33 @@ export default function SeoPage() {
     if (res.ok) {
       setSettings(await res.json());
       setVerificationSaved(true);
+    } else {
+      const data = await res.json();
+      setError(data.error || "Save failed");
+    }
+  }
+
+  async function handleSaveIndexing(e) {
+    e.preventDefault();
+    setError(null);
+    setIndexingSaved(false);
+    setBusy(true);
+    const res = await fetch("/api/settings/site", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        site_url: siteUrlDraft,
+        // An empty string here means "leave the existing key alone" — see
+        // the API route — so a blank field never accidentally clears a
+        // previously saved key.
+        bing_webmaster_api_key: bingApiKeyDraft,
+      }),
+    });
+    setBusy(false);
+    if (res.ok) {
+      setSettings(await res.json());
+      setBingApiKeyDraft(""); // don't leave the just-typed key hanging in the DOM after saving
+      setIndexingSaved(true);
     } else {
       const data = await res.json();
       setError(data.error || "Save failed");
@@ -202,13 +233,43 @@ export default function SeoPage() {
 
       <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
         <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>Faster indexing</p>
-        <p style={{ fontSize: 12, color: "var(--text-muted)" }}>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 12 }}>
           Every article automatically pings IndexNow when published or updated, so Bing, Yandex,
           and Seznam pick it up right away instead of waiting for their next scheduled crawl.
           Google doesn't support this protocol directly — for Google, freshness comes from the
           sitemap (regenerated on every publish) and correct structured data, both of which are
-          already in place.
+          already in place. Optionally, Bing's own URL Submission API (below) is called as well —
+          a separate, direct channel straight to Bing, on top of IndexNow.
         </p>
+        <form onSubmit={handleSaveIndexing}>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
+            Public site URL — required so pings always use the public domain (not the admin
+            subdomain you might be logged in on) and so the RSS auto-publish background process
+            can send them too, since it has no browser session to read a domain from
+          </p>
+          <input
+            type="text"
+            placeholder="https://novapers.nl"
+            value={siteUrlDraft}
+            onChange={(e) => setSiteUrlDraft(e.target.value)}
+            style={{ marginBottom: 10 }}
+          />
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>
+            Bing Webmaster API key (optional){" "}
+            {settings.has_bing_webmaster_api_key && <span style={{ color: "var(--success-text)" }}>— already set</span>}
+          </p>
+          <input
+            type="password"
+            placeholder={settings.has_bing_webmaster_api_key ? "Leave blank to keep, or paste a new key" : "From Bing Webmaster Tools \u2192 Settings \u2192 API access"}
+            value={bingApiKeyDraft}
+            onChange={(e) => setBingApiKeyDraft(e.target.value)}
+            style={{ marginBottom: 10 }}
+          />
+          {indexingSaved && <p style={{ color: "var(--success-text)", fontSize: 13, marginBottom: 8 }}>Saved.</p>}
+          <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px" }}>
+            Save
+          </button>
+        </form>
       </div>
     </>
   );
