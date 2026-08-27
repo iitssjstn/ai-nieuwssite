@@ -1,11 +1,21 @@
 import { NextResponse } from "next/server";
-import { getArticle, updateArticle, editArticleWithRevision, deleteArticle, addReviewLogEntry, addLiveblogUpdate, deleteLiveblogUpdate } from "@/lib/db";
+import { getArticle, updateArticle, editArticleWithRevision, deleteArticle, addReviewLogEntry, addLiveblogUpdate, deleteLiveblogUpdate, getSiteSettings } from "@/lib/db";
 import { getSessionFromRequest } from "@/lib/auth";
 import { computeReadability } from "@/lib/readability";
 import { triggerWebhooks } from "@/lib/webhooks";
-import { pingIndexNow } from "@/lib/indexnow";
+import { pingIndexNow, submitUrlToBing } from "@/lib/indexnow";
 
-function getBaseUrl(request) {
+// Voor IndexNow/Bing MOET dit de publieke hoofddomein-URL zijn (bijv.
+// "https://novapers.nl"), nooit afgeleid van het inkomende request — deze
+// route draait namelijk ook op admin.novapers.nl, en request.headers.get
+// ("host") zou daar dus per ongeluk het admin-subdomein opleveren. Bij
+// het ontbreken van de instelling (nog niet ingevuld) wordt de host van
+// het huidige request als beste-poging-terugval gebruikt, zodat pings nog
+// steeds iets doen zolang de instelling niet is ingevuld — al kan dat dus
+// per ongeluk het admin-subdomein zijn.
+function getPublicBaseUrl(request) {
+  const configured = getSiteSettings().site_url;
+  if (configured) return configured;
   const proto = request.headers.get("x-forwarded-proto") || request.nextUrl.protocol.replace(":", "");
   return `${proto}://${request.headers.get("host")}`;
 }
@@ -56,7 +66,8 @@ export async function PATCH(request, { params }) {
       published_at: new Date().toISOString(),
     });
     triggerWebhooks("article.published", updated).catch(() => {});
-    pingIndexNow(getBaseUrl(request), `${getBaseUrl(request)}/artikel/${updated.slug}`);
+    pingIndexNow(getPublicBaseUrl(request), `${getPublicBaseUrl(request)}/artikel/${updated.slug}`);
+    submitUrlToBing(getPublicBaseUrl(request), `${getPublicBaseUrl(request)}/artikel/${updated.slug}`);
   } else if (action === "reject") {
     updated = updateArticle(params.id, {
       status: "rejected",
@@ -132,7 +143,8 @@ export async function PATCH(request, { params }) {
       pending_update: null,
     });
     triggerWebhooks("article.updated", updated).catch(() => {});
-    pingIndexNow(getBaseUrl(request), `${getBaseUrl(request)}/artikel/${updated.slug}`);
+    pingIndexNow(getPublicBaseUrl(request), `${getPublicBaseUrl(request)}/artikel/${updated.slug}`);
+    submitUrlToBing(getPublicBaseUrl(request), `${getPublicBaseUrl(request)}/artikel/${updated.slug}`);
   } else if (action === "update_claim") {
     if (!Number.isInteger(claimIndex) || claimIndex < 0) {
       return NextResponse.json({ error: "claimIndex is required" }, { status: 400 });
