@@ -39,12 +39,31 @@ function timeAgo(dateStr) {
 
 export default function TagPage({ params }) {
   const tag = decodeURIComponent(params.tag);
+  const baseUrl = getBaseUrl();
   const articles = getArticles({ status: "published" })
     .filter((a) => (a.tags || []).some((t) => t.toLowerCase() === tag.toLowerCase()))
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `#${tag}`,
+    itemListElement: articles.slice(0, 50).map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${baseUrl}/artikel/${a.slug}`,
+      name: a.title,
+    })),
+  };
+
   return (
     <div className="container">
+      {articles.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      )}
       <Header />
       <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>#{tag}</h1>
 
