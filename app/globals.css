@@ -415,23 +415,11 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
   .home-layout { grid-template-columns: minmax(0, 1fr); }
 }
 
-.hero-row {
-  display: grid;
-  grid-template-columns: minmax(0, 2fr) 260px;
-  gap: 20px;
-  align-items: start;
-  margin-bottom: 24px;
-}
-@media (max-width: 960px) {
-  .hero-row { grid-template-columns: minmax(0, 1fr); }
-}
-
 .sidebar-box {
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 16px;
-  height: 100%;
   box-sizing: border-box;
 }
 .sidebar-box h3 {
