@@ -48,7 +48,7 @@ export async function POST(request) {
         const photo = await searchStockPhoto(draft.image_keywords, getAllImageProviderConfigs(), getCustomImageProviders());
         if (photo) {
           featuredImage = photo.url;
-          featuredImageCredit = { name: photo.credit_name, url: photo.credit_url, source: photo.source };
+          featuredImageCredit = { name: photo.credit_name, url: photo.credit_url, source: photo.source, alt: photo.alt || null };
         }
       } catch {
         // stil negeren — geen afbeelding is niet erg genoeg om het hele
