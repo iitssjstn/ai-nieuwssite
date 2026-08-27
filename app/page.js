@@ -108,14 +108,14 @@ export default function HomePage() {
     .filter((p) => p.active)
     .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
 
-  // Prepare the 3 most recent articles per category, with pre-
-  // computed reading time/timestamp/excerpt — CategoryTabs is a
-  // client component and can't call these server-only helpers itself.
+  // Prepare the 5 most recent articles per category, with pre-computed
+  // reading time/timestamp/excerpt, reusing the same helpers already used
+  // elsewhere on this page.
   const articlesByCategory = {};
   for (const c of categories) {
     articlesByCategory[c.name] = published
       .filter((a) => a.category === c.name)
-      .slice(0, 3)
+      .slice(0, 5)
       .map((a) => ({
         id: a.id,
         slug: a.slug,
