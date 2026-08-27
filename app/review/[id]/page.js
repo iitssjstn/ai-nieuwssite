@@ -186,7 +186,7 @@ export default function ReviewDetail() {
 
   function choosePhoto(option) {
     setFeaturedImage(option.url);
-    setFeaturedImageCredit({ name: option.credit_name, url: option.credit_url, source: option.source });
+    setFeaturedImageCredit({ name: option.credit_name, url: option.credit_url, source: option.source, alt: option.alt || null });
     setPhotoOptions(null);
     if (option.source === "Unsplash" && option.confirmUrl) {
       fetch("/api/generate/image/confirm", {
