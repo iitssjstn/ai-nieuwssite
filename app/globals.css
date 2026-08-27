@@ -419,7 +419,7 @@ input[type="file"] { color: var(--text-secondary); font-size: 13px; }
   display: grid;
   grid-template-columns: minmax(0, 2fr) 260px;
   gap: 20px;
-  align-items: stretch;
+  align-items: start;
   margin-bottom: 24px;
 }
 @media (max-width: 960px) {
