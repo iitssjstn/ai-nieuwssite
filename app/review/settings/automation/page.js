@@ -235,6 +235,47 @@ export default function AutomationPage() {
           before (Pexels/Unsplash/Pixabay stock photos).
         </p>
       </div>
+
+      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Prioritize speed</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
+              {settings.prioritize_speed ? "Active — fastest provider tried first" : "Disabled — Gemini tried first (current default)"}
+            </p>
+          </div>
+          <button onClick={() => patchField("prioritize_speed", !settings.prioritize_speed)} disabled={busy} className={settings.prioritize_speed ? "danger" : "primary"} style={{ width: "auto", padding: "8px 16px" }}>
+            {settings.prioritize_speed ? "Turn Off" : "Turn On"}
+          </button>
+        </div>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>
+          Tries Groq first (typically the fastest of the configured free providers) instead of
+          always starting with Gemini. Only affects the ORDER providers are tried in — all
+          other fallback behavior stays the same. No effect if Groq isn't configured under
+          Settings → AI Providers.
+        </p>
+      </div>
+
+      <div style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+          <div>
+            <p style={{ fontSize: 14, fontWeight: 500, margin: 0 }}>Verification pass</p>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "2px 0 0" }}>
+              {settings.verification_pass_enabled ? "Active — adds an extra AI check per draft" : "Disabled"}
+            </p>
+          </div>
+          <button onClick={() => patchField("verification_pass_enabled", !settings.verification_pass_enabled)} disabled={busy} className={settings.verification_pass_enabled ? "danger" : "primary"} style={{ width: "auto", padding: "8px 16px" }}>
+            {settings.verification_pass_enabled ? "Turn Off" : "Turn On"}
+          </button>
+        </div>
+        <p style={{ fontSize: 12, color: "var(--text-muted)", lineHeight: 1.5 }}>
+          After writing a draft, a second AI call reviews it against the original source text(s)
+          and corrects anything that looks invented, exaggerated, or unsupported — flagged issues
+          are shown to you in the review screen. This is a full extra AI call per draft, so it
+          adds generation time and uses more of your free-tier quota. Your approval is still
+          required before publication either way.
+        </p>
+      </div>
     </>
   );
 }
