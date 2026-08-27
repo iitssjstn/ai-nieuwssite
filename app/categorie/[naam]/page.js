@@ -47,12 +47,35 @@ export default function CategoryPage({ params }) {
   const naam = decodeURIComponent(params.naam);
   const categories = getCategories();
   const capitalized = resolveCategoryName(naam, categories);
+  const baseUrl = getBaseUrl();
   const articles = getArticles({ status: "published" })
     .filter((a) => a.category?.toLowerCase() === naam.toLowerCase())
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
+  // Vertelt Google expliciet dat dit een geordende lijst artikelen is
+  // (i.p.v. dat Google zelf uit de HTML moet afleiden welke links de
+  // "inhoud" van de pagina vormen) — kan meehelpen bij sitelinks en een
+  // beter begrip van de categorie-hiërarchie.
+  const itemListJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `${capitalized} news`,
+    itemListElement: articles.slice(0, 50).map((a, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      url: `${baseUrl}/artikel/${a.slug}`,
+      name: a.title,
+    })),
+  };
+
   return (
     <div className="container" style={{ maxWidth: 1000 }}>
+      {articles.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      )}
       <Header activeCategory={capitalized} />
       <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>
         {capitalized}
