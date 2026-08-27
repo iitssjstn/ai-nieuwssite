@@ -157,7 +157,7 @@ export default function HomePage() {
               <div className={`hero-card${hero.featured_image ? " has-image" : ""}`} style={{ height: "100%" }}>
                 {hero.featured_image && (
                   <>
-                    <Image src={hero.featured_image} alt={hero.title} fill sizes="(max-width: 780px) 100vw, 900px" className="hero-card-image" style={{ objectFit: "cover" }} priority />
+                    <Image src={hero.featured_image} alt={hero.featured_image_credit?.alt || hero.title} fill sizes="(max-width: 780px) 100vw, 900px" className="hero-card-image" style={{ objectFit: "cover" }} priority />
                     <div className="hero-card-overlay" />
                   </>
                 )}
@@ -297,7 +297,7 @@ export default function HomePage() {
                 <Link key={a.id} href={`/artikel/${a.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
                   <div className="card">
                     {a.featured_image && (
-                      <Image src={a.featured_image} alt={a.title} width={400} height={225} sizes="(max-width: 720px) 50vw, 25vw" style={{ width: "100%", height: "auto", borderRadius: 6, marginBottom: 12, display: "block" }} />
+                      <Image src={a.featured_image} alt={a.featured_image_credit?.alt || a.title} width={400} height={225} sizes="(max-width: 720px) 50vw, 25vw" style={{ width: "100%", height: "auto", borderRadius: 6, marginBottom: 12, display: "block" }} />
                     )}
                     <span className="badge badge-muted" style={getCategoryStyle(a.category, categories)}>{a.category}</span>
                     <h3>{a.title}</h3>
