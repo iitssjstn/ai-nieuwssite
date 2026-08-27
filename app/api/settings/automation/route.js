@@ -13,6 +13,7 @@ export async function PATCH(request) {
     auto_gather_sources, auto_update_published, auto_update_min_confidence,
     use_source_image, poll_interval_minutes, active_hours_enabled,
     active_hours_start, active_hours_end, backup_frequency_hours,
+    prioritize_speed, verification_pass_enabled,
   } = await request.json();
   if (max_per_source !== undefined && (max_per_source < 1 || max_per_source > 20)) {
     return NextResponse.json({ error: "max_per_source moet tussen 1 en 20 liggen" }, { status: 400 });
@@ -41,6 +42,7 @@ export async function PATCH(request) {
     auto_gather_sources, auto_update_published, auto_update_min_confidence,
     use_source_image, poll_interval_minutes, active_hours_enabled,
     active_hours_start, active_hours_end, backup_frequency_hours,
+    prioritize_speed, verification_pass_enabled,
   });
   return NextResponse.json(getAutomationSettings());
 }
