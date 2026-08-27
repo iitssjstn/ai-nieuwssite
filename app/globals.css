@@ -73,6 +73,32 @@ body {
   padding: 14px 20px 60px;
 }
 
+/* Instant navigatie-feedback (Next.js loading.js-bestanden) — zonder deze
+   ziet de bezoeker na een klik op een artikel/categorie even niets tot de
+   server helemaal klaar is met renderen, wat traag aanvoelt ondanks dat de
+   server zelf niet per se langzaam is. Deze skeleton verschijnt direct bij
+   klikken, terwijl de echte pagina op de achtergrond wordt opgehaald.
+   Bewust GEEN echte <Header/>-component hier (die zou de paginaweergave-
+   teller dubbel laten tellen, één keer voor de skeleton en één keer voor
+   de echte pagina erna) — dit is puur een visuele plaatsvervanger. */
+.skeleton-block {
+  background: linear-gradient(90deg, var(--surface-1) 25%, var(--surface-2) 50%, var(--surface-1) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-pulse 1.4s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-header-bar {
+  height: 56px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 18px;
+}
+
 .site-header {
   display: flex;
   justify-content: space-between;
