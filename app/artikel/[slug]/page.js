@@ -213,7 +213,7 @@ export default async function ArticlePage({ params }) {
           <>
             <Image
               src={article.featured_image}
-              alt={article.title}
+              alt={article.featured_image_credit?.alt || article.title}
               width={800}
               height={450}
               sizes="(max-width: 780px) 100vw, 780px"
