@@ -8,6 +8,7 @@ import PollWidget from "../../components/PollWidget";
 import AdSlot from "../../components/AdSlot";
 import NativeAd from "../../components/NativeAd";
 import KeyClaims from "../../components/KeyClaims";
+import ShareButtons from "../../components/ShareButtons";
 import { getArticle, getArticleBySlug, getArticles, getSiteSettings, getCategories, getAdSlots, incrementViews } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { headers, cookies } from "next/headers";
@@ -212,6 +213,10 @@ export default async function ArticlePage({ params }) {
             <p>Written with AI, reviewed by our editorial team</p>
             <p className="small">{timeAgo(article.published_at)} · Source: {article.source_id}</p>
           </div>
+        </div>
+
+        <div style={{ margin: "0 0 20px" }}>
+          <ShareButtons slug={article.slug} title={article.title} />
         </div>
 
         {article.featured_image && (
