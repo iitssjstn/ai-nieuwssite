@@ -149,8 +149,10 @@ export default function HomePage() {
         {new Date().toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
       </p>
 
-      <div className="hero-row">
-        {/* Hero */}
+      <div className="home-layout">
+        {/* Main column: hero, then Featured grid, then News by category — one
+            continuous flow, so "Featured" always starts right after the hero
+            card ends, regardless of how tall the sidebar column next to it is. */}
         <div>
           {hero && (
             <Link href={`/artikel/${hero.slug}`} style={{ textDecoration: "none", color: "inherit", display: "block" }}>
@@ -193,9 +195,38 @@ export default function HomePage() {
               No published articles yet.
             </p>
           )}
+
+          {gridItems.length > 0 && (
+            <>
+              <h2 style={{ fontSize: 15, fontWeight: 500, margin: "24px 0 12px" }}>Featured</h2>
+              <div className="grid-4">
+              {gridItems.map((a) => (
+                <Link key={a.id} href={`/artikel/${a.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
+                  <div className="card">
+                    {a.featured_image && (
+                      <Image src={a.featured_image} alt={a.featured_image_credit?.alt || a.title} width={400} height={225} sizes="(max-width: 720px) 50vw, 25vw" style={{ width: "100%", height: "auto", borderRadius: 6, marginBottom: 12, display: "block" }} />
+                    )}
+                    <span className="badge badge-muted" style={getCategoryStyle(a.category, categories)}>{a.category}</span>
+                    <h3>{a.title}</h3>
+                    <p className="meta">{timeAgo(a.published_at)}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            </>
+          )}
+
+          {categories.length > 0 && (
+            <div style={{ marginTop: 28 }}>
+              <h2 style={{ fontSize: 15, fontWeight: 500, marginBottom: 12 }}>News by category</h2>
+              <CategoryTabs categories={categories} articlesByCategory={articlesByCategory} />
+            </div>
+          )}
         </div>
 
-        {/* Sidebar column: Jump to, then Latest News, then room for an ad, then Most Read */}
+        {/* Sidebar column: Jump to, Latest News, room for an ad, Most Read,
+            then the rest — all in one continuous flow of its own, independent
+            of how tall the main column ends up. */}
         <div>
           <div style={{ marginBottom: 16 }}>
             <p style={{ fontSize: 12, fontWeight: 500, margin: "0 0 8px" }}>Jump to</p>
@@ -291,44 +322,8 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
-        </div>
-      </div>
 
-      <div className="home-layout">
-        {/* Main column */}
-        <div>
-
-          {gridItems.length > 0 && (
-            <>
-              <h2 style={{ fontSize: 15, fontWeight: 500, margin: "24px 0 12px" }}>Featured</h2>
-              <div className="grid-4">
-              {gridItems.map((a) => (
-                <Link key={a.id} href={`/artikel/${a.slug}`} style={{ textDecoration: "none", color: "inherit" }}>
-                  <div className="card">
-                    {a.featured_image && (
-                      <Image src={a.featured_image} alt={a.featured_image_credit?.alt || a.title} width={400} height={225} sizes="(max-width: 720px) 50vw, 25vw" style={{ width: "100%", height: "auto", borderRadius: 6, marginBottom: 12, display: "block" }} />
-                    )}
-                    <span className="badge badge-muted" style={getCategoryStyle(a.category, categories)}>{a.category}</span>
-                    <h3>{a.title}</h3>
-                    <p className="meta">{timeAgo(a.published_at)}</p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            </>
-          )}
-
-          {categories.length > 0 && (
-            <div style={{ marginTop: 28 }}>
-              <h2 style={{ fontSize: 15, fontWeight: 500, marginBottom: 12 }}>News by category</h2>
-              <CategoryTabs categories={categories} articlesByCategory={articlesByCategory} />
-            </div>
-          )}
-        </div>
-
-        {/* Sidebar */}
-        <div>
-          <div style={{ marginTop: 0 }}>
+          <div style={{ marginTop: 20 }}>
             <AdSlot config={{ ...adSlots.banners.homepage_sidebar, width: adSlots.banners.homepage_sidebar?.width || 300, height: adSlots.banners.homepage_sidebar?.height || 250 }} />
           </div>
 
@@ -353,7 +348,7 @@ export default function HomePage() {
               <p style={{ fontSize: 13, fontWeight: 500, margin: "0 0 10px" }}>{activePoll.question}</p>
               <PollWidget pollId={activePoll.id} compact />
               <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 8 }}>
-                <Link href="/polls" style={{ color: "var(--accent-text)" }}>Bekijk alle polls</Link>
+                <Link href="/polls" style={{ color: "var(--accent-text)" }}>View all polls</Link>
               </p>
             </div>
           )}
