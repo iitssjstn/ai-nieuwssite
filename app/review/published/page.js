@@ -132,7 +132,14 @@ export default function PublishedArticles() {
         />
         <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} style={{ width: "auto" }}>
           <option value="">Alle categorieën</option>
-          {categories.map((c) => <option key={c.name} value={c.name}>{c.name}</option>)}
+          {categories.filter((c) => !c.parent).map((top) => (
+            <optgroup key={top.name} label={top.name}>
+              <option value={top.name}>{top.name}</option>
+              {categories.filter((c) => c.parent === top.name).map((sub) => (
+                <option key={sub.name} value={sub.name}>&nbsp;↳ {sub.name}</option>
+              ))}
+            </optgroup>
+          ))}
         </select>
         <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} style={{ width: "auto" }}>
           <option value="newest">Nieuwste eerst</option>
