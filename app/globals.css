@@ -145,25 +145,15 @@ body {
   font-weight: 500;
 }
 
-/* Dropdown voor categorieën met subcategorieën (bijv. Sport → Voetbal, F1)
-   — een native <details>/<summary> i.p.v. eigen open/dicht-state in JS:
-   werkt zonder extra code al goed met klikken (desktop) én tikken
-   (mobiel), en blijft toegankelijk via het toetsenbord. */
-.category-dropdown { position: relative; flex-shrink: 0; }
-.category-dropdown > summary {
-  list-style: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-.category-dropdown > summary::-webkit-details-marker { display: none; }
-.category-dropdown .chevron { font-size: 9px; opacity: 0.7; transition: transform 0.15s; }
-.category-dropdown[open] .chevron { transform: rotate(180deg); }
+/* Dropdown voor categorieën met subcategorieën (bijv. Sport → Voetbal, F1).
+   Het menu zelf wordt via een portal buiten de navigatiebalk gerenderd met
+   position: fixed (zie CategoryDropdown.js) — dat is nodig omdat de balk
+   overflow-x: auto heeft (voor horizontaal scrollen op mobiel), wat
+   volgens de CSS-spec ook alles verticaal buiten die balk afknipt. Alleen
+   het uiterlijk van het menu staat daarom nog hier; de positionering zelf
+   komt via inline styles vanuit JS. */
+.chevron { font-size: 9px; opacity: 0.7; transition: transform 0.15s; }
 .category-dropdown-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 10px;
