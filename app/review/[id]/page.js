@@ -366,6 +366,17 @@ export default function ReviewDetail() {
         </div>
       )}
 
+      {article.ai_provider_notes?.length > 0 && (
+        <div style={{ background: "#412402", color: "#f0b154", borderRadius: 8, padding: "10px 14px", margin: "16px 0", fontSize: 13 }}>
+          <p style={{ margin: "0 0 6px", fontWeight: 500 }}>⚠ Dit artikel is pas gelukt na eerdere mislukte pogingen (uiteindelijk gegenereerd via {article.provider || "een terugval-provider"}):</p>
+          <ul style={{ margin: 0, paddingLeft: 18 }}>
+            {article.ai_provider_notes.map((note, i) => (
+              <li key={i}>{note}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       {article.claims?.length > 0 && (
         <div style={{ background: "var(--surface-1)", borderRadius: 8, padding: "10px 14px", margin: "16px 0", fontSize: 13 }}>
           <p style={{ margin: "0 0 8px", fontWeight: 500 }}>🔍 Claim-verificatie</p>
