@@ -151,7 +151,7 @@ export default function CategoriesPage() {
             <div
               key={c.name}
               className="pending-item"
-              style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: c.parent ? 28 : 0 }}
+              style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: c.parent ? 28 : 0, flexWrap: "wrap" }}
             >
               <div style={{ display: "flex", flexDirection: "column", gap: 2, flexShrink: 0 }}>
                 <button
@@ -178,7 +178,7 @@ export default function CategoriesPage() {
                 value={c.color}
                 onChange={(e) => updateColor(c.name, e.target.value)}
                 disabled={busy}
-                style={{ width: 36, height: 36, padding: 0, border: "1px solid var(--border)", borderRadius: 6, cursor: "pointer" }}
+                style={{ width: 36, height: 36, padding: 0, border: "1px solid var(--border)", borderRadius: 6, cursor: "pointer", flexShrink: 0 }}
               />
               <input
                 type="text"
@@ -189,21 +189,21 @@ export default function CategoriesPage() {
                   }
                 }}
                 disabled={busy}
-                style={{ flex: 1 }}
+                style={{ flex: "1 1 160px", minWidth: 120 }}
               />
               <select
                 value={c.parent || ""}
                 onChange={(e) => updateParent(c.name, e.target.value)}
                 disabled={busy}
                 title="Move to a different parent category"
-                style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)", fontSize: 13, flexShrink: 0 }}
+                style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)", fontSize: 13, flexShrink: 0, maxWidth: 160 }}
               >
                 <option value="">Top-level</option>
                 {topLevel
                   .filter((t) => t.name !== c.name) // een categorie kan niet zijn eigen (klein)kind zijn
                   .map((t) => (
                     <option key={t.name} value={t.name}>
-                      Move under &quot;{t.name}&quot;
+                      {t.name}
                     </option>
                   ))}
               </select>
