@@ -3,6 +3,7 @@ import { getArticles, getSiteSettings, getCategories } from "@/lib/db";
 import PageviewTracker from "./PageviewTracker";
 import VisitorHeartbeat from "./VisitorHeartbeat";
 import SettingsPanel from "./SettingsPanel";
+import CategoryDropdown from "./CategoryDropdown";
 
 export default function Header({ activeCategory }) {
   const { site_name, favicon_url } = getSiteSettings();
@@ -55,29 +56,21 @@ export default function Header({ activeCategory }) {
                 );
               }
 
-              // Native <details>/<summary> i.p.v. eigen open/dicht-state in
-              // JS — werkt zonder extra code al goed met klikken (desktop)
-              // én tikken (mobiel), en blijft toegankelijk via het
-              // toetsenbord. Klikken op de pil zelf opent/sluit de
-              // dropdown; "Alle {categorie}"-nieuws staat als eerste item
-              // erin, want <summary> kan niet tegelijk togglen én linken.
+              // De navigatiebalk heeft overflow-x: auto (voor horizontaal
+              // scrollen op mobiel), wat volgens de CSS-spec ook alles
+              // verticaal buiten die balk afknipt — een simpele
+              // <details>-dropdown zou dus wél opengaan maar onzichtbaar
+              // wegvallen. CategoryDropdown lost dit op door het menu via
+              // een portal buiten die balk te renderen.
               return (
-                <details key={c.name} className="category-dropdown">
-                  <summary className={`category-pill${active ? " active" : ""}`} style={activeStyle}>
-                    {c.name}
-                    <span className="chevron">▾</span>
-                  </summary>
-                  <div className="category-dropdown-menu">
-                    <Link href={`/categorie/${encodeURIComponent(c.name.toLowerCase())}`}>
-                      All {c.name}
-                    </Link>
-                    {c.children.map((sub) => (
-                      <Link key={sub.name} href={`/categorie/${encodeURIComponent(sub.name.toLowerCase())}`}>
-                        {sub.name}
-                      </Link>
-                    ))}
-                  </div>
-                </details>
+                <CategoryDropdown
+                  key={c.name}
+                  category={c.name}
+                  href={`/categorie/${encodeURIComponent(c.name.toLowerCase())}`}
+                  active={active}
+                  activeStyle={activeStyle}
+                  subcategories={c.children}
+                />
               );
             })}
           </nav>
