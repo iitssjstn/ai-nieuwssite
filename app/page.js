@@ -110,11 +110,17 @@ export default function HomePage() {
 
   // Prepare the 5 most recent articles per category, with pre-computed
   // reading time/timestamp/excerpt, reusing the same helpers already used
-  // elsewhere on this page.
+  // elsewhere on this page. Only top-level categories get their own
+  // section here — a subcategory's articles (e.g. "Football") are folded
+  // into their parent's section (e.g. "Sports") instead of fragmenting
+  // into a separate small section of their own.
+  const topLevelCategories = categories.filter((c) => !c.parent);
   const articlesByCategory = {};
-  for (const c of categories) {
+  for (const c of topLevelCategories) {
+    const childNames = categories.filter((sub) => sub.parent === c.name).map((sub) => sub.name);
+    const namesToMatch = [c.name, ...childNames];
     articlesByCategory[c.name] = published
-      .filter((a) => a.category === c.name)
+      .filter((a) => namesToMatch.includes(a.category))
       .slice(0, 5)
       .map((a) => ({
         id: a.id,
@@ -216,10 +222,10 @@ export default function HomePage() {
             </>
           )}
 
-          {categories.length > 0 && (
+          {topLevelCategories.length > 0 && (
             <div style={{ marginTop: 28 }}>
               <h2 style={{ fontSize: 15, fontWeight: 500, marginBottom: 12 }}>News by category</h2>
-              <CategoryTabs categories={categories} articlesByCategory={articlesByCategory} />
+              <CategoryTabs categories={topLevelCategories} articlesByCategory={articlesByCategory} />
             </div>
           )}
         </div>
