@@ -8,11 +8,15 @@ export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
   const [newName, setNewName] = useState("");
   const [newColor, setNewColor] = useState("#0c447c");
-  const [newParent, setNewParent] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
   const [renamedCount, setRenamedCount] = useState(null);
+  // Welke hoofdcategorie momenteel zijn "+ Add subcategory"-mini-formulier
+  // open heeft staan (null = geen enkele).
+  const [addingSubFor, setAddingSubFor] = useState(null);
+  const [subName, setSubName] = useState("");
+  const [subColor, setSubColor] = useState("#0c447c");
 
   async function load() {
     const res = await fetch("/api/categories");
@@ -50,10 +54,22 @@ export default function CategoriesPage() {
   function handleAdd(e) {
     e.preventDefault();
     if (!newName.trim()) return;
-    save([...categories, { name: newName.trim(), color: newColor, parent: newParent || null }]);
+    // Dit formulier voegt altijd een HOOFDcategorie toe — subcategorieën
+    // maak je aan via de "+ Add subcategory"-knop onder de betreffende
+    // hoofdcategorie hieronder, waar de parent al vaststaat door de context
+    // (geen dropdown meer nodig om per ongeluk de verkeerde te kiezen).
+    save([...categories, { name: newName.trim(), color: newColor, parent: null }]);
     setNewName("");
     setNewColor("#0c447c");
-    setNewParent("");
+  }
+
+  function handleAddSub(e, parentName) {
+    e.preventDefault();
+    if (!subName.trim()) return;
+    save([...categories, { name: subName.trim(), color: subColor, parent: parentName }]);
+    setSubName("");
+    setSubColor("#0c447c");
+    setAddingSubFor(null);
   }
 
   function updateColor(name, color) {
@@ -115,10 +131,10 @@ export default function CategoriesPage() {
         The AI uses these categories to classify articles, and they determine the navigation on
         the public site. Each category has its own color for the badges. The order
         below also determines the order in the navigation bar and footer — move them with the
-        arrows. A category can optionally have a parent category (e.g. "Football" under
-        "Sports") — its parent's page then automatically also shows its articles, and it gets
-        its own filter chip there. Only one level of nesting is supported. Changes take effect
-        immediately.
+        arrows. Use "+ Add subcategory" under a main category to add one under it directly
+        (e.g. "Football" under "Sports") — its main category's page then automatically also
+        shows its articles, and it gets its own filter chip there. Only one level of nesting is
+        supported. Changes take effect immediately.
       </p>
 
       {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 12 }}>{error}</p>}
@@ -129,72 +145,118 @@ export default function CategoriesPage() {
         </p>
       )}
 
-      {displayList.map((c) => (
-        <div
-          key={c.name}
-          className="pending-item"
-          style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: c.parent ? 28 : 0 }}
-        >
-          <div style={{ display: "flex", flexDirection: "column", gap: 2, flexShrink: 0 }}>
+      {topLevel.map((top) => (
+        <div key={top.name}>
+          {[top, ...childrenOf(top.name)].map((c) => (
+            <div
+              key={c.name}
+              className="pending-item"
+              style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: c.parent ? 28 : 0 }}
+            >
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, flexShrink: 0 }}>
+                <button
+                  type="button"
+                  onClick={() => move(displayList, c.name, -1)}
+                  disabled={busy || displayList[0].name === c.name}
+                  aria-label="Move up"
+                  style={{ width: 24, height: 18, padding: 0, fontSize: 11, lineHeight: 1 }}
+                >
+                  ▲
+                </button>
+                <button
+                  type="button"
+                  onClick={() => move(displayList, c.name, 1)}
+                  disabled={busy || displayList[displayList.length - 1].name === c.name}
+                  aria-label="Move down"
+                  style={{ width: 24, height: 18, padding: 0, fontSize: 11, lineHeight: 1 }}
+                >
+                  ▼
+                </button>
+              </div>
+              <input
+                type="color"
+                value={c.color}
+                onChange={(e) => updateColor(c.name, e.target.value)}
+                disabled={busy}
+                style={{ width: 36, height: 36, padding: 0, border: "1px solid var(--border)", borderRadius: 6, cursor: "pointer" }}
+              />
+              <input
+                type="text"
+                defaultValue={c.name}
+                onBlur={(e) => {
+                  if (e.target.value.trim() && e.target.value.trim() !== c.name) {
+                    updateName(c.name, e.target.value.trim());
+                  }
+                }}
+                disabled={busy}
+                style={{ flex: 1 }}
+              />
+              <select
+                value={c.parent || ""}
+                onChange={(e) => updateParent(c.name, e.target.value)}
+                disabled={busy}
+                title="Move to a different parent category"
+                style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)", fontSize: 13, flexShrink: 0 }}
+              >
+                <option value="">Top-level</option>
+                {topLevel
+                  .filter((t) => t.name !== c.name) // een categorie kan niet zijn eigen (klein)kind zijn
+                  .map((t) => (
+                    <option key={t.name} value={t.name}>
+                      Move under &quot;{t.name}&quot;
+                    </option>
+                  ))}
+              </select>
+              <span className="badge" style={{ background: c.color + "22", color: c.color, flexShrink: 0 }}>
+                {c.name}
+              </span>
+              <button onClick={() => remove(c.name)} className="danger" disabled={busy} style={{ width: "auto", padding: "6px 12px", fontSize: 13, flexShrink: 0 }}>
+                Delete
+              </button>
+            </div>
+          ))}
+
+          {addingSubFor === top.name ? (
+            <form
+              onSubmit={(e) => handleAddSub(e, top.name)}
+              style={{ display: "flex", alignItems: "center", gap: 10, marginLeft: 28, marginBottom: 10, marginTop: 4 }}
+            >
+              <input
+                type="color"
+                value={subColor}
+                onChange={(e) => setSubColor(e.target.value)}
+                style={{ width: 30, height: 30, padding: 0, border: "1px solid var(--border)", borderRadius: 6, cursor: "pointer" }}
+              />
+              <input
+                type="text"
+                autoFocus
+                placeholder={`New subcategory under "${top.name}"`}
+                value={subName}
+                onChange={(e) => setSubName(e.target.value)}
+                style={{ flex: 1, minWidth: 160, fontSize: 13 }}
+              />
+              <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}>
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAddingSubFor(null); setSubName(""); }}
+                disabled={busy}
+                style={{ width: "auto", padding: "6px 12px", fontSize: 13 }}
+              >
+                Cancel
+              </button>
+            </form>
+          ) : (
             <button
               type="button"
-              onClick={() => move(displayList, c.name, -1)}
-              disabled={busy || displayList[0].name === c.name}
-              aria-label="Move up"
-              style={{ width: 24, height: 18, padding: 0, fontSize: 11, lineHeight: 1 }}
+              onClick={() => { setAddingSubFor(top.name); setSubName(""); setSubColor("#0c447c"); }}
+              disabled={busy}
+              style={{ width: "auto", padding: "4px 12px", fontSize: 12, marginLeft: 28, marginBottom: 10, color: "var(--text-muted)" }}
             >
-              ▲
+              + Add subcategory
             </button>
-            <button
-              type="button"
-              onClick={() => move(displayList, c.name, 1)}
-              disabled={busy || displayList[displayList.length - 1].name === c.name}
-              aria-label="Move down"
-              style={{ width: 24, height: 18, padding: 0, fontSize: 11, lineHeight: 1 }}
-            >
-              ▼
-            </button>
-          </div>
-          <input
-            type="color"
-            value={c.color}
-            onChange={(e) => updateColor(c.name, e.target.value)}
-            disabled={busy}
-            style={{ width: 36, height: 36, padding: 0, border: "1px solid var(--border)", borderRadius: 6, cursor: "pointer" }}
-          />
-          <input
-            type="text"
-            defaultValue={c.name}
-            onBlur={(e) => {
-              if (e.target.value.trim() && e.target.value.trim() !== c.name) {
-                updateName(c.name, e.target.value.trim());
-              }
-            }}
-            disabled={busy}
-            style={{ flex: 1 }}
-          />
-          <select
-            value={c.parent || ""}
-            onChange={(e) => updateParent(c.name, e.target.value)}
-            disabled={busy}
-            title="Parent category"
-            style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)", fontSize: 13, flexShrink: 0 }}
-          >
-            <option value="">Top-level</option>
-            {topLevel
-              .filter((t) => t.name !== c.name) // een categorie kan niet zijn eigen (klein)kind zijn
-              .map((t) => (
-                <option key={t.name} value={t.name}>
-                  Under &quot;{t.name}&quot;
-                </option>
-              ))}
-          </select>
-          <span className="badge" style={{ background: c.color + "22", color: c.color, flexShrink: 0 }}>
-            {c.name}
-          </span>
-          <button onClick={() => remove(c.name)} className="danger" disabled={busy} style={{ width: "auto", padding: "6px 12px", fontSize: 13, flexShrink: 0 }}>
-            Delete
-          </button>
+          )}
         </div>
       ))}
 
@@ -207,25 +269,13 @@ export default function CategoriesPage() {
         />
         <input
           type="text"
-          placeholder="Name of the new category"
+          placeholder="Name of the new main category"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
           style={{ flex: 1, minWidth: 160 }}
         />
-        <select
-          value={newParent}
-          onChange={(e) => setNewParent(e.target.value)}
-          style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)", fontSize: 13 }}
-        >
-          <option value="">Top-level</option>
-          {topLevel.map((t) => (
-            <option key={t.name} value={t.name}>
-              Under &quot;{t.name}&quot;
-            </option>
-          ))}
-        </select>
         <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px", flexShrink: 0 }}>
-          Add
+          Add main category
         </button>
       </form>
     </>
