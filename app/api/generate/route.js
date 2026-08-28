@@ -76,6 +76,7 @@ export async function POST(request) {
       possible_duplicate: possibleDuplicate,
       consistency_notes: draft.consistency_notes || [],
       ai_verification_notes: draft.ai_verification_notes || [],
+      ai_provider_notes: draft.ai_provider_notes || [],
       featured_image: featuredImage,
       featured_image_credit: featuredImageCredit,
       claims: draft.claims || [],
