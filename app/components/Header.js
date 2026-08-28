@@ -3,19 +3,14 @@ import { getArticles, getSiteSettings, getCategories } from "@/lib/db";
 import PageviewTracker from "./PageviewTracker";
 import VisitorHeartbeat from "./VisitorHeartbeat";
 import SettingsPanel from "./SettingsPanel";
-import CategoryDropdown from "./CategoryDropdown";
 
 export default function Header({ activeCategory }) {
   const { site_name, favicon_url } = getSiteSettings();
-  const allCategories = getCategories();
-  // Alleen hoofdcategorieën als losse pillen in de navigatiebalk — anders
-  // raakt die overvol zodra er subcategorieën als Voetbal/F1 bijkomen. Een
-  // hoofdcategorie mét subcategorieën krijgt een dropdown-pijltje; de
-  // subcategorieën zelf zijn ook nog steeds als filter-chips te vinden op
-  // de pagina van hun hoofdcategorie.
-  const categories = allCategories
-    .filter((c) => !c.parent)
-    .map((c) => ({ ...c, children: allCategories.filter((sub) => sub.parent === c.name) }));
+  // Alleen hoofdcategorieën als pillen in de navigatiebalk — subcategorieën
+  // (Voetbal, F1, ...) worden nu op de pagina van hun hoofdcategorie zelf
+  // getoond (bovenaan de 5 laatste artikelen, daaronder per subcategorie
+  // een eigen sectie) i.p.v. via een dropdown hier in de balk.
+  const categories = getCategories().filter((c) => !c.parent);
   const breaking = getArticles({ status: "published" })
     .filter((a) => a.breaking)
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))[0];
@@ -41,36 +36,15 @@ export default function Header({ activeCategory }) {
             <Link href="/" className={`category-pill${!activeCategory ? " active" : ""}`}>Home</Link>
             {categories.map((c) => {
               const active = activeCategory === c.name;
-              const activeStyle = active ? { background: c.color + "22", color: c.color } : undefined;
-
-              if (c.children.length === 0) {
-                return (
-                  <Link
-                    key={c.name}
-                    href={`/categorie/${encodeURIComponent(c.name.toLowerCase())}`}
-                    className={`category-pill${active ? " active" : ""}`}
-                    style={activeStyle}
-                  >
-                    {c.name}
-                  </Link>
-                );
-              }
-
-              // De navigatiebalk heeft overflow-x: auto (voor horizontaal
-              // scrollen op mobiel), wat volgens de CSS-spec ook alles
-              // verticaal buiten die balk afknipt — een simpele
-              // <details>-dropdown zou dus wél opengaan maar onzichtbaar
-              // wegvallen. CategoryDropdown lost dit op door het menu via
-              // een portal buiten die balk te renderen.
               return (
-                <CategoryDropdown
+                <Link
                   key={c.name}
-                  category={c.name}
                   href={`/categorie/${encodeURIComponent(c.name.toLowerCase())}`}
-                  active={active}
-                  activeStyle={activeStyle}
-                  subcategories={c.children}
-                />
+                  className={`category-pill${active ? " active" : ""}`}
+                  style={active ? { background: c.color + "22", color: c.color } : undefined}
+                >
+                  {c.name}
+                </Link>
               );
             })}
           </nav>
