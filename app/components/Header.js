@@ -6,10 +6,15 @@ import SettingsPanel from "./SettingsPanel";
 
 export default function Header({ activeCategory }) {
   const { site_name, favicon_url } = getSiteSettings();
-  // Alleen hoofdcategorieën in de navigatiebalk — anders raakt die
-  // overvol zodra er subcategorieën als Voetbal/F1 bijkomen. Subcategorieën
-  // zijn te vinden als filter-chips op de pagina van hun hoofdcategorie.
-  const categories = getCategories().filter((c) => !c.parent);
+  const allCategories = getCategories();
+  // Alleen hoofdcategorieën als losse pillen in de navigatiebalk — anders
+  // raakt die overvol zodra er subcategorieën als Voetbal/F1 bijkomen. Een
+  // hoofdcategorie mét subcategorieën krijgt een dropdown-pijltje; de
+  // subcategorieën zelf zijn ook nog steeds als filter-chips te vinden op
+  // de pagina van hun hoofdcategorie.
+  const categories = allCategories
+    .filter((c) => !c.parent)
+    .map((c) => ({ ...c, children: allCategories.filter((sub) => sub.parent === c.name) }));
   const breaking = getArticles({ status: "published" })
     .filter((a) => a.breaking)
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))[0];
@@ -35,15 +40,44 @@ export default function Header({ activeCategory }) {
             <Link href="/" className={`category-pill${!activeCategory ? " active" : ""}`}>Home</Link>
             {categories.map((c) => {
               const active = activeCategory === c.name;
+              const activeStyle = active ? { background: c.color + "22", color: c.color } : undefined;
+
+              if (c.children.length === 0) {
+                return (
+                  <Link
+                    key={c.name}
+                    href={`/categorie/${encodeURIComponent(c.name.toLowerCase())}`}
+                    className={`category-pill${active ? " active" : ""}`}
+                    style={activeStyle}
+                  >
+                    {c.name}
+                  </Link>
+                );
+              }
+
+              // Native <details>/<summary> i.p.v. eigen open/dicht-state in
+              // JS — werkt zonder extra code al goed met klikken (desktop)
+              // én tikken (mobiel), en blijft toegankelijk via het
+              // toetsenbord. Klikken op de pil zelf opent/sluit de
+              // dropdown; "Alle {categorie}"-nieuws staat als eerste item
+              // erin, want <summary> kan niet tegelijk togglen én linken.
               return (
-                <Link
-                  key={c.name}
-                  href={`/categorie/${encodeURIComponent(c.name.toLowerCase())}`}
-                  className={`category-pill${active ? " active" : ""}`}
-                  style={active ? { background: c.color + "22", color: c.color } : undefined}
-                >
-                  {c.name}
-                </Link>
+                <details key={c.name} className="category-dropdown">
+                  <summary className={`category-pill${active ? " active" : ""}`} style={activeStyle}>
+                    {c.name}
+                    <span className="chevron">▾</span>
+                  </summary>
+                  <div className="category-dropdown-menu">
+                    <Link href={`/categorie/${encodeURIComponent(c.name.toLowerCase())}`}>
+                      All {c.name}
+                    </Link>
+                    {c.children.map((sub) => (
+                      <Link key={sub.name} href={`/categorie/${encodeURIComponent(sub.name.toLowerCase())}`}>
+                        {sub.name}
+                      </Link>
+                    ))}
+                  </div>
+                </details>
               );
             })}
           </nav>
