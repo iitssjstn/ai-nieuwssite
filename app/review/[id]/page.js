@@ -483,8 +483,13 @@ export default function ReviewDetail() {
                 onChange={(e) => setCategory(e.target.value)}
                 style={{ marginBottom: 10, padding: 8, borderRadius: 8, border: "1px solid var(--border)" }}
               >
-                {categories.map((c) => (
-                  <option key={c.name} value={c.name}>{c.name}</option>
+                {categories.filter((c) => !c.parent).map((top) => (
+                  <optgroup key={top.name} label={top.name}>
+                    <option value={top.name}>{top.name}</option>
+                    {categories.filter((c) => c.parent === top.name).map((sub) => (
+                      <option key={sub.name} value={sub.name}>&nbsp;&nbsp;↳ {sub.name}</option>
+                    ))}
+                  </optgroup>
                 ))}
               </select>
 
