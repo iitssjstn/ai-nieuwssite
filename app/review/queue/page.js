@@ -191,8 +191,13 @@ export default function QueuePage() {
             style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)" }}
           >
             <option value="">Categorie: AI kiest zelf</option>
-            {categories.map((c) => (
-              <option key={c.name} value={c.name}>Categorie: {c.name}</option>
+            {categories.filter((c) => !c.parent).map((top) => (
+              <optgroup key={top.name} label={top.name}>
+                <option value={top.name}>Categorie: {top.name}</option>
+                {categories.filter((c) => c.parent === top.name).map((sub) => (
+                  <option key={sub.name} value={sub.name}>Categorie: &nbsp;↳ {sub.name}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </div>
