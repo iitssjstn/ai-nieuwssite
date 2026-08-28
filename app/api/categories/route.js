@@ -30,6 +30,29 @@ export async function PUT(request) {
   if (new Set(names).size !== names.length) {
     return NextResponse.json({ error: "Category names must be unique" }, { status: 400 });
   }
-  const articlesUpdated = setCategories(categories.map((c) => ({ name: c.name.trim(), color: c.color })), rename);
+  // Subcategorieën: maximaal één niveau diep. 'parent' moet verwijzen naar
+  // een ANDERE categorie in dezelfde lijst die zelf geen parent heeft —
+  // dat voorkomt dat iemand per ongeluk een subcategorie van een
+  // subcategorie maakt (bijv. Voetbal onder Sport onder Nieuws), wat de
+  // rest van de site (navigatie, categoriepagina's) niet ondersteunt.
+  const nameSet = new Set(categories.map((c) => c.name.trim()));
+  const topLevelNames = new Set(categories.filter((c) => !c.parent).map((c) => c.name.trim()));
+  for (const c of categories) {
+    if (!c.parent) continue;
+    const parent = c.parent.trim();
+    if (parent === c.name.trim()) {
+      return NextResponse.json({ error: `"${c.name}" cannot be its own parent category` }, { status: 400 });
+    }
+    if (!nameSet.has(parent)) {
+      return NextResponse.json({ error: `"${c.name}"'s parent category "${parent}" doesn't exist` }, { status: 400 });
+    }
+    if (!topLevelNames.has(parent)) {
+      return NextResponse.json({ error: `"${parent}" is itself a subcategory — only one level of nesting is supported` }, { status: 400 });
+    }
+  }
+  const articlesUpdated = setCategories(
+    categories.map((c) => ({ name: c.name.trim(), color: c.color, parent: c.parent ? c.parent.trim() : null })),
+    rename
+  );
   return NextResponse.json({ categories: getCategories(), articlesUpdated });
 }
