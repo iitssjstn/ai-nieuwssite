@@ -145,36 +145,6 @@ body {
   font-weight: 500;
 }
 
-/* Dropdown voor categorieën met subcategorieën (bijv. Sport → Voetbal, F1).
-   Het menu zelf wordt via een portal buiten de navigatiebalk gerenderd met
-   position: fixed (zie CategoryDropdown.js) — dat is nodig omdat de balk
-   overflow-x: auto heeft (voor horizontaal scrollen op mobiel), wat
-   volgens de CSS-spec ook alles verticaal buiten die balk afknipt. Alleen
-   het uiterlijk van het menu staat daarom nog hier; de positionering zelf
-   komt via inline styles vanuit JS. */
-.chevron { font-size: 9px; opacity: 0.7; transition: transform 0.15s; }
-.category-dropdown-menu {
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 6px;
-  min-width: 160px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  z-index: 50;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.category-dropdown-menu a {
-  padding: 8px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  text-decoration: none;
-  white-space: nowrap;
-}
-.category-dropdown-menu a:hover { background: var(--surface-1); color: var(--text-primary); }
-
 .badge {
   display: inline-block;
   font-size: 11px;
