@@ -118,6 +118,21 @@ export default function AutomationPage() {
           style={{ width: 100 }}
         />
 
+        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "14px 0 4px" }}>
+          Minimum word count per generated article — if the first attempt comes in shorter, one
+          automatic follow-up call expands it using only the original source text(s) (no new
+          facts). This is what directly prevents very short articles.
+        </p>
+        <input
+          type="number"
+          min="50"
+          max="1000"
+          value={settings.min_word_count}
+          onChange={(e) => patchField("min_word_count", parseInt(e.target.value, 10))}
+          disabled={busy}
+          style={{ width: 100 }}
+        />
+
         {saved && <p style={{ color: "var(--success-text)", fontSize: 13, marginTop: 10 }}>Saved.</p>}
       </div>
 
