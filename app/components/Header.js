@@ -6,7 +6,10 @@ import SettingsPanel from "./SettingsPanel";
 
 export default function Header({ activeCategory }) {
   const { site_name, favicon_url } = getSiteSettings();
-  const categories = getCategories();
+  // Alleen hoofdcategorieën in de navigatiebalk — anders raakt die
+  // overvol zodra er subcategorieën als Voetbal/F1 bijkomen. Subcategorieën
+  // zijn te vinden als filter-chips op de pagina van hun hoofdcategorie.
+  const categories = getCategories().filter((c) => !c.parent);
   const breaking = getArticles({ status: "published" })
     .filter((a) => a.breaking)
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at))[0];
