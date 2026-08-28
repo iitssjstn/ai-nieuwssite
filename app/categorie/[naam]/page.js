@@ -1,8 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import AdSlot from "../../components/AdSlot";
+import CategoryTabs from "../../components/CategoryTabs";
 import { getArticles, getSiteSettings, getCategories, getAdSlots } from "@/lib/db";
+import { getExcerpt, getReadingTime } from "@/lib/content";
 import { headers } from "next/headers";
 
 function getBaseUrl() {
@@ -67,6 +70,35 @@ export default function CategoryPage({ params }) {
     .filter((a) => a.category && namesToMatch.includes(a.category.toLowerCase()))
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
+  // Op de pagina van een hoofdcategorie mét subcategorieën: bovenaan de 5
+  // laatste artikelen uit de hele categorie (zichzelf + subcategorieën
+  // samen), en daaronder per subcategorie een eigen sectie met zijn
+  // recentste artikelen — hergebruikt dezelfde CategoryTabs-component en
+  // -opmaak als de homepage, voor een consistente ervaring.
+  const latestOverall = children.length > 0 ? articles.slice(0, 5) : [];
+  const articlesByChildCategory = {};
+  if (children.length > 0) {
+    const published = getArticles({ status: "published" }).sort(
+      (a, b) => new Date(b.published_at) - new Date(a.published_at)
+    );
+    for (const child of children) {
+      articlesByChildCategory[child.name] = published
+        .filter((a) => a.category === child.name)
+        .slice(0, 5)
+        .map((a) => ({
+          id: a.id,
+          slug: a.slug,
+          title: a.title,
+          category: a.category,
+          featured_image: a.featured_image,
+          featured_image_credit: a.featured_image_credit,
+          timeAgo: timeAgo(a.published_at),
+          readingTime: getReadingTime(a.body),
+          excerpt: getExcerpt(a.body, 140),
+        }));
+    }
+  }
+
   // Vertelt Google expliciet dat dit een geordende lijst artikelen is
   // (i.p.v. dat Google zelf uit de HTML moet afleiden welke links de
   // "inhoud" van de pagina vormen) — kan meehelpen bij sitelinks en een
@@ -109,35 +141,43 @@ export default function CategoryPage({ params }) {
             </Link>
           )}
 
-          {children.length > 0 && (
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
-              {children.map((c) => (
-                <Link
-                  key={c.name}
-                  href={`/categorie/${encodeURIComponent(c.name.toLowerCase())}`}
-                  className="badge"
-                  style={{ background: c.color + "22", color: c.color, textDecoration: "none" }}
-                >
-                  {c.name}
-                </Link>
-              ))}
-            </div>
-          )}
-
           {articles.length === 0 && (
             <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
               No articles in this category yet.
             </p>
           )}
 
-          {articles.map((a) => (
-            <Link key={a.id} href={`/artikel/${a.slug}`} className="list-row">
-              <div>
-                <span className="cat">{timeAgo(a.published_at)}</span>
-                <p>{a.title}</p>
-              </div>
-            </Link>
-          ))}
+          {children.length > 0 ? (
+            <>
+              {latestOverall.map((a) => (
+                <Link key={a.id} href={`/artikel/${a.slug}`} className="list-row" style={{ gap: 14, justifyContent: "flex-start" }}>
+                  {a.featured_image && (
+                    <Image src={a.featured_image} alt={a.featured_image_credit?.alt || a.title} width={130} height={88} className="list-row-thumb" />
+                  )}
+                  <div style={{ minWidth: 0 }}>
+                    <span className="cat">{a.category} · {timeAgo(a.published_at)}</span>
+                    <p>{a.title}</p>
+                  </div>
+                </Link>
+              ))}
+
+              {Object.values(articlesByChildCategory).some((items) => items.length > 0) && (
+                <div style={{ marginTop: 32 }}>
+                  <h2 style={{ fontSize: 15, fontWeight: 500, marginBottom: 12 }}>By subcategory</h2>
+                  <CategoryTabs categories={children} articlesByCategory={articlesByChildCategory} />
+                </div>
+              )}
+            </>
+          ) : (
+            articles.map((a) => (
+              <Link key={a.id} href={`/artikel/${a.slug}`} className="list-row">
+                <div>
+                  <span className="cat">{timeAgo(a.published_at)}</span>
+                  <p>{a.title}</p>
+                </div>
+              </Link>
+            ))
+          )}
         </div>
 
         <div className="category-layout-ad">
