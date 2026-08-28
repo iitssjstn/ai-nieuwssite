@@ -50,8 +50,21 @@ export default function CategoryPage({ params }) {
   const capitalized = resolveCategoryName(naam, categories);
   const baseUrl = getBaseUrl();
   const adSlots = getAdSlots();
+
+  const matchedCategory = categories.find((c) => c.name.toLowerCase() === naam.toLowerCase());
+  const children = matchedCategory ? categories.filter((c) => c.parent === matchedCategory.name) : [];
+  // Op de pagina van een hoofdcategorie tonen we ook meteen de artikelen
+  // van al zijn subcategorieën (bijv. Sport toont ook Voetbal- en
+  // F1-artikelen) — een subcategoriepagina zelf blijft, zoals voorheen,
+  // uitsluitend zijn eigen artikelen tonen.
+  const namesToMatch = [capitalized, ...children.map((c) => c.name)].map((n) => n.toLowerCase());
+  // Voor het actief markeren in de navigatiebalk (die alleen hoofdcategorieën
+  // toont): bij een subcategorie moet de balk zijn hoofdcategorie oplichten,
+  // niet niets, want de subcategorie zelf staat daar niet in.
+  const activeNavCategory = matchedCategory?.parent || capitalized;
+
   const articles = getArticles({ status: "published" })
-    .filter((a) => a.category?.toLowerCase() === naam.toLowerCase())
+    .filter((a) => a.category && namesToMatch.includes(a.category.toLowerCase()))
     .sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
 
   // Vertelt Google expliciet dat dit een geordende lijst artikelen is
@@ -78,7 +91,7 @@ export default function CategoryPage({ params }) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
         />
       )}
-      <Header activeCategory={capitalized} />
+      <Header activeCategory={activeNavCategory} />
 
       <div className="category-layout">
         <div className="category-layout-ad">
@@ -86,9 +99,30 @@ export default function CategoryPage({ params }) {
         </div>
 
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: 16 }}>
+          <h1 style={{ fontSize: 20, fontWeight: 500, marginBottom: matchedCategory?.parent ? 4 : 16 }}>
             {capitalized}
           </h1>
+
+          {matchedCategory?.parent && (
+            <Link href={`/categorie/${encodeURIComponent(matchedCategory.parent.toLowerCase())}`} style={{ fontSize: 13, color: "var(--text-muted)", display: "inline-block", marginBottom: 16 }}>
+              ← Back to {matchedCategory.parent}
+            </Link>
+          )}
+
+          {children.length > 0 && (
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 20 }}>
+              {children.map((c) => (
+                <Link
+                  key={c.name}
+                  href={`/categorie/${encodeURIComponent(c.name.toLowerCase())}`}
+                  className="badge"
+                  style={{ background: c.color + "22", color: c.color, textDecoration: "none" }}
+                >
+                  {c.name}
+                </Link>
+              ))}
+            </div>
+          )}
 
           {articles.length === 0 && (
             <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
