@@ -18,7 +18,7 @@ const SOCIAL_ICONS = {
 
 export default function Footer() {
   const { site_name, site_description } = getSiteSettings();
-  const categories = getCategories();
+  const categories = getCategories().filter((c) => !c.parent);
   const { enabled: newsletterEnabled } = getNewsletterSettings();
   const { about_enabled, privacy_enabled } = getInfoPagesSettings();
   const social = getSocialLinks();
