@@ -161,7 +161,7 @@ export default function CategoryPage({ params }) {
                 </Link>
               ))}
 
-              {Object.values(articlesByChildCategory).some((items) => items.length > 0) && (
+              {children.length > 0 && (
                 <div style={{ marginTop: 32 }}>
                   <h2 style={{ fontSize: 15, fontWeight: 500, marginBottom: 12 }}>By subcategory</h2>
                   <CategoryTabs categories={children} articlesByCategory={articlesByChildCategory} />
@@ -170,8 +170,11 @@ export default function CategoryPage({ params }) {
             </>
           ) : (
             articles.map((a) => (
-              <Link key={a.id} href={`/artikel/${a.slug}`} className="list-row">
-                <div>
+              <Link key={a.id} href={`/artikel/${a.slug}`} className="list-row" style={{ gap: 14, justifyContent: "flex-start" }}>
+                {a.featured_image && (
+                  <Image src={a.featured_image} alt={a.featured_image_credit?.alt || a.title} width={130} height={88} className="list-row-thumb" />
+                )}
+                <div style={{ minWidth: 0 }}>
                   <span className="cat">{timeAgo(a.published_at)}</span>
                   <p>{a.title}</p>
                 </div>
