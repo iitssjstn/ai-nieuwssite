@@ -8,6 +8,7 @@ export default function CategoriesPage() {
   const [categories, setCategories] = useState([]);
   const [newName, setNewName] = useState("");
   const [newColor, setNewColor] = useState("#0c447c");
+  const [newParent, setNewParent] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
@@ -49,13 +50,18 @@ export default function CategoriesPage() {
   function handleAdd(e) {
     e.preventDefault();
     if (!newName.trim()) return;
-    save([...categories, { name: newName.trim(), color: newColor }]);
+    save([...categories, { name: newName.trim(), color: newColor, parent: newParent || null }]);
     setNewName("");
     setNewColor("#0c447c");
+    setNewParent("");
   }
 
   function updateColor(name, color) {
     save(categories.map((c) => (c.name === name ? { ...c, color } : c)));
+  }
+
+  function updateParent(name, parent) {
+    save(categories.map((c) => (c.name === name ? { ...c, parent: parent || null } : c)));
   }
 
   function updateName(oldName, newName) {
@@ -65,11 +71,20 @@ export default function CategoriesPage() {
     );
   }
 
-  function move(index, direction) {
-    const target = index + direction;
-    if (target < 0 || target >= categories.length) return;
+  // Werkt op de weergave-volgorde (hoofdcategorie direct gevolgd door zijn
+  // subcategorieën), niet op de ruwe array-index — anders zou omhoog/omlaag
+  // verwarrend afwijken van wat er op het scherm staat.
+  function move(displayList, name, direction) {
+    const pos = displayList.findIndex((c) => c.name === name);
+    const targetPos = pos + direction;
+    if (targetPos < 0 || targetPos >= displayList.length) return;
+    const a = displayList[pos].name;
+    const b = displayList[targetPos].name;
+    const indexOf = (n) => categories.findIndex((c) => c.name === n);
     const updated = [...categories];
-    [updated[index], updated[target]] = [updated[target], updated[index]];
+    const iA = indexOf(a);
+    const iB = indexOf(b);
+    [updated[iA], updated[iB]] = [updated[iB], updated[iA]];
     save(updated);
   }
 
@@ -78,9 +93,19 @@ export default function CategoriesPage() {
       alert("At least one category must remain.");
       return;
     }
-    if (!(await confirm(`Delete category "${name}"? Existing articles keep this name as text, but the category disappears from dropdowns and navigation.`))) return;
+    const hasChildren = categories.some((c) => c.parent === name);
+    const warning = hasChildren
+      ? `Delete category "${name}"? Its subcategories become top-level categories. Existing articles keep this name as text, but the category disappears from dropdowns and navigation.`
+      : `Delete category "${name}"? Existing articles keep this name as text, but the category disappears from dropdowns and navigation.`;
+    if (!(await confirm(warning))) return;
     save(categories.filter((c) => c.name !== name));
   }
+
+  const topLevel = categories.filter((c) => !c.parent);
+  const childrenOf = (name) => categories.filter((c) => c.parent === name);
+  // Hoofdcategorie direct gevolgd door zijn subcategorieën — dit is zowel
+  // de render- als de omhoog/omlaag-volgorde.
+  const displayList = topLevel.flatMap((t) => [t, ...childrenOf(t.name)]);
 
   return (
     <>
@@ -90,7 +115,10 @@ export default function CategoriesPage() {
         The AI uses these categories to classify articles, and they determine the navigation on
         the public site. Each category has its own color for the badges. The order
         below also determines the order in the navigation bar and footer — move them with the
-        arrows. Changes take effect immediately.
+        arrows. A category can optionally have a parent category (e.g. "Football" under
+        "Sports") — its parent's page then automatically also shows its articles, and it gets
+        its own filter chip there. Only one level of nesting is supported. Changes take effect
+        immediately.
       </p>
 
       {error && <p style={{ color: "var(--danger-text)", fontSize: 13, marginBottom: 12 }}>{error}</p>}
@@ -101,13 +129,17 @@ export default function CategoriesPage() {
         </p>
       )}
 
-      {categories.map((c, i) => (
-        <div key={c.name} className="pending-item" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      {displayList.map((c) => (
+        <div
+          key={c.name}
+          className="pending-item"
+          style={{ display: "flex", alignItems: "center", gap: 12, marginLeft: c.parent ? 28 : 0 }}
+        >
           <div style={{ display: "flex", flexDirection: "column", gap: 2, flexShrink: 0 }}>
             <button
               type="button"
-              onClick={() => move(i, -1)}
-              disabled={busy || i === 0}
+              onClick={() => move(displayList, c.name, -1)}
+              disabled={busy || displayList[0].name === c.name}
               aria-label="Move up"
               style={{ width: 24, height: 18, padding: 0, fontSize: 11, lineHeight: 1 }}
             >
@@ -115,8 +147,8 @@ export default function CategoriesPage() {
             </button>
             <button
               type="button"
-              onClick={() => move(i, 1)}
-              disabled={busy || i === categories.length - 1}
+              onClick={() => move(displayList, c.name, 1)}
+              disabled={busy || displayList[displayList.length - 1].name === c.name}
               aria-label="Move down"
               style={{ width: 24, height: 18, padding: 0, fontSize: 11, lineHeight: 1 }}
             >
@@ -141,6 +173,22 @@ export default function CategoriesPage() {
             disabled={busy}
             style={{ flex: 1 }}
           />
+          <select
+            value={c.parent || ""}
+            onChange={(e) => updateParent(c.name, e.target.value)}
+            disabled={busy}
+            title="Parent category"
+            style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)", fontSize: 13, flexShrink: 0 }}
+          >
+            <option value="">Top-level</option>
+            {topLevel
+              .filter((t) => t.name !== c.name) // een categorie kan niet zijn eigen (klein)kind zijn
+              .map((t) => (
+                <option key={t.name} value={t.name}>
+                  Under &quot;{t.name}&quot;
+                </option>
+              ))}
+          </select>
           <span className="badge" style={{ background: c.color + "22", color: c.color, flexShrink: 0 }}>
             {c.name}
           </span>
@@ -150,7 +198,7 @@ export default function CategoriesPage() {
         </div>
       ))}
 
-      <form onSubmit={handleAdd} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16, display: "flex", alignItems: "center", gap: 12 }}>
+      <form onSubmit={handleAdd} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginTop: 16, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
         <input
           type="color"
           value={newColor}
@@ -162,8 +210,20 @@ export default function CategoriesPage() {
           placeholder="Name of the new category"
           value={newName}
           onChange={(e) => setNewName(e.target.value)}
-          style={{ flex: 1 }}
+          style={{ flex: 1, minWidth: 160 }}
         />
+        <select
+          value={newParent}
+          onChange={(e) => setNewParent(e.target.value)}
+          style={{ padding: 8, borderRadius: 8, border: "1px solid var(--border)", fontSize: 13 }}
+        >
+          <option value="">Top-level</option>
+          {topLevel.map((t) => (
+            <option key={t.name} value={t.name}>
+              Under &quot;{t.name}&quot;
+            </option>
+          ))}
+        </select>
         <button type="submit" className="primary" disabled={busy} style={{ width: "auto", padding: "8px 16px", flexShrink: 0 }}>
           Add
         </button>
