@@ -51,7 +51,13 @@ const ADMIN_ONLY_EXCEPTIONS = ["/api/users/online"];
 // Routes die op BEIDE domeinen moeten blijven werken, ook al zijn ze geen
 // "admin"-route — geüploade afbeeldingen moeten zichtbaar zijn zowel in de
 // preview binnen het adminpaneel (admin-subdomein) als op de publieke site.
-const SHARED_PATH_PREFIXES = ["/media"];
+// /api/ad-submissions hoort hier ook bij: de POST komt van de publieke
+// /advertise-pagina (hoofddomein), maar het adminpaneel (admin-subdomein)
+// roept dezelfde route aan om aanmeldingen op te halen/goed te keuren —
+// zonder deze vermelding werd die tweede aanroep vanaf het admin-subdomein
+// per ongeluk omgeleid naar /review (HTML) i.p.v. de JSON-data terug te
+// geven.
+const SHARED_PATH_PREFIXES = ["/media", "/api/ad-submissions"];
 
 function matchesPrefix(pathname, list) {
   return list.some((p) => pathname === p || pathname.startsWith(p + "/"));
