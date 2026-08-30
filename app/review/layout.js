@@ -99,6 +99,19 @@ const NAV = [
     ),
   },
   {
+    href: "/review/ads",
+    label: "Ad Center",
+    adminOnly: true,
+    group: "Management",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M3 9h18" />
+        <path d="M7 13h4M7 16h6" />
+      </svg>
+    ),
+  },
+  {
     href: "/review/settings",
     label: "Settings",
     adminOnly: true,
@@ -137,6 +150,7 @@ function pageTitle(pathname) {
   if (pathname.startsWith("/review/kaart")) return "Kaart";
   if (pathname.startsWith("/review/webhooks")) return "Webhooks & API";
   if (pathname.startsWith("/review/sources")) return "Bronnen";
+  if (pathname.startsWith("/review/ads")) return "Ad Center";
   if (pathname.startsWith("/review/settings")) return "Instellingen";
   if (/^\/review\/[^/]+$/.test(pathname)) return "Artikel reviewen";
   return "Editorial";

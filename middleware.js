@@ -34,6 +34,7 @@ const ADMIN_ONLY_PREFIXES = [
   "/review/sources",
   "/review/settings",
   "/review/webhooks",
+  "/review/ads",
   "/api/sources",
   "/api/settings",
   "/api/users",

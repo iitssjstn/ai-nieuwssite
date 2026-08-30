@@ -147,7 +147,7 @@ export default function HomePage() {
       <Header />
 
       <div style={{ margin: "16px 0" }}>
-        <AdSlot config={{ ...adSlots.banners.top_banner, width: adSlots.banners.top_banner?.width || 728, height: adSlots.banners.top_banner?.height || 90 }} />
+        <AdSlot slot="top_banner" config={{ ...adSlots.banners.top_banner, width: adSlots.banners.top_banner?.width || 728, height: adSlots.banners.top_banner?.height || 90 }} />
       </div>
       <h1 className="sr-only">{site_name} — Latest news</h1>
 
@@ -330,7 +330,7 @@ export default function HomePage() {
           </div>
 
           <div style={{ marginTop: 20 }}>
-            <AdSlot config={{ ...adSlots.banners.homepage_sidebar, width: adSlots.banners.homepage_sidebar?.width || 300, height: adSlots.banners.homepage_sidebar?.height || 250 }} />
+            <AdSlot slot="homepage_sidebar" config={{ ...adSlots.banners.homepage_sidebar, width: adSlots.banners.homepage_sidebar?.width || 300, height: adSlots.banners.homepage_sidebar?.height || 250 }} />
           </div>
 
           {trendingTags.length > 0 && (

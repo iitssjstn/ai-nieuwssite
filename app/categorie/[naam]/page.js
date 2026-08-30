@@ -127,7 +127,7 @@ export default function CategoryPage({ params }) {
 
       <div className="category-layout">
         <div className="category-layout-ad">
-          <AdSlot config={{ ...adSlots.banners.category_left, width: adSlots.banners.category_left?.width || 160, height: adSlots.banners.category_left?.height || 600 }} label="Ad space 160 x 600" />
+          <AdSlot slot="category_left" config={{ ...adSlots.banners.category_left, width: adSlots.banners.category_left?.width || 160, height: adSlots.banners.category_left?.height || 600 }} label="Ad space 160 x 600" />
         </div>
 
         <div>
@@ -184,7 +184,7 @@ export default function CategoryPage({ params }) {
         </div>
 
         <div className="category-layout-ad">
-          <AdSlot config={{ ...adSlots.banners.category_right, width: adSlots.banners.category_right?.width || 160, height: adSlots.banners.category_right?.height || 600 }} label="Ad space 160 x 600" />
+          <AdSlot slot="category_right" config={{ ...adSlots.banners.category_right, width: adSlots.banners.category_right?.width || 160, height: adSlots.banners.category_right?.height || 600 }} label="Ad space 160 x 600" />
         </div>
       </div>
 

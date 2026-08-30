@@ -274,7 +274,7 @@ export default async function ArticlePage({ params }) {
 
         {htmlBody && (
           <div className="ad-slot" style={{ marginTop: 20 }}>
-            <AdSlot config={{ ...adSlots.banners.article_incontent, width: adSlots.banners.article_incontent?.width || 468, height: adSlots.banners.article_incontent?.height || 60 }} />
+            <AdSlot slot="article_incontent" config={{ ...adSlots.banners.article_incontent, width: adSlots.banners.article_incontent?.width || 468, height: adSlots.banners.article_incontent?.height || 60 }} />
           </div>
         )}
 
@@ -317,7 +317,7 @@ export default async function ArticlePage({ params }) {
           </div>
 
           <div className="ad-slot" style={{ marginTop: 20 }}>
-            <AdSlot config={{ ...adSlots.banners.article_sidebar, width: adSlots.banners.article_sidebar?.width || 160, height: adSlots.banners.article_sidebar?.height || 300 }} />
+            <AdSlot slot="article_sidebar" config={{ ...adSlots.banners.article_sidebar, width: adSlots.banners.article_sidebar?.width || 160, height: adSlots.banners.article_sidebar?.height || 300 }} />
           </div>
         </div>
       </div>
