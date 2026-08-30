@@ -11,12 +11,25 @@ function slotLabel(id) {
 export default function AdsPage() {
   const { confirm, ConfirmDialog } = useConfirmDialog();
   const [submissions, setSubmissions] = useState(null);
+  const [loadError, setLoadError] = useState(null);
   const [busyId, setBusyId] = useState(null);
   const [error, setError] = useState(null);
 
   async function load() {
-    const res = await fetch("/api/ad-submissions");
-    setSubmissions(await res.json());
+    setLoadError(null);
+    try {
+      const res = await fetch("/api/ad-submissions");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      if (!Array.isArray(data)) throw new Error("Unexpected response from the server");
+      setSubmissions(data);
+    } catch (err) {
+      // Zonder dit bleef het scherm voor altijd op "niets" staan zodra de
+      // eerste ophaal-actie om wat voor reden dan ook faalde (bijv. geen
+      // geldige sessie meer) — nu krijg je in elk geval een duidelijke
+      // melding i.p.v. een leeg scherm.
+      setLoadError(err.message);
+    }
   }
 
   useEffect(() => {
@@ -57,6 +70,17 @@ export default function AdsPage() {
     }
   }
 
+  if (loadError) {
+    return (
+      <>
+        <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Ad Center</h2>
+        <p style={{ color: "var(--danger-text)", fontSize: 13 }}>Could not load ad submissions: {loadError}</p>
+        <button onClick={load} style={{ width: "auto", padding: "6px 12px", fontSize: 13, marginTop: 8 }}>
+          Retry
+        </button>
+      </>
+    );
+  }
   if (!submissions) return null;
 
   const pending = submissions.filter((s) => s.status === "pending");
