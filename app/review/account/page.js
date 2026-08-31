@@ -10,6 +10,7 @@ export default function MyAccountPage() {
   const [address, setAddress] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+  const [loadError, setLoadError] = useState(null);
   const [saved, setSaved] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -20,13 +21,21 @@ export default function MyAccountPage() {
   const [pwSaved, setPwSaved] = useState(false);
 
   async function load() {
-    const res = await fetch("/api/account");
-    const data = await res.json();
-    setProfile(data);
-    setFullName(data.full_name || "");
-    setEmail(data.email || "");
-    setPhone(data.phone || "");
-    setAddress(data.address || "");
+    setLoadError(null);
+    try {
+      const res = await fetch("/api/account");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      setProfile(data);
+      setFullName(data.full_name || "");
+      setEmail(data.email || "");
+      setPhone(data.phone || "");
+      setAddress(data.address || "");
+    } catch (err) {
+      // Zonder dit bleef de pagina voor altijd leeg staan zodra het laden
+      // om wat voor reden dan ook mislukte (bijv. een verlopen sessie).
+      setLoadError(err.message);
+    }
   }
 
   useEffect(() => {
@@ -79,6 +88,17 @@ export default function MyAccountPage() {
     }
   }
 
+  if (loadError) {
+    return (
+      <div className="container">
+        <h1 style={{ fontSize: 18, fontWeight: 500, marginBottom: 8 }}>My Account</h1>
+        <p style={{ color: "var(--danger-text)", fontSize: 13 }}>Could not load your account: {loadError}</p>
+        <button onClick={load} style={{ width: "auto", padding: "6px 12px", fontSize: 13, marginTop: 8 }}>
+          Retry
+        </button>
+      </div>
+    );
+  }
   if (!profile) return null;
 
   return (

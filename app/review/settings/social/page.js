@@ -6,10 +6,18 @@ export default function SocialSettingsPage() {
   const [social, setSocial] = useState(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [loadError, setLoadError] = useState(null);
 
   async function load() {
-    const res = await fetch("/api/settings/social");
-    setSocial(await res.json());
+    setLoadError(null);
+    try {
+      const res = await fetch("/api/settings/social");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      setSocial(data);
+    } catch (err) {
+      setLoadError(err.message);
+    }
   }
 
   useEffect(() => {
@@ -31,6 +39,17 @@ export default function SocialSettingsPage() {
     }
   }
 
+  if (loadError) {
+    return (
+      <>
+        <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Social Media</h2>
+        <p style={{ color: "var(--danger-text)", fontSize: 13 }}>Could not load settings: {loadError}</p>
+        <button onClick={load} style={{ width: "auto", padding: "6px 12px", fontSize: 13, marginTop: 8 }}>
+          Retry
+        </button>
+      </>
+    );
+  }
   if (!social) return null;
 
   return (

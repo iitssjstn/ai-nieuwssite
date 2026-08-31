@@ -8,12 +8,19 @@ export default function NewsletterSettingsPage() {
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
+  const [loadError, setLoadError] = useState(null);
 
   async function load() {
-    const res = await fetch("/api/settings/newsletter");
-    const data = await res.json();
-    setNewsletter(data);
-    setDraft(data.sender_email || "");
+    setLoadError(null);
+    try {
+      const res = await fetch("/api/settings/newsletter");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      setNewsletter(data);
+      setDraft(data.sender_email || "");
+    } catch (err) {
+      setLoadError(err.message);
+    }
   }
 
   useEffect(() => {
@@ -40,6 +47,17 @@ export default function NewsletterSettingsPage() {
     }
   }
 
+  if (loadError) {
+    return (
+      <>
+        <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Newsletter</h2>
+        <p style={{ color: "var(--danger-text)", fontSize: 13 }}>Could not load settings: {loadError}</p>
+        <button onClick={load} style={{ width: "auto", padding: "6px 12px", fontSize: 13, marginTop: 8 }}>
+          Retry
+        </button>
+      </>
+    );
+  }
   if (!newsletter) return null;
 
   return (

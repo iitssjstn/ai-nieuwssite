@@ -15,10 +15,18 @@ export default function AdsterraPage() {
   const [slots, setSlots] = useState(null);
   const [slotBusy, setSlotBusy] = useState(false);
   const [slotSaved, setSlotSaved] = useState(false);
+  const [loadError, setLoadError] = useState(null);
 
   async function loadSlots() {
-    const res = await fetch("/api/settings/ad-slots");
-    setSlots(await res.json());
+    setLoadError(null);
+    try {
+      const res = await fetch("/api/settings/ad-slots");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      setSlots(data);
+    } catch (err) {
+      setLoadError(err.message);
+    }
   }
 
   useEffect(() => {
@@ -40,6 +48,17 @@ export default function AdsterraPage() {
     }
   }
 
+  if (loadError) {
+    return (
+      <>
+        <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Adsterra</h2>
+        <p style={{ color: "var(--danger-text)", fontSize: 13 }}>Could not load settings: {loadError}</p>
+        <button onClick={loadSlots} style={{ width: "auto", padding: "6px 12px", fontSize: 13, marginTop: 8 }}>
+          Retry
+        </button>
+      </>
+    );
+  }
   if (!slots) return null;
 
   return (

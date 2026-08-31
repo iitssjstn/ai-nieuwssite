@@ -5,10 +5,18 @@ import { useEffect, useState } from "react";
 export default function InfoPagesSettingsPage() {
   const [infoPages, setInfoPages] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [loadError, setLoadError] = useState(null);
 
   async function load() {
-    const res = await fetch("/api/settings/info-pages");
-    setInfoPages(await res.json());
+    setLoadError(null);
+    try {
+      const res = await fetch("/api/settings/info-pages");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      setInfoPages(data);
+    } catch (err) {
+      setLoadError(err.message);
+    }
   }
 
   useEffect(() => {
@@ -26,6 +34,17 @@ export default function InfoPagesSettingsPage() {
     if (res.ok) setInfoPages(await res.json());
   }
 
+  if (loadError) {
+    return (
+      <>
+        <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>Info Pages</h2>
+        <p style={{ color: "var(--danger-text)", fontSize: 13 }}>Could not load settings: {loadError}</p>
+        <button onClick={load} style={{ width: "auto", padding: "6px 12px", fontSize: 13, marginTop: 8 }}>
+          Retry
+        </button>
+      </>
+    );
+  }
   if (!infoPages) return null;
 
   return (

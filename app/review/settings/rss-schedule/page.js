@@ -9,10 +9,23 @@ export default function RssSchedulePage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
   const [saved, setSaved] = useState(false);
+  const [loadError, setLoadError] = useState(null);
 
   async function load() {
-    const res = await fetch("/api/settings/automation");
-    setSettings(await res.json());
+    try {
+      const res = await fetch("/api/settings/automation");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || `Request failed (${res.status})`);
+      setSettings(data);
+      setLoadError(null);
+    } catch (err) {
+      // Bewust NIET setSettings(null) hier — anders zou een tijdelijke
+      // hik bij een van de periodieke hartslag-ververingen (zie hieronder)
+      // het hele formulier laten verdwijnen terwijl er allang goede data
+      // op het scherm stond. Alleen de allereerste keer (settings nog
+      // null) blokkeert dit de pagina.
+      setLoadError(err.message);
+    }
   }
 
   useEffect(() => {
@@ -45,6 +58,17 @@ export default function RssSchedulePage() {
     }
   }
 
+  if (loadError && !settings) {
+    return (
+      <>
+        <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>RSS Schedule</h2>
+        <p style={{ color: "var(--danger-text)", fontSize: 13 }}>Could not load settings: {loadError}</p>
+        <button onClick={load} style={{ width: "auto", padding: "6px 12px", fontSize: 13, marginTop: 8 }}>
+          Retry
+        </button>
+      </>
+    );
+  }
   if (!settings) return null;
 
   const heartbeatMinutesAgo = settings.scheduler_heartbeat

@@ -14,6 +14,7 @@ import { notFound, redirect } from "next/navigation";
 import { headers, cookies } from "next/headers";
 import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
 import { isHtmlBody, getExcerpt, resolveImageUrl, getCategoryStyle } from "@/lib/content";
+import { sanitizeArticleBody } from "@/lib/sanitize";
 import { isBotUserAgent } from "@/lib/bot-detection";
 
 // Voorkomt dat het bezoek van de ingelogde admin/redacteur zelf (bijv. even
@@ -248,7 +249,7 @@ export default async function ArticlePage({ params }) {
           <>
             {article.body && (
               htmlBody ? (
-                <div dangerouslySetInnerHTML={{ __html: article.body }} style={{ marginBottom: 20 }} />
+                <div dangerouslySetInnerHTML={{ __html: sanitizeArticleBody(article.body) }} style={{ marginBottom: 20 }} />
               ) : (
                 paragraphs.map((p, i) => <p key={i}>{p}</p>)
               )
@@ -256,7 +257,7 @@ export default async function ArticlePage({ params }) {
             <LiveblogTimeline articleId={article.id} initialUpdates={article.liveblog_updates || []} />
           </>
         ) : htmlBody ? (
-          <div dangerouslySetInnerHTML={{ __html: article.body }} />
+          <div dangerouslySetInnerHTML={{ __html: sanitizeArticleBody(article.body) }} />
         ) : (
           <>
             {paragraphs.slice(0, mid).map((p, i) => <p key={i}>{p}</p>)}
