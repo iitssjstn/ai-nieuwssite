@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getTopArticles, getCategoryStats } from "@/lib/db";
+import { getTopArticles, getCategoryStats, getCountryStats } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
@@ -11,5 +11,6 @@ export async function GET(request) {
   return NextResponse.json({
     top_articles: getTopArticles(days),
     by_category: getCategoryStats(),
+    by_country: getCountryStats(),
   });
 }

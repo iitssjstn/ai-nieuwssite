@@ -91,6 +91,14 @@ export default function ReviewOverview() {
     }))
     .filter((c) => c.value > 0);
 
+  // Landnaam-weergave via de ingebouwde Intl-API — geen extra library
+  // nodig voor "NL" -> "Netherlands" enzovoort.
+  const regionNames = typeof Intl !== "undefined" ? new Intl.DisplayNames(["en"], { type: "region" }) : null;
+  const countryTotal = Object.values(analytics?.by_country || {}).reduce((s, n) => s + n, 0);
+  const countryData = Object.entries(analytics?.by_country || {})
+    .map(([code, count]) => ({ code, count, label: regionNames?.of(code) || code }))
+    .sort((a, b) => b.count - a.count);
+
   const alerts = [];
   if (stats?.pending_review > 0) {
     alerts.push({ type: "warn", text: `${stats.pending_review} article(s) awaiting review`, href: "/review/queue" });
@@ -199,6 +207,24 @@ export default function ReviewOverview() {
                   })}
                 </div>
               </>
+            )}
+          </div>
+
+          <div className="admin-glass-card" style={{ padding: 20 }}>
+            <p style={{ fontSize: 14, fontWeight: 600, margin: "0 0 14px" }}>Visitors by country</p>
+            <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "-8px 0 14px" }}>
+              Based on a local, offline lookup — no IP addresses are stored, only country totals.
+            </p>
+            {countryData.length === 0 ? (
+              <p style={{ fontSize: 13, color: "var(--text-muted)" }}>No visits recorded yet.</p>
+            ) : (
+              countryData.slice(0, 10).map((c) => (
+                <div key={c.code} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, marginBottom: 6 }}>
+                  <span style={{ flex: 1 }}>{c.label}</span>
+                  <span style={{ color: "var(--text-muted)" }}>{Math.round((c.count / countryTotal) * 100)}%</span>
+                  <span style={{ color: "var(--text-muted)", minWidth: 32, textAlign: "right" }}>{c.count}</span>
+                </div>
+              ))
             )}
           </div>
         </div>
