@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { getProviderConfig, setProviderConfig, getCustomAiProviders } from "@/lib/db";
-import { PROVIDERS } from "@/lib/ai";
+import { PROVIDERS, getProviderCooldowns } from "@/lib/ai";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
   const allProviders = [...PROVIDERS, ...getCustomAiProviders()];
+  const cooldowns = getProviderCooldowns();
   const providers = allProviders.map((p) => {
     const cfg = getProviderConfig(p.id);
     const key = cfg?.api_key || null;
@@ -18,6 +19,7 @@ export async function GET() {
       masked: key ? `${key.slice(0, 4)}...${key.slice(-4)}` : null,
       custom: !PROVIDERS.some((b) => b.id === p.id),
       baseUrl: p.base_url || null,
+      cooldownUntil: cooldowns[p.id] || null,
     };
   });
   return NextResponse.json({ providers });
