@@ -28,6 +28,10 @@ export default function AiProvidersPage() {
 
   useEffect(() => {
     load();
+    // Ververst periodiek zodat een aftellende cooldown ("nog 12 min")
+    // zichtbaar bijwerkt zonder dat je zelf de pagina hoeft te verversen.
+    const interval = setInterval(load, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   function updateDraft(id, field, value) {
@@ -108,12 +112,17 @@ export default function AiProvidersPage() {
       <p style={{ fontSize: 13, color: "var(--text-secondary)", marginBottom: 20 }}>
         Configure multiple free providers — if the first one fails (limit reached, outage),
         the system automatically falls back to the next one in this order. Custom providers
-        (added below) are tried last, after all of these. Use "Test" to quickly try out a
-        provider on its own, without waiting for a real article generation.
+        (added below) are tried last, after all of these. A provider that hits a quota/rate
+        limit is automatically skipped for ~15 minutes afterward, so generation doesn't waste
+        time retrying it on every article. Use "Test" to quickly try out a provider on its own,
+        without waiting for a real article generation.
       </p>
 
       {providers.map((p) => {
         const test = testResults[p.id];
+        const cooldownMinutesLeft = p.cooldownUntil
+          ? Math.max(0, Math.ceil((new Date(p.cooldownUntil).getTime() - Date.now()) / 60000))
+          : 0;
         return (
           <div key={p.id} style={{ background: "var(--surface-1)", borderRadius: 12, padding: 16, marginBottom: 16 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 10 }}>
@@ -127,6 +136,13 @@ export default function AiProvidersPage() {
             </div>
             {p.custom && (
               <p style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>{p.baseUrl}/chat/completions</p>
+            )}
+            {cooldownMinutesLeft > 0 && (
+              <p style={{ fontSize: 12, color: "#f0b154", marginBottom: 8 }}>
+                ⏸ Temporarily skipped for ~{cooldownMinutesLeft} more minute{cooldownMinutesLeft === 1 ? "" : "s"} — hit a
+                quota/rate limit recently, so generation won't retry it until then (avoids
+                wasting time on every article). Use "Test" to check right now and clear this early.
+              </p>
             )}
 
             <input
