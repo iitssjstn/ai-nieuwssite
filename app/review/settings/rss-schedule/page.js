@@ -17,6 +17,13 @@ export default function RssSchedulePage() {
 
   useEffect(() => {
     load();
+    // Ververst puur de hartslag-weergave periodiek, zodat je op deze
+    // pagina kunt zien of de planner nog "leeft" zonder zelf te hoeven
+    // verversen — verder verandert er dan niets aan het formulier, want
+    // elk veld wordt al direct bij wijzigen opgeslagen (geen concept-status
+    // die hierdoor verloren zou kunnen gaan).
+    const interval = setInterval(load, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   async function patchField(field, value) {
@@ -40,6 +47,14 @@ export default function RssSchedulePage() {
 
   if (!settings) return null;
 
+  const heartbeatMinutesAgo = settings.scheduler_heartbeat
+    ? Math.round((Date.now() - new Date(settings.scheduler_heartbeat).getTime()) / 60000)
+    : null;
+  // De planner werkt zijn hartslag na elke voltooide tick bij (elke 60s) —
+  // een paar minuten speling voor normale schommelingen, ruim boven wat
+  // een proces dat daadwerkelijk is vastgelopen/gecrasht zou halen.
+  const heartbeatStale = heartbeatMinutesAgo === null || heartbeatMinutesAgo > 5;
+
   return (
     <>
       <h2 style={{ fontSize: 16, fontWeight: 500, marginBottom: 6 }}>RSS Schedule</h2>
@@ -48,6 +63,34 @@ export default function RssSchedulePage() {
         time window that's allowed to happen. Changes take effect within a few minutes, no restart
         needed.
       </p>
+
+      <div
+        className="admin-glass-card"
+        style={{
+          padding: 16,
+          marginBottom: 16,
+          borderLeft: `3px solid ${heartbeatStale ? "var(--danger-text)" : "var(--success-text)"}`,
+        }}
+      >
+        <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 4px" }}>Background scheduler status</p>
+        {heartbeatMinutesAgo === null ? (
+          <p style={{ fontSize: 13, color: "var(--danger-text)" }}>
+            Never checked in — the background process may not be running. Redeploying the site
+            should start it.
+          </p>
+        ) : heartbeatStale ? (
+          <p style={{ fontSize: 13, color: "var(--danger-text)" }}>
+            Last checked in {heartbeatMinutesAgo} minute{heartbeatMinutesAgo === 1 ? "" : "s"} ago —
+            this is longer than expected (normally every ~1 minute). The background process may
+            have stopped; it should restart automatically, but if this stays stale, a redeploy
+            will restart it.
+          </p>
+        ) : (
+          <p style={{ fontSize: 13, color: "var(--success-text)" }}>
+            Running — last checked in {heartbeatMinutesAgo === 0 ? "less than a minute" : `${heartbeatMinutesAgo} minute${heartbeatMinutesAgo === 1 ? "" : "s"}`} ago.
+          </p>
+        )}
+      </div>
 
       <div className="admin-glass-card" style={{ padding: 16, marginBottom: 16 }}>
         <p style={{ fontSize: 14, fontWeight: 500, margin: "0 0 10px" }}>How often</p>

@@ -4,13 +4,28 @@
 // als fs/crypto importeren zonder de standalone-build kapot te maken,
 // vercel/next.js#49565) door de scheduler volledig los van Next.js' eigen
 // bundelproces te draaien — gewoon een normaal Node-script.
-import { getSources, getAutomationSettings, isWithinActiveHours, getRemoteBackupSettings } from "../lib/db.js";
+import { getSources, getAutomationSettings, isWithinActiveHours, getRemoteBackupSettings, updateSchedulerHeartbeat } from "../lib/db.js";
 import { fetchAndImportFromSource } from "../lib/rss.js";
 import { runScheduledBackupIfNeeded, pushBackupToRemote } from "../lib/backup.js";
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+// Vangnet tegen precies het scenario dat aan het licht kwam: een fout die
+// buiten de try/catch-blokken hieronder valt (bijv. in een niet-geawaite
+// promise, of iets onvoorziens diep in een geïmporteerde functie) zou
+// zonder dit het HELE proces laten crashen — stilletjes, zonder dat de
+// admin dat ooit te zien krijgt totdat er al uren geen nieuwe artikelen
+// meer verschenen. Loggen en doorgaan in plaats van de planner mee te
+// laten sterven aan een fout die geen enkel artikel zou moeten kunnen
+// raken.
+process.on("uncaughtException", (err) => {
+  console.error("[RSS-scheduler] onverwachte, niet-afgevangen fout — planner blijft draaien:", err);
+});
+process.on("unhandledRejection", (reason) => {
+  console.error("[RSS-scheduler] onverwachte, niet-afgevangen promise-afwijzing — planner blijft draaien:", reason);
+});
 
 // Elke bron mag zijn eigen poll_interval_minutes hebben (ingesteld via
 // Instellingen → Bronnen); staat die op null, dan geldt het globale
@@ -103,8 +118,21 @@ async function tick() {
   } catch (err) {
     console.error("[RSS-scheduler] onverwachte fout tijdens pollen:", err.message);
   }
+  // Bewust NA de try/catch, dus ook bijgewerkt als pollDueSources() een
+  // fout gaf — een tick die (met of zonder fout) volledig is doorlopen,
+  // bewijst dat het proces nog leeft en niet is vastgelopen/gecrasht.
+  try {
+    updateSchedulerHeartbeat();
+  } catch {
+    // Een mislukte heartbeat-schrijfactie mag de planner zelf niet stoppen.
+  }
   tick();
 }
 
 console.log("[RSS-scheduler] gestart — interval per bron instelbaar via Instellingen → Bronnen, globaal via Instellingen → RSS-schema");
+try {
+  updateSchedulerHeartbeat();
+} catch {
+  // idem, mag het opstarten zelf niet blokkeren.
+}
 tick();

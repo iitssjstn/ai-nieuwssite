@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { getAutomationSettings, setAutomationSettings } from "@/lib/db";
+import { getAutomationSettings, setAutomationSettings, getSchedulerHeartbeat } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  return NextResponse.json(getAutomationSettings());
+  return NextResponse.json({ ...getAutomationSettings(), scheduler_heartbeat: getSchedulerHeartbeat() });
 }
 
 export async function PATCH(request) {

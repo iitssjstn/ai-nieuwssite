@@ -26,6 +26,22 @@ fi
 # scripts/rss-scheduler.mjs). Faalt dit om wat voor reden dan ook, dan mag
 # dat de hoofdsite nooit platleggen — vandaar op de achtergrond, los van
 # "exec" voor de hoofdserver hieronder.
-node scripts/rss-scheduler.mjs &
+#
+# BELANGRIJK: een kale "&" alleen was niet genoeg — als het script om wat
+# voor reden dan ook crasht, kijkt Docker's eigen herstart-beleid alleen
+# naar het HOOFDproces (server.js hieronder), niet naar dit losse
+# achtergrondproces. De site zelf bleef dan gewoon volledig normaal
+# werken, terwijl RSS-automatisering stilletjes voor onbepaalde tijd
+# stopte — zonder enig zichtbaar signaal, tot iemand toevallig merkte dat
+# er al uren geen nieuwe artikelen meer bijkwamen. Deze lus herstart het
+# script automatisch (met een korte pauze, om geen crash-loop te
+# veroorzaken bij een structureel probleem) zodra het onverwacht stopt.
+(
+  while true; do
+    node scripts/rss-scheduler.mjs
+    echo "[docker-entrypoint] RSS-scheduler is gestopt (exit code $?) — herstart over 10s" >&2
+    sleep 10
+  done
+) &
 
 exec node server.js
