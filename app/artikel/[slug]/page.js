@@ -9,22 +9,11 @@ import AdSlot from "../../components/AdSlot";
 import NativeAd from "../../components/NativeAd";
 import KeyClaims from "../../components/KeyClaims";
 import ShareButtons from "../../components/ShareButtons";
-import { getArticle, getArticleBySlug, getArticles, getSiteSettings, getCategories, getAdSlots, incrementViews } from "@/lib/db";
+import { getArticle, getArticleBySlug, getArticles, getSiteSettings, getCategories, getAdSlots } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
-import { headers, cookies } from "next/headers";
-import { SESSION_COOKIE_NAME, verifySessionToken } from "@/lib/auth";
+import { headers } from "next/headers";
 import { isHtmlBody, getExcerpt, resolveImageUrl, getCategoryStyle } from "@/lib/content";
 import { sanitizeArticleBody } from "@/lib/sanitize";
-import { isBotUserAgent } from "@/lib/bot-detection";
-
-// Voorkomt dat het bezoek van de ingelogde admin/redacteur zelf (bijv. even
-// een net gepubliceerd artikel controleren) meetelt als een gewone
-// paginaweergave in de statistieken.
-async function isAdminSession() {
-  const token = cookies().get(SESSION_COOKIE_NAME)?.value;
-  if (!token) return false;
-  return Boolean(await verifySessionToken(token));
-}
 
 function timeAgo(dateStr) {
   if (!dateStr) return "";
@@ -103,14 +92,6 @@ export default async function ArticlePage({ params }) {
   const article = resolveArticle(params.slug);
   if (!article || article.status !== "published") notFound();
 
-  // Alleen echte, menselijke bezoeken meetellen — niet de admin zelf, en
-  // niet crawlers/linkpreview-bots/scanners (zie lib/bot-detection.js).
-  // Belangrijk voor betrouwbare cijfers, o.a. als basis voor
-  // advertentietarieven.
-  if (!(await isAdminSession()) && !isBotUserAgent(headers().get("user-agent"))) {
-    incrementViews(article.id);
-  }
-
   const { site_name } = getSiteSettings();
   const categories = getCategories();
   const adSlots = getAdSlots();
@@ -182,7 +163,7 @@ export default async function ArticlePage({ params }) {
 
   return (
     <div className="container" style={{ maxWidth: 1350 }}>
-      <Header />
+      <Header articleId={article.id} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

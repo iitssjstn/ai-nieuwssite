@@ -4,7 +4,7 @@ import PageviewTracker from "./PageviewTracker";
 import VisitorHeartbeat from "./VisitorHeartbeat";
 import SettingsPanel from "./SettingsPanel";
 
-export default function Header({ activeCategory }) {
+export default function Header({ activeCategory, articleId }) {
   const { site_name, favicon_url } = getSiteSettings();
   // Alleen hoofdcategorieën als pillen in de navigatiebalk — subcategorieën
   // (Voetbal, F1, ...) worden nu op de pagina van hun hoofdcategorie zelf
@@ -17,7 +17,7 @@ export default function Header({ activeCategory }) {
 
   return (
     <>
-      <PageviewTracker />
+      <PageviewTracker articleId={articleId} />
       <VisitorHeartbeat />
       {breaking && (
         <Link href={`/artikel/${breaking.slug}`} className="breaking-bar">

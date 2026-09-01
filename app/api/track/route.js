@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { incrementPageview, incrementCountry } from "@/lib/db";
+import { incrementPageview, incrementCountry, incrementViews } from "@/lib/db";
 import { getSessionFromRequest } from "@/lib/auth";
 import { isBotUserAgent } from "@/lib/bot-detection";
 import geoip from "geoip-lite";
@@ -22,6 +22,23 @@ export async function POST(request) {
   // wel doen. Zelfde reden als bij incrementViews.
   if (!session && !isBotUserAgent(request.headers.get("user-agent"))) {
     incrementPageview();
+
+    // Artikel-view (voedt Categories/Most Read) — pas hier, in dezelfde
+    // browser-uitgevoerde aanroep als de gewone paginaweergave, NIET meer
+    // server-side bij het renderen van de artikelpagina zelf. Dat laatste
+    // liet crawlers zonder JS-uitvoering (bijv. zoekmachines die dankzij
+    // IndexNow/Bing sneller langskomen) wél meetellen, wat de cijfers
+    // scheeftrok t.o.v. "Page views" — nu tellen beide exact dezelfde
+    // bezoeken.
+    let articleId = null;
+    try {
+      const body = await request.json();
+      articleId = body?.articleId || null;
+    } catch {
+      // Geen (geldige) JSON-body — normaal voor een gewone paginaweergave
+      // zonder artikel, geen fout.
+    }
+    if (articleId) incrementViews(articleId);
 
     // Alleen-lokaal, offline landcode-opzoeking (geoip-lite bevat zijn
     // eigen database, geen enkele aanroep naar een externe dienst) — er
