@@ -15,13 +15,23 @@ function getClientIp(request) {
 }
 
 export async function POST(request) {
+  // Tijdelijke diagnostische log — controleert of deze route sowieso wordt
+  // bereikt, om te onderscheiden tussen "de aanroep komt nooit aan" (iets
+  // vóór de server, bijv. cache/proxy) en "de aanroep komt wel aan maar
+  // telt niet mee" (iets in de logica hieronder).
+  console.log(`[track] verzoek ontvangen om ${new Date().toISOString()}, user-agent: ${request.headers.get("user-agent")?.slice(0, 60)}`);
+
   const session = await getSessionFromRequest(request);
   // Bots voeren zelden client-side JS uit (deze route wordt vanuit de
   // browser aangeroepen, zie PageviewTracker.js), dus dit vangt vooral de
   // uitzonderingen — headless crawlers, sommige preview-bots — die dat
   // wel doen. Zelfde reden als bij incrementViews.
-  if (!session && !isBotUserAgent(request.headers.get("user-agent"))) {
+  const looksLikeBot = isBotUserAgent(request.headers.get("user-agent"));
+  if (session) console.log("[track] overgeslagen: sessie actief (ingelogd)");
+  if (looksLikeBot) console.log("[track] overgeslagen: herkend als bot/crawler");
+  if (!session && !looksLikeBot) {
     incrementPageview();
+    console.log("[track] incrementPageview() uitgevoerd");
 
     // Artikel-view (voedt Categories/Most Read) — pas hier, in dezelfde
     // browser-uitgevoerde aanroep als de gewone paginaweergave, NIET meer
@@ -38,6 +48,7 @@ export async function POST(request) {
       // Geen (geldige) JSON-body — normaal voor een gewone paginaweergave
       // zonder artikel, geen fout.
     }
+    console.log(`[track] articleId in dit verzoek: ${articleId || "(geen — gewone paginaweergave)"}`);
     if (articleId) incrementViews(articleId);
 
     // Alleen-lokaal, offline landcode-opzoeking (geoip-lite bevat zijn
